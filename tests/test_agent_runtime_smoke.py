@@ -20,6 +20,38 @@ if str(SRC_ROOT) not in sys.path:
 
 
 class AgentRuntimeSmokeTest(unittest.TestCase):
+    def test_execute_agent_runtime_pick_place_succeeds(self) -> None:
+        from isaacsim_agent.runtime import build_agent_v0_manipulation_task_config
+        from isaacsim_agent.runtime import execute_agent_v0
+
+        run_data = execute_agent_v0(
+            config=build_agent_v0_manipulation_task_config(backend="toy"),
+            run_id="unit-agent-runtime-pick-place",
+        )
+
+        self.assertTrue(run_data.result.success)
+        self.assertEqual(run_data.result.termination_reason.value, "success")
+        self.assertEqual(run_data.config.task_type.value, "pick_place")
+        self.assertTrue(run_data.config.runtime_options.planner_enabled)
+        self.assertEqual(run_data.result.invalid_action_count, 0)
+        self.assertGreater(run_data.result.planner_call_count, 0)
+        self.assertEqual(run_data.result.tool_call_count, run_data.result.step_count)
+        self.assertEqual(len(run_data.planner_trace), run_data.result.planner_call_count)
+        self.assertEqual(len(run_data.tool_trace), run_data.result.tool_call_count)
+        self.assertEqual(run_data.events[0].event_type.value, "episode_start")
+        self.assertEqual(run_data.events[-1].event_type.value, "episode_end")
+        event_types = [event.event_type.value for event in run_data.events]
+        self.assertIn("planner_call", event_types)
+        self.assertIn("planner_response", event_types)
+        self.assertIn("tool_call", event_types)
+        self.assertIn("tool_result", event_types)
+        self.assertTrue(run_data.result.metrics["manipulation.grasp_completed"])
+        self.assertTrue(run_data.result.metrics["manipulation.object_placed"])
+        self.assertEqual(run_data.result.metrics["manipulation.planner_backend"], "mock_rule_based")
+        self.assertEqual(len(run_data.trajectory["states"]), run_data.result.step_count + 1)
+        self.assertEqual(run_data.planner_trace[0]["parsed_action"]["tool_name"], "get_object_state")
+        self.assertEqual(run_data.tool_trace[-1]["tool_name"], "scripted_pick_place_step")
+
     def test_execute_agent_runtime_succeeds(self) -> None:
         from isaacsim_agent.runtime import build_agent_v0_navigation_task_config
         from isaacsim_agent.runtime import execute_agent_v0

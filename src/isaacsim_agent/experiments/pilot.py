@@ -1,4 +1,4 @@
-"""Config-driven navigation pilot and block A suite runner built on the M4/M5 paths."""
+"""Config-driven block A pilot and suite runner built on the M4/M5 paths."""
 
 from __future__ import annotations
 
@@ -24,9 +24,11 @@ from isaacsim_agent.planner import BlockAPilotPlannerBackend
 from isaacsim_agent.planner import MockPlannerBackend
 from isaacsim_agent.planner import PlannerConfig
 from isaacsim_agent.runtime import AgentRuntimeConfig
+from isaacsim_agent.runtime import build_agent_v0_manipulation_task_config
 from isaacsim_agent.runtime import build_agent_v0_navigation_task_config
 from isaacsim_agent.runtime import run_and_write_agent_v0
 from isaacsim_agent.tools import Pose2D
+from isaacsim_agent.tools import Pose3D
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SRC_ROOT = REPO_ROOT / "src"
@@ -84,7 +86,7 @@ class PilotRuntimeVariant:
 
 @dataclass(frozen=True)
 class PilotTaskSpec:
-    """One navigation task used in the pilot suite."""
+    """One navigation or manipulation task used in the pilot suite."""
 
     task_id: str
     scene_id: str
@@ -93,15 +95,21 @@ class PilotTaskSpec:
     seed: int
     max_steps: int
     max_time_sec: float
-    start_pose: Pose2D
-    goal_pose: Pose2D
-    success_radius_m: float
-    step_size_m: float
-    control_dt_sec: float
+    start_pose: Pose2D | None = None
+    goal_pose: Pose2D | None = None
+    success_radius_m: float | None = None
+    step_size_m: float | None = None
+    control_dt_sec: float | None = None
+    gripper_start_pose: Pose3D | None = None
+    object_start_pose: Pose3D | None = None
+    target_pose: Pose3D | None = None
+    hover_offset_m: float | None = None
+    grasp_tolerance_m: float | None = None
+    place_tolerance_m: float | None = None
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "task_id": self.task_id,
             "scene_id": self.scene_id,
             "backend": self.backend,
@@ -109,13 +117,31 @@ class PilotTaskSpec:
             "seed": self.seed,
             "max_steps": self.max_steps,
             "max_time_sec": self.max_time_sec,
-            "start_pose": self.start_pose.to_dict(),
-            "goal_pose": self.goal_pose.to_dict(),
-            "success_radius_m": self.success_radius_m,
-            "step_size_m": self.step_size_m,
-            "control_dt_sec": self.control_dt_sec,
             "notes": self.notes,
         }
+        if self.start_pose is not None:
+            payload["start_pose"] = self.start_pose.to_dict()
+        if self.goal_pose is not None:
+            payload["goal_pose"] = self.goal_pose.to_dict()
+        if self.success_radius_m is not None:
+            payload["success_radius_m"] = self.success_radius_m
+        if self.step_size_m is not None:
+            payload["step_size_m"] = self.step_size_m
+        if self.control_dt_sec is not None:
+            payload["control_dt_sec"] = self.control_dt_sec
+        if self.gripper_start_pose is not None:
+            payload["gripper_start_pose"] = self.gripper_start_pose.to_dict()
+        if self.object_start_pose is not None:
+            payload["object_start_pose"] = self.object_start_pose.to_dict()
+        if self.target_pose is not None:
+            payload["target_pose"] = self.target_pose.to_dict()
+        if self.hover_offset_m is not None:
+            payload["hover_offset_m"] = self.hover_offset_m
+        if self.grasp_tolerance_m is not None:
+            payload["grasp_tolerance_m"] = self.grasp_tolerance_m
+        if self.place_tolerance_m is not None:
+            payload["place_tolerance_m"] = self.place_tolerance_m
+        return payload
 
 
 @dataclass(frozen=True)
@@ -211,8 +237,8 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
         raise ValueError("defaults must be a JSON/YAML mapping when provided")
 
     task_family = _required_string(payload, "task_family")
-    if task_family != "navigation":
-        raise ValueError("pilot runner currently supports only task_family='navigation'")
+    if task_family not in {"navigation", "manipulation"}:
+        raise ValueError("pilot runner currently supports only task_family='navigation' or 'manipulation'")
 
     execution_mode = _optional_string(payload.get("execution_mode")) or "sequential"
     if execution_mode != "sequential":
@@ -244,7 +270,7 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
 
     prompt_variants = [_parse_prompt_variant(item) for item in prompt_variants_payload]
     runtime_variants = [_parse_runtime_variant(item) for item in runtime_variants_payload]
-    tasks = [_parse_task(item, defaults, suite_backend=backend) for item in tasks_payload]
+    tasks = [_parse_task(item, defaults, suite_backend=backend, task_family=task_family) for item in tasks_payload]
 
     _ensure_unique_ids([variant.variant_id for variant in prompt_variants], "prompt variant")
     _ensure_unique_ids([variant.variant_id for variant in runtime_variants], "runtime variant")
@@ -461,21 +487,40 @@ def build_pilot_summary(
 
 def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     prompt_text = _render_prompt_text(run)
-    task_config = build_agent_v0_navigation_task_config(
-        backend=run.task.backend,
-        planner_backend=config.planner_backend,
-        task_id=run.task.task_id,
-        scene_id=run.task.scene_id,
-        robot_id=run.task.robot_id,
-        seed=run.task.seed,
-        max_steps=run.task.max_steps,
-        max_time_sec=run.task.max_time_sec,
-        start_pose=run.task.start_pose,
-        goal_pose=run.task.goal_pose,
-        success_radius_m=run.task.success_radius_m,
-        step_size_m=run.task.step_size_m,
-        control_dt_sec=run.task.control_dt_sec,
-    )
+    if config.task_family == "manipulation":
+        task_config = build_agent_v0_manipulation_task_config(
+            backend=run.task.backend,
+            planner_backend=config.planner_backend,
+            task_id=run.task.task_id,
+            scene_id=run.task.scene_id,
+            robot_id=run.task.robot_id,
+            seed=run.task.seed,
+            max_steps=run.task.max_steps,
+            max_time_sec=run.task.max_time_sec,
+            gripper_start_pose=run.task.gripper_start_pose,
+            object_start_pose=run.task.object_start_pose,
+            target_pose=run.task.target_pose,
+            hover_offset_m=run.task.hover_offset_m,
+            grasp_tolerance_m=run.task.grasp_tolerance_m,
+            place_tolerance_m=run.task.place_tolerance_m,
+            control_dt_sec=run.task.control_dt_sec,
+        )
+    else:
+        task_config = build_agent_v0_navigation_task_config(
+            backend=run.task.backend,
+            planner_backend=config.planner_backend,
+            task_id=run.task.task_id,
+            scene_id=run.task.scene_id,
+            robot_id=run.task.robot_id,
+            seed=run.task.seed,
+            max_steps=run.task.max_steps,
+            max_time_sec=run.task.max_time_sec,
+            start_pose=run.task.start_pose,
+            goal_pose=run.task.goal_pose,
+            success_radius_m=run.task.success_radius_m,
+            step_size_m=run.task.step_size_m,
+            control_dt_sec=run.task.control_dt_sec,
+        )
     task_config.runtime_options.tool_validation_enabled = run.runtime_variant.validate_actions
     task_config.runtime_options.recovery_enabled = run.runtime_variant.max_retries_per_step > 0
 
@@ -488,7 +533,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     extra_options["runtime_policy"] = run.runtime_variant.runtime_policy
     extra_options["runtime_validate_actions"] = run.runtime_variant.validate_actions
     extra_options["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
-    extra_options["navigation_backend"] = run.task.backend
+    extra_options[f"{config.task_family}_backend"] = run.task.backend
     extra_options["suite_experiment"] = config.experiment_name
     extra_options["planner_prompt_text"] = prompt_text
     task_config.runtime_options.extra_options = extra_options
@@ -527,7 +572,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     agent_metadata["runtime_policy"] = run.runtime_variant.runtime_policy
     agent_metadata["runtime_validate_actions"] = run.runtime_variant.validate_actions
     agent_metadata["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
-    agent_metadata["navigation_backend"] = run.task.backend
+    agent_metadata[f"{config.task_family}_backend"] = run.task.backend
     agent_metadata["prompt_text"] = prompt_text
     metadata["agent_runtime_v0"] = agent_metadata
     task_config.metadata = metadata
@@ -535,7 +580,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     tags = list(task_config.tags)
     for tag in (
         "pilot",
-        "pilot_navigation",
+        f"pilot_{config.task_family}",
         f"backend_{run.task.backend.lower()}",
         f"prompt_{run.prompt_variant.variant_id.lower()}",
         f"runtime_{run.runtime_variant.variant_id.lower()}",
@@ -663,13 +708,36 @@ def _render_prompt_text(run: PlannedRun) -> str:
         "seed": run.task.seed,
         "max_steps": run.task.max_steps,
         "max_time_sec": run.task.max_time_sec,
-        "start_x": run.task.start_pose.x,
-        "start_y": run.task.start_pose.y,
-        "start_yaw": run.task.start_pose.yaw,
-        "goal_x": run.task.goal_pose.x,
-        "goal_y": run.task.goal_pose.y,
-        "goal_yaw": run.task.goal_pose.yaw,
-        "success_radius_m": run.task.success_radius_m,
+        "start_x": run.task.start_pose.x if run.task.start_pose is not None else 0.0,
+        "start_y": run.task.start_pose.y if run.task.start_pose is not None else 0.0,
+        "start_yaw": run.task.start_pose.yaw if run.task.start_pose is not None else 0.0,
+        "goal_x": run.task.goal_pose.x if run.task.goal_pose is not None else 0.0,
+        "goal_y": run.task.goal_pose.y if run.task.goal_pose is not None else 0.0,
+        "goal_yaw": run.task.goal_pose.yaw if run.task.goal_pose is not None else 0.0,
+        "success_radius_m": run.task.success_radius_m if run.task.success_radius_m is not None else 0.0,
+        "gripper_start_x": (
+            run.task.gripper_start_pose.x if run.task.gripper_start_pose is not None else 0.0
+        ),
+        "gripper_start_y": (
+            run.task.gripper_start_pose.y if run.task.gripper_start_pose is not None else 0.0
+        ),
+        "gripper_start_z": (
+            run.task.gripper_start_pose.z if run.task.gripper_start_pose is not None else 0.0
+        ),
+        "object_x": run.task.object_start_pose.x if run.task.object_start_pose is not None else 0.0,
+        "object_y": run.task.object_start_pose.y if run.task.object_start_pose is not None else 0.0,
+        "object_z": run.task.object_start_pose.z if run.task.object_start_pose is not None else 0.0,
+        "target_x": run.task.target_pose.x if run.task.target_pose is not None else 0.0,
+        "target_y": run.task.target_pose.y if run.task.target_pose is not None else 0.0,
+        "target_z": run.task.target_pose.z if run.task.target_pose is not None else 0.0,
+        "hover_offset_m": run.task.hover_offset_m if run.task.hover_offset_m is not None else 0.0,
+        "grasp_tolerance_m": (
+            run.task.grasp_tolerance_m if run.task.grasp_tolerance_m is not None else 0.0
+        ),
+        "place_tolerance_m": (
+            run.task.place_tolerance_m if run.task.place_tolerance_m is not None else 0.0
+        ),
+        "control_dt_sec": run.task.control_dt_sec if run.task.control_dt_sec is not None else 0.0,
         "prompt_variant": run.prompt_variant.variant_id,
         "response_mode": run.prompt_variant.response_mode,
         "self_check_required": str(run.prompt_variant.self_check_required).lower(),
@@ -948,35 +1016,84 @@ def _parse_runtime_variant(payload: Any) -> PilotRuntimeVariant:
     )
 
 
-def _parse_task(payload: Any, defaults: dict[str, Any], suite_backend: str) -> PilotTaskSpec:
+def _parse_task(
+    payload: Any,
+    defaults: dict[str, Any],
+    suite_backend: str,
+    task_family: str,
+) -> PilotTaskSpec:
     if not isinstance(payload, dict):
         raise ValueError("each task must be a mapping")
-    return PilotTaskSpec(
-        task_id=_required_string(payload, "task_id"),
-        scene_id=_required_string(payload, "scene_id"),
-        backend=_parse_backend(
+    task_id = _required_string(payload, "task_id")
+    shared = {
+        "task_id": task_id,
+        "scene_id": _required_string(payload, "scene_id"),
+        "backend": _parse_backend(
             _optional_string(payload.get("backend")) or _optional_string(defaults.get("backend")) or suite_backend,
-            field_name=f"tasks[{_required_string(payload, 'task_id')}].backend",
+            field_name=f"tasks[{task_id}].backend",
             allow_mixed=False,
         ),
-        robot_id=_optional_string(payload.get("robot_id"))
+        "robot_id": _optional_string(payload.get("robot_id"))
         or _optional_string(defaults.get("robot_id"))
-        or "agent_point_robot",
-        seed=_positive_or_zero_int(payload.get("seed", defaults.get("seed", 0)), "seed"),
-        max_steps=_positive_int(payload.get("max_steps", defaults.get("max_steps", 10)), "max_steps"),
-        max_time_sec=_positive_float(payload.get("max_time_sec", defaults.get("max_time_sec", 10.0)), "max_time_sec"),
+        or ("gripper_marker" if task_family == "manipulation" else "agent_point_robot"),
+        "seed": _positive_or_zero_int(payload.get("seed", defaults.get("seed", 0)), "seed"),
+        "max_steps": _positive_int(payload.get("max_steps", defaults.get("max_steps", 10)), "max_steps"),
+        "max_time_sec": _positive_float(
+            payload.get("max_time_sec", defaults.get("max_time_sec", 10.0)),
+            "max_time_sec",
+        ),
+        "notes": _optional_string(payload.get("notes")) or "",
+    }
+
+    if task_family == "manipulation":
+        return PilotTaskSpec(
+            **shared,
+            gripper_start_pose=_parse_pose3d(
+                payload.get("gripper_start_pose", defaults.get("gripper_start_pose")),
+                "gripper_start_pose",
+            ),
+            object_start_pose=_parse_pose3d(
+                payload.get("object_start_pose", defaults.get("object_start_pose")),
+                "object_start_pose",
+            ),
+            target_pose=_parse_pose3d(
+                payload.get("target_pose", defaults.get("target_pose")),
+                "target_pose",
+            ),
+            hover_offset_m=_positive_float(
+                payload.get("hover_offset_m", defaults.get("hover_offset_m", 0.12)),
+                "hover_offset_m",
+            ),
+            grasp_tolerance_m=_positive_float(
+                payload.get("grasp_tolerance_m", defaults.get("grasp_tolerance_m", 0.01)),
+                "grasp_tolerance_m",
+            ),
+            place_tolerance_m=_positive_float(
+                payload.get("place_tolerance_m", defaults.get("place_tolerance_m", 0.02)),
+                "place_tolerance_m",
+            ),
+            control_dt_sec=_positive_float(
+                payload.get("control_dt_sec", defaults.get("control_dt_sec", 0.5)),
+                "control_dt_sec",
+            ),
+        )
+
+    return PilotTaskSpec(
+        **shared,
         start_pose=_parse_pose(payload.get("start_pose", defaults.get("start_pose")), "start_pose"),
         goal_pose=_parse_pose(payload.get("goal_pose", defaults.get("goal_pose")), "goal_pose"),
         success_radius_m=_positive_float(
             payload.get("success_radius_m", defaults.get("success_radius_m", 0.2)),
             "success_radius_m",
         ),
-        step_size_m=_positive_float(payload.get("step_size_m", defaults.get("step_size_m", 0.5)), "step_size_m"),
+        step_size_m=_positive_float(
+            payload.get("step_size_m", defaults.get("step_size_m", 0.5)),
+            "step_size_m",
+        ),
         control_dt_sec=_positive_float(
             payload.get("control_dt_sec", defaults.get("control_dt_sec", 0.5)),
             "control_dt_sec",
         ),
-        notes=_optional_string(payload.get("notes")) or "",
     )
 
 
@@ -984,6 +1101,12 @@ def _parse_pose(payload: Any, field_name: str) -> Pose2D:
     if not isinstance(payload, dict):
         raise ValueError(f"{field_name} must be a mapping with x, y, yaw")
     return Pose2D.from_dict(payload)
+
+
+def _parse_pose3d(payload: Any, field_name: str) -> Pose3D:
+    if not isinstance(payload, dict):
+        raise ValueError(f"{field_name} must be a mapping with x, y, z")
+    return Pose3D.from_dict(payload)
 
 
 def _build_planner_backend(planner_backend: str):

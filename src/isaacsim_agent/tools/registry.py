@@ -83,3 +83,44 @@ def build_navigation_tool_registry() -> ToolRegistry:
             ),
         ]
     )
+
+
+def build_manipulation_tool_registry() -> ToolRegistry:
+    """Return the minimal pick-and-place tool surface for agent runtime v0."""
+
+    return ToolRegistry(
+        [
+            ToolSpec(
+                name="get_gripper_state",
+                description="Return the current gripper pose and open/closed state.",
+                allowed_task_types=(TaskType.PICK_PLACE,),
+            ),
+            ToolSpec(
+                name="get_object_state",
+                description="Return the current object pose and attachment state.",
+                allowed_task_types=(TaskType.PICK_PLACE,),
+            ),
+            ToolSpec(
+                name="get_target_state",
+                description="Return the configured pick-and-place target pose and tolerances.",
+                allowed_task_types=(TaskType.PICK_PLACE,),
+            ),
+            ToolSpec(
+                name="scripted_pick_place_step",
+                description="Advance one scripted pick-and-place phase for the current task.",
+                allowed_task_types=(TaskType.PICK_PLACE,),
+                required_arguments=("phase_name",),
+            ),
+        ]
+    )
+
+
+def build_agent_v0_tool_registry() -> ToolRegistry:
+    """Return the combined M4 runtime tool registry across supported task families."""
+
+    return ToolRegistry(
+        [
+            *build_navigation_tool_registry().specs_for_task(TaskType.NAVIGATION),
+            *build_manipulation_tool_registry().specs_for_task(TaskType.PICK_PLACE),
+        ]
+    )
