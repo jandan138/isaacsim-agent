@@ -1,0 +1,88 @@
+{
+  "experiment_name": "easy_navigation_pilot_v0",
+  "description": "Very small post-M5 pilot suite for easy navigation-only agent-runtime runs before M6 ablations.",
+  "task_family": "navigation",
+  "execution_mode": "sequential",
+  "backend": "toy",
+  "planner_backend": "mock_rule_based",
+  "defaults": {
+    "robot_id": "agent_point_robot",
+    "seed": 0,
+    "success_radius_m": 0.2,
+    "step_size_m": 0.5,
+    "control_dt_sec": 0.5
+  },
+  "prompt_variants": [
+    {
+      "id": "P0",
+      "label": "minimal_goal_only",
+      "instruction_template": "Navigate the robot to the configured goal pose ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}).",
+      "notes": "Shortest prompt used as the minimal pilot baseline."
+    },
+    {
+      "id": "P1",
+      "label": "structured_tool_prompt",
+      "instruction_template": "Task: navigation. Start pose: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}). Goal pose: ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Use only the provided tools and emit one JSON tool call per step until the robot is within {success_radius_m:.2f} m of the goal.",
+      "notes": "Slightly more structured prompt for pilot-level prompt metadata and token accounting."
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "R0",
+      "label": "strict_invalid_budget",
+      "runtime_policy": "agent_runtime_v0",
+      "max_invalid_actions": 1,
+      "notes": "Current M4 runtime with the default invalid-action limit."
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "easy_nav_short_forward",
+      "scene_id": "easy_empty_stage_a",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "max_steps": 6,
+      "max_time_sec": 6.0
+    },
+    {
+      "task_id": "easy_nav_long_forward",
+      "scene_id": "easy_empty_stage_b",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.5,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "max_steps": 8,
+      "max_time_sec": 8.0
+    },
+    {
+      "task_id": "easy_nav_diagonal",
+      "scene_id": "easy_empty_stage_c",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 1.0,
+        "yaw": 0.0
+      },
+      "max_steps": 10,
+      "max_time_sec": 10.0
+    }
+  ]
+}

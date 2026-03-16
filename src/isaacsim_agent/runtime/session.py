@@ -164,6 +164,30 @@ def _add_token_usage(total: TokenUsage, increment: TokenUsage) -> TokenUsage:
 
 
 def _navigation_instruction(config: TaskConfig) -> str:
+    extra_options = config.runtime_options.extra_options
+    prompt_text = extra_options.get("planner_prompt_text")
+    if isinstance(prompt_text, str) and prompt_text.strip():
+        return prompt_text.strip()
+
+    prompting = config.metadata.get("prompting")
+    if isinstance(prompting, dict):
+        explicit_instruction = prompting.get("instruction")
+        if isinstance(explicit_instruction, str) and explicit_instruction.strip():
+            return explicit_instruction.strip()
+
+        instruction_template = prompting.get("instruction_template")
+        if isinstance(instruction_template, str) and instruction_template.strip():
+            try:
+                return instruction_template.format(**_navigation_prompt_values(config)).strip()
+            except (KeyError, ValueError):
+                return instruction_template.strip()
+
+    agent_metadata = config.metadata.get("agent_runtime_v0")
+    if isinstance(agent_metadata, dict):
+        metadata_prompt = agent_metadata.get("prompt_text")
+        if isinstance(metadata_prompt, str) and metadata_prompt.strip():
+            return metadata_prompt.strip()
+
     if config.navigation is None or config.navigation.goal_pose is None:
         return "Navigate the robot to the configured goal pose."
     goal_pose = Pose2D.from_dict(config.navigation.goal_pose)
@@ -171,6 +195,37 @@ def _navigation_instruction(config: TaskConfig) -> str:
         "Navigate the robot to the configured goal pose "
         f"({goal_pose.x:.2f}, {goal_pose.y:.2f}, yaw={goal_pose.yaw:.2f})."
     )
+
+
+def _navigation_prompt_values(config: TaskConfig) -> dict[str, Any]:
+    start_pose = Pose2D(x=0.0, y=0.0, yaw=0.0)
+    navigation_metadata = config.metadata.get("navigation_baseline")
+    if isinstance(navigation_metadata, dict):
+        start_pose_payload = navigation_metadata.get("start_pose")
+        if isinstance(start_pose_payload, dict):
+            start_pose = Pose2D.from_dict(start_pose_payload)
+
+    goal_pose = Pose2D(x=0.0, y=0.0, yaw=0.0)
+    success_radius_m = 0.0
+    if config.navigation is not None and config.navigation.goal_pose is not None:
+        goal_pose = Pose2D.from_dict(config.navigation.goal_pose)
+        success_radius_m = float(config.navigation.success_radius_m)
+
+    return {
+        "task_id": config.task_id,
+        "scene_id": config.scene_id,
+        "robot_id": config.robot_id,
+        "seed": config.seed,
+        "max_steps": config.max_steps,
+        "max_time_sec": float(config.max_time_sec),
+        "start_x": start_pose.x,
+        "start_y": start_pose.y,
+        "start_yaw": start_pose.yaw,
+        "goal_x": goal_pose.x,
+        "goal_y": goal_pose.y,
+        "goal_yaw": goal_pose.yaw,
+        "success_radius_m": success_radius_m,
+    }
 
 
 class AgentRuntime:

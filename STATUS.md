@@ -4,153 +4,137 @@
 
 - Date: 2026-03-16
 - Plan source of truth: `plan.md`
-- Active milestone: `M5 Logging / Eval Harness`
-- Milestone state: completed for this repo run at the minimal offline-harness scope
-- Completion level: a reusable M5 episode-level eval harness now scans canonical run directories, validates contract completeness vs run completeness, emits script-friendly summary tables plus aggregate reports, and reuses the existing M1.5/M2.5/M3/M4 artifact layout without changing baseline or runtime writers; M6 and later milestones remain intentionally untouched
+- Active milestone: `M5.1 Easy Pilot Runs`
+- Milestone state: completed for this repo run at the minimal post-M5, pre-M6 navigation-only pilot scope
+- Completion level: the repo now has a config-driven easy pilot workflow that reuses the existing M1.5 contracts, M4 navigation-only runtime v0, and M5 eval harness to launch a very small local sequential run matrix, preserve canonical per-run artifacts, and emit pilot-level aggregate summaries for manual go/no-go review before any M6 ablations
 
 ## Milestone summary
 
 - Completed in this run:
-  - added `src/isaacsim_agent/eval/` with a minimal offline loader, validator, and summarizer over the existing `manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/*` conventions
-  - defined lightweight `RunRecord`, `RunValidation`, `ValidationIssue`, `EpisodeSummary`, and aggregate bundle structures for M5 consumption
-  - implemented results-root scanning across multiple runs plus tolerant field extraction for navigation baseline, manipulation baseline, and M4 agent-runtime outputs
-  - implemented explicit bad-run detection for missing required files, JSON parse failures, missing core schema fields, cross-file identity mismatches, interrupted runs without `episode_end`, and missing referenced artifacts
-  - implemented summary export to both `jsonl` and `csv`, plus `aggregate.json` and `validation.json`
-  - added `scripts/summarize_results.py` with `summarize` and `validate` subcommands and caller-selectable output directories under `results/processed/`
-  - added M5 smoke coverage for a successful baseline run, a successful agent-runtime run, and a contract-complete but artifact-incomplete bad run
-  - updated `results/schema.md` and `scripts/README.md` to document processed outputs and the new CLI
+  - added a minimal pilot experiment config layer under `configs/experiments/pilot/` with one small easy navigation suite definition
+  - added `src/isaacsim_agent/experiments/pilot.py` to load JSON-compatible YAML configs, validate the very small matrix size, expand task x prompt x runtime variants, and inject experiment metadata into `task_config.runtime_options.extra_options` and `task_config.metadata`
+  - added `scripts/run_suite.py` to run the pilot suite sequentially through the existing M4 runtime entrypoint, preserve canonical run artifacts under `results/.../runs/<run_id>/`, reuse the M5 summarize/write path, and write `pilot_summary.json`, `pilot_summary.md`, and `run_plan.json`
+  - extended the M4 runtime prompt construction so pilot runs can record and actually use config-supplied prompt text without changing the shared contracts
+  - extended the M5 summary layer to preserve `prompt_variant` and explicit `runtime_variant` metadata in `run_summary.{jsonl,csv}` while keeping older fallback behavior intact
+  - added `tests/test_run_suite_smoke.py` to cover config parsing, sequential pilot execution, canonical artifact writing, M5 summarize reuse, and pilot summary artifact generation
+  - updated `configs/README.md`, `scripts/README.md`, and `results/schema.md` to document the pilot config location, suite runner, and derived pilot outputs
 - Not completed in this run:
-  - no `run_suite.py` batch launcher yet; this run stayed within the minimal offline harness requested for M5
-  - no step-level analytics, dashboard/web UI, large sweep system, memory/context/runtime ablations, manipulation runtime expansion, or large experiment launch
-  - no changes to the shared M1.5 writer contracts or existing M2.5/M3/M4 smoke paths beyond read-only reuse by the new eval harness
+  - no full M6 block A implementation
+  - no large sweep orchestration, parallel execution, dashboard, or scheduler integration
+  - no memory, context, tool abstraction, randomization, or paper asset work
+  - no manipulation runtime expansion
+  - no retry/recovery/fallback stack beyond the pre-existing minimal invalid-action handling already present in M4
+  - no second runtime variant beyond `R0`; the delivered pilot matrix is `3 tasks x 2 prompt variants x 1 runtime variant = 6 runs`
 
-## M5 harness definition
+## Pilot workflow definition
 
-- Scan target:
-  - one results root containing `runs/<run_id>/...`
-  - or a direct `runs/` directory
-- Contract-complete run:
-  - all required canonical files exist
-  - required JSON/JSONL files parse successfully
-  - core identity fields are present and consistent across manifest/task/result
-- Run-complete run:
-  - contract-complete
-  - `events.jsonl` includes an `episode_end` record
-  - referenced artifacts expected by the run metadata exist on disk
-- Episode-level summary fields emitted:
-  - `run_id`
+- Supported scope:
+  - navigation-only pilots
+  - easy tasks only
+  - very small local sequential execution only
+  - current backend support limited to the lightweight `toy` path for this milestone
+- Config schema highlights:
+  - `experiment_name`
+  - `description`
   - `task_family`
-  - `task_id`
-  - `scene_id`
-  - `success`
-  - `termination_reason`
-  - `failure_reason`
-  - `step_count`
-  - `planner_calls`
-  - `tool_calls`
-  - `invalid_actions`
-  - `episode_time_s`
-  - `backend_variant`
-  - `model_variant`
-  - `runtime_variant`
+  - `execution_mode`
+  - `backend`
   - `planner_backend`
-  - `tool_variant`
-  - completeness flags plus explicit validation issue codes/messages
-- Derived outputs:
+  - `defaults`
+  - `prompt_variants[]`
+  - `runtime_variants[]`
+  - `tasks[]`
+- Canonical per-run reuse:
+  - `manifest.json`
+  - `task_config.json`
+  - `episode_result.json`
+  - `events.jsonl`
+  - `artifacts/trajectory.json`
+  - `artifacts/planner_trace.json`
+  - `artifacts/tool_trace.json`
+- Derived pilot outputs:
   - `run_summary.jsonl`
   - `run_summary.csv`
   - `aggregate.json`
   - `validation.json`
-
-## Contract notes
-
-- The M1.5 canonical run artifacts were reused as-is; no shared schema writer or baseline/runtime artifact writer was changed for M5
-- M5 derived outputs now live under `results/processed/` or a caller-specified directory, while canonical per-run artifacts remain under `results/runs/<run_id>/`
-- The harness intentionally stays at episode level for now; it does not attempt step-level analytics or experiment orchestration
+  - `pilot_summary.json`
+  - `pilot_summary.md`
+  - `run_plan.json`
+- Per-run pilot metadata recorded in `task_config.json`:
+  - `prompt_variant`
+  - `runtime_variant`
+  - `runtime_policy`
+  - `planner_prompt_text`
+  - `suite_experiment`
+  - `metadata.prompting.instruction_text`
 
 ## Changed files
 
 - `STATUS.md`
+- `configs/README.md`
+- `configs/experiments/pilot/easy_navigation_minimal.yaml`
 - `results/schema.md`
 - `scripts/README.md`
-- `scripts/summarize_results.py`
-- `src/isaacsim_agent/eval/__init__.py`
-- `src/isaacsim_agent/eval/loader.py`
+- `scripts/run_suite.py`
 - `src/isaacsim_agent/eval/summarize.py`
-- `src/isaacsim_agent/eval/validate.py`
-- `tests/test_eval_harness_smoke.py`
+- `src/isaacsim_agent/experiments/__init__.py`
+- `src/isaacsim_agent/experiments/pilot.py`
+- `src/isaacsim_agent/runtime/session.py`
+- `tests/test_run_suite_smoke.py`
 
 ## Validation commands
 
-- `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/eval/__init__.py src/isaacsim_agent/eval/loader.py src/isaacsim_agent/eval/validate.py src/isaacsim_agent/eval/summarize.py scripts/summarize_results.py tests/test_eval_harness_smoke.py`
-- `PYTHONPATH=src uv run python -m unittest tests.test_eval_harness_smoke tests.test_agent_runtime_smoke tests.test_nav_smoke tests.test_pickplace_smoke`
-- `mktemp -d /tmp/isaacsim-agent-m5-e2e-XXXXXX`
-- `PYTHONPATH=src uv run python - <<'PY'
-from pathlib import Path
-
-from isaacsim_agent.runtime import build_agent_v0_navigation_task_config
-from isaacsim_agent.runtime import run_and_write_agent_v0
-from isaacsim_agent.tasks.manipulation import build_minimal_pickplace_task_config
-from isaacsim_agent.tasks.manipulation import run_and_write_pickplace_baseline
-from isaacsim_agent.tasks.navigation import build_minimal_navigation_task_config
-from isaacsim_agent.tasks.navigation import run_and_write_navigation_baseline
-
-results_root = Path('/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results')
-run_and_write_navigation_baseline(
-    config=build_minimal_navigation_task_config(backend='toy'),
-    run_id='m5-nav-good',
-    results_root=results_root,
-)
-run_and_write_agent_v0(
-    config=build_agent_v0_navigation_task_config(backend='toy'),
-    run_id='m5-agent-good',
-    results_root=results_root,
-)
-_, bad_layout = run_and_write_pickplace_baseline(
-    config=build_minimal_pickplace_task_config(backend='toy'),
-    run_id='m5-pickplace-missing-artifact',
-    results_root=results_root,
-)
-(bad_layout.artifacts_dir / 'trajectory.json').unlink()
-print(results_root)
-PY`
-- `PYTHONPATH=src uv run python scripts/summarize_results.py summarize --results-root /tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results --output-dir /tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary`
-- `find /tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary -maxdepth 1 -type f | sort`
-- `PYTHONPATH=src uv run python scripts/summarize_results.py validate --results-root /tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results --output-dir /tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-validate`
+- `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/experiments/pilot.py src/isaacsim_agent/experiments/__init__.py src/isaacsim_agent/runtime/session.py src/isaacsim_agent/eval/summarize.py scripts/run_suite.py tests/test_run_suite_smoke.py`
+- `PYTHONPATH=src uv run python -m unittest tests.test_run_suite_smoke tests.test_eval_harness_smoke tests.test_agent_runtime_smoke tests.test_nav_smoke tests.test_pickplace_smoke`
+- `mktemp -d /tmp/isaacsim-agent-pilot-e2e-XXXXXX`
+- `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/pilot/easy_navigation_minimal.yaml --results-root /tmp/isaacsim-agent-pilot-e2e-shjWmq/results --output-dir /tmp/isaacsim-agent-pilot-e2e-shjWmq/results/processed/easy_navigation_pilot_v0`
+- `sed -n '1,220p' /tmp/isaacsim-agent-pilot-e2e-shjWmq/results/processed/easy_navigation_pilot_v0/pilot_summary.md`
+- `sed -n '1,120p' /tmp/isaacsim-agent-pilot-e2e-shjWmq/results/processed/easy_navigation_pilot_v0/run_summary.jsonl`
 - `git status --short`
 
 ## Validation results
 
 - Python compilation check succeeded with no output
-- Focused M5 eval harness plus existing M2.5/M3/M4 smoke suite passed with `Ran 9 tests in 21.203s` and `OK`
-- Manual sample results root `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results` was created with:
-  - one successful navigation baseline run `m5-nav-good`
-  - one successful agent-runtime run `m5-agent-good`
-  - one intentionally incomplete run `m5-pickplace-missing-artifact` created by deleting `artifacts/trajectory.json` after a successful pick-and-place baseline run
-- End-to-end summarize CLI run succeeded with:
-  - `Runs scanned: 3`
-  - `Contract-complete runs: 3`
-  - `Run-complete runs: 2`
-  - `Successful runs: 3`
-  - `Bad runs: 1`
-  - output files written under `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary`
-- Summary output directory contained the expected files:
-  - `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary/aggregate.json`
-  - `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary/run_summary.csv`
-  - `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary/run_summary.jsonl`
-  - `/tmp/isaacsim-agent-m5-e2e-D5ZvaQ/results/processed/manual-summary/validation.json`
-- End-to-end validate CLI run returned exit code `1` by design and explicitly flagged the bad run:
-  - `Incomplete runs: m5-pickplace-missing-artifact`
-- The emitted `run_summary.jsonl` preserved the requested episode-level fields and marked the bad run as:
-  - `contract_complete: true`
-  - `run_complete: false`
-  - `validation_issue_codes: ["missing_artifact"]`
+- Focused smoke coverage across the new pilot suite plus the existing M2.5/M3/M4/M5 paths passed with `Ran 10 tests in 19.738s` and `OK`
+- Manual pilot suite e2e run succeeded at `/tmp/isaacsim-agent-pilot-e2e-shjWmq/results` with:
+  - `Planned runs: 6`
+  - `Runs scanned: 6`
+  - `Contract-complete runs: 6`
+  - `Run-complete runs: 6`
+  - `Successful runs: 6`
+- The manual e2e suite produced the expected derived files under `/tmp/isaacsim-agent-pilot-e2e-shjWmq/results/processed/easy_navigation_pilot_v0`:
+  - `aggregate.json`
+  - `pilot_summary.json`
+  - `pilot_summary.md`
+  - `run_plan.json`
+  - `run_summary.csv`
+  - `run_summary.jsonl`
+  - `validation.json`
+- The emitted `pilot_summary.md` shows:
+  - 3 easy tasks exercised
+  - 2 prompt variants exercised
+  - 1 runtime variant exercised
+  - per-variant rows for `P0/R0` and `P1/R0`
+  - all 6 runs successful, contract-complete, and run-complete
+- The emitted `run_summary.jsonl` preserves the requested pilot-facing identifiers and outcome fields for each run, including:
+  - `task_id`
+  - `scene_id`
+  - `prompt_variant`
+  - `runtime_variant`
+  - `success`
+  - `termination_reason`
+  - `step_count`
+  - `planner_calls`
+  - `tool_calls`
+  - `invalid_actions`
+  - `run_complete`
+  - `contract_complete`
 
 ## Blockers
 
-- None within the scoped minimal M5 offline eval harness
-- `run_suite.py` remains intentionally deferred rather than being a blocker for the requested minimal M5 deliverable
+- None within the scoped M5.1 easy pilot workflow
+- A second runtime variant remains intentionally deferred until there is a concrete reason to extend beyond the current `R0` path
 
 ## Recommended next step
 
-- M5.1: add a thin suite runner that launches a small hand-picked batch of existing baseline/runtime scripts and immediately calls `scripts/summarize_results.py` to populate `results/processed/`, still without introducing sweeps, dashboards, or M6 ablations
+- Review the pilot prompt texts and the emitted `pilot_summary.md`, then decide whether to enter M6 with prompt-only ablations on the existing `R0` runtime first, or introduce one carefully scoped `R1` runtime variant only if a truly minimal validation-handling difference is needed

@@ -36,6 +36,7 @@ class EpisodeSummary:
     planner_latency_s: float | None
     backend_variant: str | None
     model_variant: str | None
+    prompt_variant: str | None
     runtime_variant: str | None
     planner_backend: str | None
     tool_variant: str | None
@@ -65,6 +66,7 @@ class EpisodeSummary:
             "planner_latency_s": self.planner_latency_s,
             "backend_variant": self.backend_variant,
             "model_variant": self.model_variant,
+            "prompt_variant": self.prompt_variant,
             "runtime_variant": self.runtime_variant,
             "planner_backend": self.planner_backend,
             "tool_variant": self.tool_variant,
@@ -184,9 +186,11 @@ def build_episode_summary(record: RunRecord, validation: RunValidation) -> Episo
         backend_variant=_extract_backend_variant(metadata, metrics),
         model_variant=_first_string(
             extra_options.get("model_variant"),
+            _nested_string(metadata, "agent_runtime_v0", "model_variant"),
             metadata.get("model_variant") if isinstance(metadata, dict) else None,
             metrics.get("model_variant") if isinstance(metrics, dict) else None,
         ),
+        prompt_variant=_extract_prompt_variant(metadata, extra_options, metrics),
         runtime_variant=_extract_runtime_variant(metadata, extra_options),
         planner_backend=_extract_planner_backend(metadata, extra_options, metrics),
         tool_variant=_extract_tool_variant(metadata),
@@ -345,11 +349,24 @@ def _extract_backend_variant(metadata: Any, metrics: Any) -> str | None:
 
 def _extract_runtime_variant(metadata: Any, extra_options: Any) -> str | None:
     if isinstance(extra_options, dict):
+        runtime_variant = extra_options.get("runtime_variant")
+        if isinstance(runtime_variant, str) and runtime_variant:
+            return runtime_variant
         runtime_policy = extra_options.get("runtime_policy")
         if isinstance(runtime_policy, str) and runtime_policy:
             return runtime_policy
 
     if isinstance(metadata, dict):
+        pilot_suite = metadata.get("pilot_suite")
+        if isinstance(pilot_suite, dict):
+            variant = pilot_suite.get("runtime_variant")
+            if isinstance(variant, str) and variant:
+                return variant
+        agent_runtime = metadata.get("agent_runtime_v0")
+        if isinstance(agent_runtime, dict):
+            variant = agent_runtime.get("runtime_variant")
+            if isinstance(variant, str) and variant:
+                return variant
         if "agent_runtime_v0" in metadata:
             return "agent_runtime_v0"
         if "navigation_baseline" in metadata:
@@ -357,6 +374,22 @@ def _extract_runtime_variant(metadata: Any, extra_options: Any) -> str | None:
         if "manipulation_baseline" in metadata:
             return "manipulation_baseline"
     return None
+
+
+def _extract_prompt_variant(metadata: Any, extra_options: Any, metrics: Any) -> str | None:
+    candidates = []
+    if isinstance(extra_options, dict):
+        candidates.append(extra_options.get("prompt_variant"))
+    if isinstance(metadata, dict):
+        pilot_suite = metadata.get("pilot_suite")
+        if isinstance(pilot_suite, dict):
+            candidates.append(pilot_suite.get("prompt_variant"))
+        agent_runtime = metadata.get("agent_runtime_v0")
+        if isinstance(agent_runtime, dict):
+            candidates.append(agent_runtime.get("prompt_variant"))
+    if isinstance(metrics, dict):
+        candidates.append(metrics.get("prompt_variant"))
+    return _first_string(*candidates)
 
 
 def _extract_planner_backend(metadata: Any, extra_options: Any, metrics: Any) -> str | None:
@@ -422,4 +455,16 @@ def _first_float(*values: Any) -> float | None:
             continue
         if isinstance(value, (int, float)):
             return float(value)
+    return None
+
+
+def _nested_string(payload: Any, key: str, nested_key: str) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    nested_payload = payload.get(key)
+    if not isinstance(nested_payload, dict):
+        return None
+    value = nested_payload.get(nested_key)
+    if isinstance(value, str) and value:
+        return value
     return None

@@ -19,6 +19,9 @@ results/
       run_summary.csv
       aggregate.json
       validation.json
+      pilot_summary.json
+      pilot_summary.md
+      run_plan.json
 ```
 
 ## Required files
@@ -35,4 +38,5 @@ results/
 - per-task metrics should use namespaced keys in `episode_result.json`
 - ad hoc artifacts go under `artifacts/`
 - M5 processed summaries must not rewrite the canonical per-run layout; derived tables belong under `results/processed/`
+- post-M5 pilot workflows may add derived files such as `pilot_summary.{json,md}` and `run_plan.json` under `results/processed/`, but they must continue to reuse the canonical per-run layout under `runs/`
 - future result processors should assume this layout unless `STATUS.md` explicitly records a later schema revision
