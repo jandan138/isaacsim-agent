@@ -60,3 +60,17 @@ Before task baselines begin, the repo now defines a project-wide contracts layer
 - Contract docs: `docs/contracts.md`
 - Output schema guide: `results/schema.md`
 - Validation script: `scripts/validate_contracts.py`
+
+## M2 navigation baseline
+
+Milestone `M2` adds one minimal deterministic navigation baseline that stays lightweight on purpose: a point robot resets to a fixed start pose and moves in straight-line steps toward a single fixed goal pose until it reaches the success radius or terminates on `max_steps`, `max_time_sec`, or `robot_stuck`.
+
+Run it from the repo root:
+
+```bash
+uv run python scripts/run_nav_baseline.py --run-id demo-nav-baseline
+```
+
+The run writes canonical artifacts under `results/runs/<run_id>/`, including `manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/trajectory.json`.
+
+This M2 baseline is intentionally pure Python so it is fast to validate and does not require launching Isaac Sim. The existing `scripts/isaac_python.sh` workflow remains the correct path for later milestones that need to import `isaacsim`, `omni.*`, or `pxr`.

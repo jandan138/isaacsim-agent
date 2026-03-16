@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Run the M2 minimal deterministic navigation baseline."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime
+
+from isaacsim_agent.tasks.navigation import build_minimal_navigation_task_config
+from isaacsim_agent.tasks.navigation import run_and_write_navigation_baseline
+from isaacsim_agent.tools.navigation import Pose2D
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Run the minimal deterministic navigation baseline.")
+    parser.add_argument("--run-id", default=None, help="Run identifier. Defaults to a UTC timestamp-based id.")
+    parser.add_argument("--results-root", default="results", help="Root directory for contract-compliant outputs.")
+    parser.add_argument("--task-id", default="minimal_deterministic_navigation", help="Task identifier.")
+    parser.add_argument("--scene-id", default="minimal_empty_stage", help="Scene identifier.")
+    parser.add_argument("--robot-id", default="point_robot", help="Robot identifier.")
+    parser.add_argument("--seed", type=int, default=0, help="Deterministic seed recorded in task artifacts.")
+    parser.add_argument("--max-steps", type=int, default=10, help="Maximum control steps before termination.")
+    parser.add_argument("--max-time-sec", type=float, default=10.0, help="Maximum simulated time before timeout.")
+    parser.add_argument("--start-x", type=float, default=0.0, help="Start x position in meters.")
+    parser.add_argument("--start-y", type=float, default=0.0, help="Start y position in meters.")
+    parser.add_argument("--start-yaw", type=float, default=0.0, help="Start yaw in radians.")
+    parser.add_argument("--goal-x", type=float, default=2.0, help="Goal x position in meters.")
+    parser.add_argument("--goal-y", type=float, default=0.0, help="Goal y position in meters.")
+    parser.add_argument("--goal-yaw", type=float, default=0.0, help="Goal yaw in radians.")
+    parser.add_argument(
+        "--success-radius-m",
+        type=float,
+        default=0.2,
+        help="Goal-distance threshold required for success.",
+    )
+    parser.add_argument(
+        "--step-size-m",
+        type=float,
+        default=0.5,
+        help="Deterministic straight-line motion applied on each control step.",
+    )
+    parser.add_argument(
+        "--control-dt-sec",
+        type=float,
+        default=0.5,
+        help="Simulated time increment recorded for each control step.",
+    )
+    return parser
+
+
+def default_run_id() -> str:
+    return "nav-baseline-" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    run_id = args.run_id or default_run_id()
+
+    config = build_minimal_navigation_task_config(
+        task_id=args.task_id,
+        scene_id=args.scene_id,
+        robot_id=args.robot_id,
+        seed=args.seed,
+        max_steps=args.max_steps,
+        max_time_sec=args.max_time_sec,
+        start_pose=Pose2D(x=args.start_x, y=args.start_y, yaw=args.start_yaw),
+        goal_pose=Pose2D(x=args.goal_x, y=args.goal_y, yaw=args.goal_yaw),
+        success_radius_m=args.success_radius_m,
+        step_size_m=args.step_size_m,
+        control_dt_sec=args.control_dt_sec,
+    )
+    run_data, layout = run_and_write_navigation_baseline(
+        config=config,
+        run_id=run_id,
+        results_root=args.results_root,
+    )
+
+    print("Run directory:", layout.run_dir)
+    print("Task:", run_data.config.task_id)
+    print("Scene:", run_data.config.scene_id)
+    print("Termination:", run_data.result.termination_reason.value)
+    print("Steps:", run_data.result.step_count)
+    print("Final goal distance (m):", run_data.result.metrics["navigation.final_goal_distance_m"])
+
+    if run_data.result.success:
+        print("NAV_BASELINE_OK")
+        return 0
+
+    print("NAV_BASELINE_FAILED")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -4,93 +4,83 @@
 
 - Date: 2026-03-16
 - Plan source of truth: `plan.md`
-- Active milestone: `M1.5 Unified Task and Result Contracts`
+- Active milestone: `M2 Minimal Deterministic Navigation Baseline`
 - Milestone state: completed for this repo run
-- Completion level: shared contracts, metrics conventions, artifact layout, validation utility, dummy run output, tests, and initial git repository management are now in place; `M2` has not started
+- Completion level: one minimal deterministic navigation baseline is implemented, validated, and writing contract-compliant run artifacts; later milestones remain untouched
 
 ## Milestone summary
 
-- Completed in this run: unified task config/result/event contracts, shared termination reasons, project-wide metrics contract, canonical run artifact layout, contract documentation, minimal serialization helpers, a dummy contract validation runner, and tests
-- Not completed in this run: navigation logic, manipulation logic, instruction execution logic, planner/runtime logic, experiments, or M2 baseline work
+- Completed in this run:
+  - defined one minimal navigation task: `minimal_deterministic_navigation` in scene `minimal_empty_stage`
+  - encoded reset/start/target/success/termination semantics without changing the M1.5 schema
+  - implemented a deterministic scripted straight-line controller with no planner, memory, recovery policy, or manipulation logic
+  - added a repo-facing runner that writes `manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/trajectory.json`
+  - added navigation smoke tests and documented the baseline run command
+- Not completed in this run:
+  - Isaac-scene-backed robot navigation or Nav2 integration
+  - manipulation, instruction following, LLM planner logic, memory, runtime policy, experiments, or paper-writing work
 
-## Repo git management update
+## M2 baseline definition
 
-- Initialized a local Git repository on branch `main`
-- Added a stricter `.gitignore` that excludes Python envs, caches, build metadata, editor files, temp files, local env files, and generated `results/` artifacts
-- Added `.gitattributes` with LF normalization for source/docs/config files and binary handling for common archives, images, PDFs, and Isaac-relevant `usdc`/`usdz` files
-- Kept `results/README.md` and `results/schema.md` tracked while ignoring generated folders such as `results/setup/` and `results/runs/`
-- Created the first commit: `a3a4986 chore: initialize repository scaffold`
+- Task: move a point robot from a fixed start pose to one fixed goal pose on an empty 2D plane
+- Reset: restore the robot pose to `metadata.navigation_baseline.start_pose` and clear step/time/stuck counters
+- Start: stored in `TaskConfig.metadata["navigation_baseline"]["start_pose"]`
+- Target: stored in `TaskConfig.navigation.goal_pose` with `goal_ref="goal_marker_A"`
+- Success condition: `distance_to_goal_m <= navigation.success_radius_m`
+- Termination conditions:
+  - `success`
+  - `max_steps`
+  - `max_time_sec`
+  - `robot_stuck`
 
-## Contract decisions
+## Contract notes
 
-- Canonical task config type: `TaskConfig` with common fields plus exactly one matching task-specific section: `NavigationSpec`, `PickPlaceSpec`, or `InstructionFollowingSpec`
-- Canonical result type: `EpisodeResult` with required common rollout metrics and a namespaced `metrics` map for task-specific values
-- Canonical event type: `EventRecord` written as JSONL in `events.jsonl`
-- Canonical termination enum: `TerminationReason`
-- Canonical task type enum: `TaskType`
-- Canonical event enum: `EventType`
-- Canonical output layout: `results/runs/<run_id>/manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/`
-- Planner latency contract: `planner_latency_sec` means total planner wall-clock latency accumulated across the episode
-- Token accounting contract: stored in nested `TokenUsage` with prompt, completion, total, and optional estimated cost
-- Task-specific metrics contract: store them in `EpisodeResult.metrics` using stable prefixes such as `navigation.*`, `pick_place.*`, and `instruction_following.*`
+- The M1.5 contracts were reused as-is; no schema changes were required
+- Navigation-specific task details beyond the base contract are stored under `TaskConfig.metadata["navigation_baseline"]`
+- The deterministic controller writes task-specific metrics using the required `navigation.*` namespace
+- Extra trace data is written only under `artifacts/trajectory.json`, preserving the canonical top-level result layout
 
 ## Changed files
 
-- `.gitattributes`
-- `.gitignore`
 - `README.md`
 - `STATUS.md`
-- `docs/contracts.md`
-- `results/README.md`
-- `results/schema.md`
 - `scripts/README.md`
-- `scripts/validate_contracts.py`
-- `src/isaacsim_agent/__init__.py`
-- `src/isaacsim_agent/contracts/__init__.py`
-- `src/isaacsim_agent/contracts/enums.py`
-- `src/isaacsim_agent/contracts/io.py`
-- `src/isaacsim_agent/contracts/metrics.py`
-- `src/isaacsim_agent/contracts/models.py`
-- `tests/test_contracts.py`
-- `results/runs/dummy-contract-run/manifest.json`
-- `results/runs/dummy-contract-run/task_config.json`
-- `results/runs/dummy-contract-run/episode_result.json`
-- `results/runs/dummy-contract-run/events.jsonl`
-- `results/runs/dummy-contract-run/artifacts/README.txt`
-- `results/runs/dummy-contract-run.validation.log`
-- `results/runs/unittest_contracts.log`
+- `scripts/run_nav_baseline.py`
+- `src/isaacsim_agent/tasks/__init__.py`
+- `src/isaacsim_agent/tasks/navigation/__init__.py`
+- `src/isaacsim_agent/tasks/navigation/baseline.py`
+- `src/isaacsim_agent/tools/__init__.py`
+- `src/isaacsim_agent/tools/navigation.py`
+- `tests/test_nav_smoke.py`
 
 ## Validation commands
 
-- `uv run python scripts/validate_contracts.py --run-id dummy-contract-run`
-- `uv run python -m unittest discover -s tests -p 'test_*.py'`
-- `git init -b main`
-- `git status --short --ignored`
-- `git add .`
+- `PYTHONPATH=src uv run python -m unittest tests.test_nav_smoke`
+- `PYTHONPATH=src uv run python scripts/run_nav_baseline.py --run-id nav-baseline-smoke --results-root /tmp/isaacsim-agent-nav-smoke`
+- `PYTHONPATH=src uv run python scripts/run_nav_baseline.py --run-id nav-baseline-ep1 --results-root /tmp/isaacsim-agent-nav-validation`
+- `PYTHONPATH=src uv run python scripts/run_nav_baseline.py --run-id nav-baseline-ep2 --results-root /tmp/isaacsim-agent-nav-validation`
+- `PYTHONPATH=src uv run python scripts/run_nav_baseline.py --run-id nav-baseline-ep3 --results-root /tmp/isaacsim-agent-nav-validation`
+- `PYTHONPATH=src uv run python -m unittest discover -s tests -p 'test_*.py'`
 - `git status --short`
-- `git -c user.name='Codex CLI' -c user.email='codex@example.com' commit -m 'chore: initialize repository scaffold'`
-- `git log --oneline -1`
 
 ## Validation results
 
-- Dummy contract run succeeded with `CONTRACT_VALIDATION_OK`
-- Canonical artifact layout was created under `results/runs/dummy-contract-run/`
-- `task_config.json` round-tripped successfully through serialization and loading
-- `episode_result.json` and `events.jsonl` were written with the expected structure
-- Test suite passed with `Ran 5 tests in 10.721s` and `OK`
-- Git repository initialization succeeded
-- `git status --short --ignored` confirmed that `.venv/`, `results/setup/`, `results/runs/`, and Python cache/build artifacts are ignored while source/docs remain tracked
-- `git add .` staged the intended project files without pulling generated artifacts into version control
-- The stricter `.gitignore` and `.gitattributes` rules were applied successfully
-- The first commit was created successfully as `a3a4986`
+- `tests.test_nav_smoke` passed with `Ran 2 tests in 0.170s` and `OK`
+- `scripts/run_nav_baseline.py` succeeded for `nav-baseline-smoke` with `Termination: success`, `Steps: 4`, `Final goal distance (m): 0.0`, and `NAV_BASELINE_OK`
+- Three additional scripted episodes (`nav-baseline-ep1`, `nav-baseline-ep2`, `nav-baseline-ep3`) all succeeded in 4 steps with `NAV_BASELINE_OK`
+- Full test suite passed with `Ran 7 tests in 10.360s` and `OK`
+- Run outputs were written in the canonical layout under:
+  - `/tmp/isaacsim-agent-nav-smoke/runs/nav-baseline-smoke/`
+  - `/tmp/isaacsim-agent-nav-validation/runs/nav-baseline-ep1/`
+  - `/tmp/isaacsim-agent-nav-validation/runs/nav-baseline-ep2/`
+  - `/tmp/isaacsim-agent-nav-validation/runs/nav-baseline-ep3/`
+- Output files conformed to the M1.5 contract layout and included the navigation trajectory artifact under `artifacts/trajectory.json`
 
-## Open issues
+## Blockers
 
-- The current contract uses a single total `planner_latency_sec`; future aggregation code may also want derived mean/max latency fields, but those should be computed without breaking this base contract unless a central schema revision is recorded
-- The current contract leaves task-specific payload details intentionally lightweight; future milestones must extend the documented namespaced `metrics` and task-specific spec sections rather than creating parallel schemas
-- Multi-episode batch manifests and aggregate result tables are not defined yet; they should build on top of the per-run layout introduced here rather than replacing it
-- No remote Git repository is configured yet
+- None within the scoped M2 baseline
+- The implemented baseline is intentionally pure Python and does not yet drive a real Isaac Sim robot asset; that limitation is a scope choice for this milestone, not a blocker for the current validation path
 
 ## Recommended next step
 
-- Start `M2. Navigation baseline` with one deterministic scripted navigation task, and make all outputs conform to the shared contracts defined in this milestone
+- Start `M3 Manipulation baseline` with the same contract discipline: one minimal deterministic pick-and-place task, one scripted baseline runner, contract-compliant artifacts, and lightweight validation first
