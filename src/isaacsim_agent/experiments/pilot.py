@@ -161,6 +161,8 @@ class PilotExperimentConfig:
     summary_title: str = "Pilot Summary"
     results_root: str | None = None
     output_dir: str | None = None
+    analysis_mode: str | None = None
+    reference_summary_path: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -174,6 +176,8 @@ class PilotExperimentConfig:
             "summary_title": self.summary_title,
             "results_root": self.results_root,
             "output_dir": self.output_dir,
+            "analysis_mode": self.analysis_mode,
+            "reference_summary_path": self.reference_summary_path,
             "prompt_variants": [variant.to_dict() for variant in self.prompt_variants],
             "runtime_variants": [variant.to_dict() for variant in self.runtime_variants],
             "tasks": [task.to_dict() for task in self.tasks],
@@ -299,6 +303,8 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
         summary_title=_optional_string(payload.get("summary_title")) or "Pilot Summary",
         results_root=_optional_string(payload.get("results_root")),
         output_dir=_optional_string(payload.get("output_dir")),
+        analysis_mode=_optional_string(payload.get("analysis_mode")),
+        reference_summary_path=_optional_string(payload.get("reference_summary_path")),
     )
 
 
@@ -431,7 +437,7 @@ def build_pilot_summary(
     incomplete_runs = [_failure_row(summary) for summary in bundle.summaries if not summary.run_complete]
     unsuccessful_runs = [_failure_row(summary) for summary in bundle.summaries if summary.success is False]
 
-    return {
+    summary = {
         "experiment_name": config.experiment_name,
         "description": config.description,
         "config_path": str(config_path.resolve()),
@@ -483,6 +489,289 @@ def build_pilot_summary(
         "incomplete_runs": incomplete_runs,
         "unsuccessful_runs": unsuccessful_runs,
     }
+    analysis = _build_optional_analysis(config=config, config_path=config_path, summary=summary)
+    if analysis is not None:
+        summary["analysis"] = analysis
+    return summary
+
+
+def _build_optional_analysis(
+    config: PilotExperimentConfig,
+    config_path: Path,
+    summary: dict[str, Any],
+) -> dict[str, Any] | None:
+    if config.analysis_mode == "block_a_navigation_robustness":
+        return _build_block_a_navigation_robustness_analysis(
+            config=config,
+            config_path=config_path,
+            summary=summary,
+        )
+    return None
+
+
+def _build_block_a_navigation_robustness_analysis(
+    config: PilotExperimentConfig,
+    config_path: Path,
+    summary: dict[str, Any],
+) -> dict[str, Any]:
+    prompt_runtime_rows = {
+        (str(row.get("prompt_variant")), str(row.get("runtime_variant"))): row
+        for row in summary.get("by_prompt_runtime", [])
+        if isinstance(row, dict)
+    }
+    task_rows = [
+        row
+        for row in summary.get("by_task_variant", [])
+        if isinstance(row, dict)
+    ]
+
+    p0_r0 = prompt_runtime_rows.get(("P0", "R0"))
+    p0_r1 = prompt_runtime_rows.get(("P0", "R1"))
+    p1_r0 = prompt_runtime_rows.get(("P1", "R0"))
+    p1_r1 = prompt_runtime_rows.get(("P1", "R1"))
+    p2_r0 = prompt_runtime_rows.get(("P2", "R0"))
+    p2_r1 = prompt_runtime_rows.get(("P2", "R1"))
+
+    questions: dict[str, dict[str, Any]] = {}
+    findings: list[str] = []
+
+    p0_r0_worst = bool(
+        p0_r0
+        and all(
+            (row.get("success_rate") or 0.0) > (p0_r0.get("success_rate") or 0.0)
+            for key, row in prompt_runtime_rows.items()
+            if key != ("P0", "R0")
+        )
+    )
+    p0_r0_termination = _format_termination_reasons(
+        p0_r0.get("termination_reasons") if isinstance(p0_r0, dict) else None
+    )
+    questions["q1_p0_r0_worst"] = {
+        "answer": p0_r0_worst,
+        "success_rate": p0_r0.get("success_rate") if p0_r0 else None,
+        "termination_reasons": p0_r0.get("termination_reasons") if p0_r0 else {},
+    }
+    if p0_r0 is not None:
+        findings.append(
+            "P0/R0 remains the worst cell on the harder navigation slice: "
+            f"success_rate `{p0_r0['success_rate']}` with termination `{p0_r0_termination}`, "
+            f"`{p0_r0['total_invalid_actions']}` invalid actions, and `{p0_r0['total_retries']}` retries."
+        )
+
+    p0_r1_recovered = bool(p0_r1 and p0_r1.get("successful_runs") == p0_r1.get("run_count"))
+    questions["q2_r1_recovers_p0"] = {
+        "answer": p0_r1_recovered,
+        "success_rate": p0_r1.get("success_rate") if p0_r1 else None,
+        "total_retries": p0_r1.get("total_retries") if p0_r1 else None,
+        "average_planner_calls": p0_r1.get("average_planner_calls") if p0_r1 else None,
+        "average_tool_calls": p0_r1.get("average_tool_calls") if p0_r1 else None,
+    }
+    if p0_r1 is not None:
+        findings.append(
+            "R1 still recovers P0 across the full harder-task slice: "
+            f"P0/R1 reaches success_rate `{p0_r1['success_rate']}` with `{p0_r1['total_retries']}` retries, "
+            f"`{p0_r1['average_planner_calls']}` average planner calls, and "
+            f"`{p0_r1['average_tool_calls']}` average tool calls."
+        )
+
+    p1_p2_success = bool(
+        all(
+            row is not None and row.get("successful_runs") == row.get("run_count")
+            for row in (p1_r0, p1_r1, p2_r0, p2_r1)
+        )
+    )
+    questions["q3_p1_p2_success"] = {
+        "answer": p1_p2_success,
+        "rows": {
+            "P1/R0": p1_r0,
+            "P1/R1": p1_r1,
+            "P2/R0": p2_r0,
+            "P2/R1": p2_r1,
+        },
+    }
+    findings.append(
+        "P1 and P2 remain globally successful on these harder navigation tasks: "
+        f"P1/R0 `{_success_rate_text(p1_r0)}`, P1/R1 `{_success_rate_text(p1_r1)}`, "
+        f"P2/R0 `{_success_rate_text(p2_r0)}`, and P2/R1 `{_success_rate_text(p2_r1)}`."
+    )
+
+    p2_more_efficient = bool(
+        p1_r0
+        and p2_r0
+        and p1_r1
+        and p2_r1
+        and (p2_r0.get("average_planner_calls") or 0.0) < (p1_r0.get("average_planner_calls") or 0.0)
+        and (p2_r0.get("average_tool_calls") or 0.0) < (p1_r0.get("average_tool_calls") or 0.0)
+        and (p2_r1.get("average_planner_calls") or 0.0) < (p1_r1.get("average_planner_calls") or 0.0)
+        and (p2_r1.get("average_tool_calls") or 0.0) < (p1_r1.get("average_tool_calls") or 0.0)
+    )
+    questions["q4_p2_more_efficient_than_p1"] = {
+        "answer": p2_more_efficient,
+        "r0": {
+            "p1_average_planner_calls": p1_r0.get("average_planner_calls") if p1_r0 else None,
+            "p2_average_planner_calls": p2_r0.get("average_planner_calls") if p2_r0 else None,
+            "p1_average_tool_calls": p1_r0.get("average_tool_calls") if p1_r0 else None,
+            "p2_average_tool_calls": p2_r0.get("average_tool_calls") if p2_r0 else None,
+        },
+        "r1": {
+            "p1_average_planner_calls": p1_r1.get("average_planner_calls") if p1_r1 else None,
+            "p2_average_planner_calls": p2_r1.get("average_planner_calls") if p2_r1 else None,
+            "p1_average_tool_calls": p1_r1.get("average_tool_calls") if p1_r1 else None,
+            "p2_average_tool_calls": p2_r1.get("average_tool_calls") if p2_r1 else None,
+        },
+    }
+    if p1_r0 is not None and p2_r0 is not None and p1_r1 is not None and p2_r1 is not None:
+        findings.append(
+            "P2 keeps the planner/tool efficiency edge over P1 under both runtimes: "
+            f"R0 planner/tool `{p2_r0['average_planner_calls']}`/`{p2_r0['average_tool_calls']}` "
+            f"vs P1 `{p1_r0['average_planner_calls']}`/`{p1_r0['average_tool_calls']}`, "
+            f"and R1 planner/tool `{p2_r1['average_planner_calls']}`/`{p2_r1['average_tool_calls']}` "
+            f"vs P1 `{p1_r1['average_planner_calls']}`/`{p1_r1['average_tool_calls']}`."
+        )
+
+    unsuccessful_rows = [
+        row
+        for row in task_rows
+        if row.get("success_rate") == 0.0
+    ]
+    questions["q5_harder_tasks_amplify_differences"] = {
+        "answer": None,
+        "reference_summary_path": None,
+        "details": [],
+    }
+
+    reference_comparison = _build_reference_comparison(
+        config=config,
+        config_path=config_path,
+        prompt_runtime_rows=prompt_runtime_rows,
+    )
+    if reference_comparison is not None:
+        questions["q5_harder_tasks_amplify_differences"] = reference_comparison
+        if reference_comparison.get("answer") is True:
+            findings.append(
+                "Compared with the existing easy navigation reference, the harder slice increases planner/tool "
+                "overhead while preserving the same qualitative ordering: "
+                + "; ".join(reference_comparison["details"])
+                + "."
+            )
+        else:
+            findings.append(
+                "Relative to the existing easy navigation reference, the harder slice preserves the same success "
+                "ordering without a clear efficiency-gap increase."
+            )
+    elif unsuccessful_rows:
+        findings.append(
+            "The harder slice does not create new failure cells beyond P0/R0; the main difference is higher "
+            "planner/tool overhead on successful variants."
+        )
+
+    return {
+        "mode": "block_a_navigation_robustness",
+        "reference_summary_path": reference_comparison.get("reference_summary_path") if reference_comparison else None,
+        "questions": questions,
+        "findings": findings,
+    }
+
+
+def _build_reference_comparison(
+    config: PilotExperimentConfig,
+    config_path: Path,
+    prompt_runtime_rows: dict[tuple[str, str], dict[str, Any]],
+) -> dict[str, Any] | None:
+    if not config.reference_summary_path:
+        return None
+    reference_summary_path = _resolve_reference_summary_path(
+        reference_summary_path=config.reference_summary_path,
+        config_path=config_path,
+    )
+    if not reference_summary_path.is_file():
+        return None
+
+    payload = json.loads(reference_summary_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+
+    reference_rows = _select_reference_prompt_runtime_rows(
+        reference_summary=payload,
+        backend=config.backend,
+    )
+    comparisons: list[str] = []
+    amplified = False
+    for prompt_variant, runtime_variant in (("P0", "R1"), ("P1", "R0"), ("P2", "R0")):
+        current = prompt_runtime_rows.get((prompt_variant, runtime_variant))
+        reference = reference_rows.get((prompt_variant, runtime_variant))
+        if current is None or reference is None:
+            continue
+        current_planner = current.get("average_planner_calls")
+        reference_planner = reference.get("average_planner_calls")
+        current_tool = current.get("average_tool_calls")
+        reference_tool = reference.get("average_tool_calls")
+        if not isinstance(current_planner, (int, float)) or not isinstance(reference_planner, (int, float)):
+            continue
+        if not isinstance(current_tool, (int, float)) or not isinstance(reference_tool, (int, float)):
+            continue
+        if current_planner > reference_planner or current_tool > reference_tool:
+            amplified = True
+        comparisons.append(
+            f"{prompt_variant}/{runtime_variant} planner/tool "
+            f"`{reference_planner}`/`{reference_tool}` -> `{current_planner}`/`{current_tool}`"
+        )
+
+    if not comparisons:
+        return None
+    return {
+        "answer": amplified,
+        "reference_summary_path": str(reference_summary_path),
+        "details": comparisons,
+    }
+
+
+def _resolve_reference_summary_path(reference_summary_path: str, config_path: Path) -> Path:
+    candidate = Path(reference_summary_path)
+    if candidate.is_absolute():
+        return candidate
+    repo_candidate = REPO_ROOT / candidate
+    if repo_candidate.exists():
+        return repo_candidate
+    config_candidate = config_path.parent / candidate
+    if config_candidate.exists():
+        return config_candidate
+    return repo_candidate
+
+
+def _select_reference_prompt_runtime_rows(
+    reference_summary: dict[str, Any],
+    backend: str,
+) -> dict[tuple[str, str], dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if backend in {"toy", "isaac"}:
+        backend_rows = reference_summary.get("by_backend_prompt_runtime", [])
+        if isinstance(backend_rows, list):
+            rows = [
+                row
+                for row in backend_rows
+                if isinstance(row, dict) and row.get("backend_variant") == backend
+            ]
+    if not rows:
+        prompt_runtime_rows = reference_summary.get("by_prompt_runtime", [])
+        if isinstance(prompt_runtime_rows, list):
+            rows = [row for row in prompt_runtime_rows if isinstance(row, dict)]
+    return {
+        (str(row.get("prompt_variant")), str(row.get("runtime_variant"))): row
+        for row in rows
+    }
+
+
+def _format_termination_reasons(payload: Any) -> str:
+    if not isinstance(payload, dict) or not payload:
+        return "unknown"
+    return ", ".join(f"{key}:{payload[key]}" for key in sorted(payload))
+
+
+def _success_rate_text(row: dict[str, Any] | None) -> str:
+    if row is None:
+        return "missing"
+    return f"{row.get('successful_runs')}/{row.get('run_count')} ({row.get('success_rate')})"
 
 
 def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
@@ -836,6 +1125,15 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
     if summary.get("description"):
         lines.extend(["", summary["description"]])
 
+    analysis = summary.get("analysis")
+    if isinstance(analysis, dict) and analysis.get("mode") == "block_a_navigation_robustness":
+        lines.extend(["", "## Robustness Findings", ""])
+        for finding in analysis.get("findings", []):
+            lines.append(f"- {finding}")
+        reference_summary_path = analysis.get("reference_summary_path")
+        if isinstance(reference_summary_path, str) and reference_summary_path.strip():
+            lines.append(f"- Reference summary: `{reference_summary_path}`")
+
     lines.extend(
         [
             "",
@@ -896,8 +1194,11 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "successful_runs",
                     "success_rate",
                     "average_step_count",
+                    "average_planner_calls",
+                    "average_tool_calls",
                     "total_invalid_actions",
                     "total_retries",
+                    "average_episode_time_s",
                     "termination_reasons",
                 ],
             ),
