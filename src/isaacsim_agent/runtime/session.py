@@ -274,6 +274,8 @@ def _manifest_metadata(config: TaskConfig, planner_backend: str) -> dict[str, An
     payload: dict[str, Any] = {
         "planner_backend": planner_backend,
         "runtime_policy": _runtime_policy_name(config),
+        "task_id": config.task_id,
+        "scene_id": config.scene_id,
     }
     prompt_variant = _prompt_variant(config)
     runtime_variant = _runtime_variant(config)

@@ -1,8 +1,12 @@
-"""Minimal config-driven pilot suite runner for post-M5 easy navigation runs."""
+"""Config-driven navigation pilot and block A suite runner built on the M4/M5 paths."""
 
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -23,6 +27,11 @@ from isaacsim_agent.runtime import AgentRuntimeConfig
 from isaacsim_agent.runtime import build_agent_v0_navigation_task_config
 from isaacsim_agent.runtime import run_and_write_agent_v0
 from isaacsim_agent.tools import Pose2D
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+SRC_ROOT = REPO_ROOT / "src"
+ISAAC_WRAPPER = REPO_ROOT / "scripts" / "isaac_python.sh"
+PILOT_RUNNER = REPO_ROOT / "scripts" / "run_pilot_run.py"
 
 
 @dataclass(frozen=True)
@@ -75,10 +84,11 @@ class PilotRuntimeVariant:
 
 @dataclass(frozen=True)
 class PilotTaskSpec:
-    """One easy navigation task used in the pilot suite."""
+    """One navigation task used in the pilot suite."""
 
     task_id: str
     scene_id: str
+    backend: str
     robot_id: str
     seed: int
     max_steps: int
@@ -94,6 +104,7 @@ class PilotTaskSpec:
         return {
             "task_id": self.task_id,
             "scene_id": self.scene_id,
+            "backend": self.backend,
             "robot_id": self.robot_id,
             "seed": self.seed,
             "max_steps": self.max_steps,
@@ -121,6 +132,7 @@ class PilotExperimentConfig:
     runtime_variants: list[PilotRuntimeVariant]
     tasks: list[PilotTaskSpec]
     summary_basename: str = "pilot_summary"
+    summary_title: str = "Pilot Summary"
     results_root: str | None = None
     output_dir: str | None = None
 
@@ -133,6 +145,7 @@ class PilotExperimentConfig:
             "backend": self.backend,
             "planner_backend": self.planner_backend,
             "summary_basename": self.summary_basename,
+            "summary_title": self.summary_title,
             "results_root": self.results_root,
             "output_dir": self.output_dir,
             "prompt_variants": [variant.to_dict() for variant in self.prompt_variants],
@@ -155,6 +168,7 @@ class PlannedRun:
             "run_id": self.run_id,
             "task_id": self.task.task_id,
             "scene_id": self.task.scene_id,
+            "backend": self.task.backend,
             "robot_id": self.task.robot_id,
             "seed": self.task.seed,
             "prompt_variant": self.prompt_variant.variant_id,
@@ -204,9 +218,11 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
     if execution_mode != "sequential":
         raise ValueError("pilot runner currently supports only sequential execution")
 
-    backend = _optional_string(payload.get("backend")) or _optional_string(defaults.get("backend")) or "toy"
-    if backend != "toy":
-        raise ValueError("pilot runner currently supports only backend='toy' for lightweight local pilots")
+    backend = _parse_backend(
+        _optional_string(payload.get("backend")) or _optional_string(defaults.get("backend")) or "toy",
+        field_name="backend",
+        allow_mixed=True,
+    )
 
     planner_backend = (
         _optional_string(payload.get("planner_backend"))
@@ -228,11 +244,20 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
 
     prompt_variants = [_parse_prompt_variant(item) for item in prompt_variants_payload]
     runtime_variants = [_parse_runtime_variant(item) for item in runtime_variants_payload]
-    tasks = [_parse_task(item, defaults) for item in tasks_payload]
+    tasks = [_parse_task(item, defaults, suite_backend=backend) for item in tasks_payload]
 
     _ensure_unique_ids([variant.variant_id for variant in prompt_variants], "prompt variant")
     _ensure_unique_ids([variant.variant_id for variant in runtime_variants], "runtime variant")
     _ensure_unique_ids([task.task_id for task in tasks], "task")
+
+    task_backends = {task.backend for task in tasks}
+    if backend == "mixed":
+        if len(task_backends) < 2:
+            raise ValueError("backend='mixed' requires at least two distinct task backends")
+    elif task_backends != {backend}:
+        raise ValueError(
+            "task backend overrides must match the suite backend unless backend='mixed'"
+        )
 
     return PilotExperimentConfig(
         experiment_name=_required_string(payload, "experiment_name"),
@@ -245,6 +270,7 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
         runtime_variants=runtime_variants,
         tasks=tasks,
         summary_basename=_optional_string(payload.get("summary_basename")) or "pilot_summary",
+        summary_title=_optional_string(payload.get("summary_title")) or "Pilot Summary",
         results_root=_optional_string(payload.get("results_root")),
         output_dir=_optional_string(payload.get("output_dir")),
     )
@@ -322,10 +348,11 @@ def run_pilot_suite(
             max_validation_retries=run.runtime_variant.max_retries_per_step,
             max_invalid_actions=run.runtime_variant.max_invalid_actions,
         )
-        run_and_write_agent_v0(
-            config=task_config,
-            run_id=run.run_id,
+        _execute_planned_run(
+            run=run,
+            task_config=task_config,
             results_root=resolved_results_root,
+            planner_backend_name=config.planner_backend,
             planner_backend=planner_backend,
             runtime_config=runtime_config,
         )
@@ -382,6 +409,7 @@ def build_pilot_summary(
         "experiment_name": config.experiment_name,
         "description": config.description,
         "config_path": str(config_path.resolve()),
+        "summary_title": config.summary_title,
         "task_family": config.task_family,
         "execution_mode": config.execution_mode,
         "backend": config.backend,
@@ -390,10 +418,12 @@ def build_pilot_summary(
         "output_dir": str(output_dir.resolve()),
         "matrix": {
             "task_count": len(config.tasks),
+            "backend_count": len({task.backend for task in config.tasks}),
             "prompt_variant_count": len(config.prompt_variants),
             "runtime_variant_count": len(config.runtime_variants),
             "planned_run_count": len(planned_runs),
         },
+        "backends": sorted({task.backend for task in config.tasks}),
         "prompt_variants": [variant.to_dict() for variant in config.prompt_variants],
         "runtime_variants": [variant.to_dict() for variant in config.runtime_variants],
         "tasks": [task.to_dict() for task in config.tasks],
@@ -416,9 +446,13 @@ def build_pilot_summary(
             bundle=bundle,
             group_fields=("prompt_variant", "runtime_variant"),
         ),
+        "by_backend_prompt_runtime": _aggregate_summary_rows(
+            bundle=bundle,
+            group_fields=("backend_variant", "prompt_variant", "runtime_variant"),
+        ),
         "by_task_variant": _aggregate_summary_rows(
             bundle=bundle,
-            group_fields=("task_id", "scene_id", "prompt_variant", "runtime_variant"),
+            group_fields=("backend_variant", "task_id", "scene_id", "prompt_variant", "runtime_variant"),
         ),
         "incomplete_runs": incomplete_runs,
         "unsuccessful_runs": unsuccessful_runs,
@@ -428,7 +462,7 @@ def build_pilot_summary(
 def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     prompt_text = _render_prompt_text(run)
     task_config = build_agent_v0_navigation_task_config(
-        backend=config.backend,
+        backend=run.task.backend,
         planner_backend=config.planner_backend,
         task_id=run.task.task_id,
         scene_id=run.task.scene_id,
@@ -454,6 +488,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     extra_options["runtime_policy"] = run.runtime_variant.runtime_policy
     extra_options["runtime_validate_actions"] = run.runtime_variant.validate_actions
     extra_options["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
+    extra_options["navigation_backend"] = run.task.backend
     extra_options["suite_experiment"] = config.experiment_name
     extra_options["planner_prompt_text"] = prompt_text
     task_config.runtime_options.extra_options = extra_options
@@ -471,6 +506,8 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     }
     metadata["pilot_suite"] = {
         "experiment_name": config.experiment_name,
+        "task_id": run.task.task_id,
+        "scene_id": run.task.scene_id,
         "prompt_variant": run.prompt_variant.variant_id,
         "runtime_variant": run.runtime_variant.variant_id,
         "runtime_policy": run.runtime_variant.runtime_policy,
@@ -479,6 +516,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
         "max_invalid_actions": run.runtime_variant.max_invalid_actions,
         "planner_backend": config.planner_backend,
         "task_family": config.task_family,
+        "backend": run.task.backend,
     }
 
     agent_metadata = dict(metadata.get("agent_runtime_v0", {}))
@@ -489,6 +527,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     agent_metadata["runtime_policy"] = run.runtime_variant.runtime_policy
     agent_metadata["runtime_validate_actions"] = run.runtime_variant.validate_actions
     agent_metadata["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
+    agent_metadata["navigation_backend"] = run.task.backend
     agent_metadata["prompt_text"] = prompt_text
     metadata["agent_runtime_v0"] = agent_metadata
     task_config.metadata = metadata
@@ -497,6 +536,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     for tag in (
         "pilot",
         "pilot_navigation",
+        f"backend_{run.task.backend.lower()}",
         f"prompt_{run.prompt_variant.variant_id.lower()}",
         f"runtime_{run.runtime_variant.variant_id.lower()}",
     ):
@@ -505,6 +545,114 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     task_config.tags = tags
 
     return task_config
+
+
+def _execute_planned_run(
+    run: PlannedRun,
+    task_config: Any,
+    results_root: Path,
+    planner_backend_name: str,
+    planner_backend: Any,
+    runtime_config: AgentRuntimeConfig,
+) -> None:
+    if run.task.backend == "isaac":
+        _run_agent_subprocess(
+            task_config=task_config,
+            run_id=run.run_id,
+            results_root=results_root,
+            planner_backend_name=planner_backend_name,
+            runtime_config=runtime_config,
+        )
+        return
+
+    run_and_write_agent_v0(
+        config=task_config,
+        run_id=run.run_id,
+        results_root=results_root,
+        planner_backend=planner_backend,
+        runtime_config=runtime_config,
+    )
+
+
+def _run_agent_subprocess(
+    task_config: Any,
+    run_id: str,
+    results_root: Path,
+    planner_backend_name: str,
+    runtime_config: AgentRuntimeConfig,
+) -> None:
+    helper_script = REPO_ROOT / "scripts" / "run_agent_v0_task_config.py"
+    python_executable = _resolve_isaac_python_executable() or Path(sys.executable)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".json",
+        prefix=f"{_slugify(run_id)}-",
+        delete=False,
+        encoding="utf-8",
+    ) as handle:
+        json.dump(task_config.to_dict(), handle, indent=2)
+        handle.write("\n")
+        temp_config_path = Path(handle.name)
+
+    try:
+        command = [
+            str(python_executable),
+            str(helper_script),
+            "--task-config",
+            str(temp_config_path),
+            "--run-id",
+            run_id,
+            "--results-root",
+            str(results_root),
+            "--planner-backend",
+            planner_backend_name,
+            "--runtime-policy",
+            runtime_config.policy_name,
+            "--validation-enabled",
+            "true" if runtime_config.validation_enabled else "false",
+            "--max-validation-retries",
+            str(runtime_config.max_validation_retries),
+            "--max-invalid-actions",
+            str(runtime_config.max_invalid_actions),
+        ]
+        completed = subprocess.run(
+            command,
+            cwd=REPO_ROOT,
+            check=False,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        )
+        if completed.returncode != 0:
+            raise RuntimeError(
+                f"subprocess Isaac run failed for {run_id} with exit code {completed.returncode}"
+            )
+    finally:
+        temp_config_path.unlink(missing_ok=True)
+
+
+def _resolve_isaac_python_executable() -> Path | None:
+    env_root = os.environ.get("ISAAC_SIM_ROOT")
+    candidates: list[Path] = []
+    if env_root:
+        candidates.append(Path(env_root) / "python.sh")
+    candidates.append(Path("/isaac-sim/python.sh"))
+
+    ov_root = Path.home() / ".local" / "share" / "ov" / "pkg"
+    if ov_root.is_dir():
+        candidates.extend(sorted((path / "python.sh") for path in ov_root.glob("isaac_sim-*")))
+
+    candidates.extend(
+        [
+            Path("/opt/nvidia/isaac-sim/python.sh"),
+            Path("/opt/NVIDIA/isaac-sim/python.sh"),
+            Path("/opt/omniverse/isaac-sim/python.sh"),
+        ]
+    )
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def _render_prompt_text(run: PlannedRun) -> str:
@@ -599,14 +747,16 @@ def _failure_row(summary: Any) -> dict[str, Any]:
 
 
 def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
+    summary_title = summary.get("summary_title") or "Pilot Summary"
     lines = [
-        f"# Pilot Summary: {summary['experiment_name']}",
+        f"# {summary_title}: {summary['experiment_name']}",
         "",
         f"- Config: `{summary['config_path']}`",
         f"- Results root: `{summary['results_root']}`",
         f"- Output dir: `{summary['output_dir']}`",
         f"- Task family: `{summary['task_family']}`",
         f"- Backend: `{summary['backend']}`",
+        f"- Backends in tasks: `{', '.join(summary['backends'])}`",
         f"- Planner backend: `{summary['planner_backend']}`",
         f"- Planned runs: `{summary['overall']['planned_runs']}`",
         f"- Summarized runs: `{summary['overall']['summarized_runs']}`",
@@ -642,11 +792,34 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                 ],
             ),
             "",
+            "## Backend x Prompt x Runtime",
+            "",
+            _render_markdown_table(
+                summary["by_backend_prompt_runtime"],
+                columns=[
+                    "backend_variant",
+                    "prompt_variant",
+                    "runtime_variant",
+                    "run_count",
+                    "run_complete_runs",
+                    "successful_runs",
+                    "success_rate",
+                    "average_step_count",
+                    "average_planner_calls",
+                    "average_tool_calls",
+                    "total_invalid_actions",
+                    "total_retries",
+                    "average_episode_time_s",
+                    "average_planner_latency_s",
+                ],
+            ),
+            "",
             "## Task x Variant",
             "",
             _render_markdown_table(
                 summary["by_task_variant"],
                 columns=[
+                    "backend_variant",
                     "task_id",
                     "scene_id",
                     "prompt_variant",
@@ -775,12 +948,17 @@ def _parse_runtime_variant(payload: Any) -> PilotRuntimeVariant:
     )
 
 
-def _parse_task(payload: Any, defaults: dict[str, Any]) -> PilotTaskSpec:
+def _parse_task(payload: Any, defaults: dict[str, Any], suite_backend: str) -> PilotTaskSpec:
     if not isinstance(payload, dict):
         raise ValueError("each task must be a mapping")
     return PilotTaskSpec(
         task_id=_required_string(payload, "task_id"),
         scene_id=_required_string(payload, "scene_id"),
+        backend=_parse_backend(
+            _optional_string(payload.get("backend")) or _optional_string(defaults.get("backend")) or suite_backend,
+            field_name=f"tasks[{_required_string(payload, 'task_id')}].backend",
+            allow_mixed=False,
+        ),
         robot_id=_optional_string(payload.get("robot_id"))
         or _optional_string(defaults.get("robot_id"))
         or "agent_point_robot",
@@ -858,6 +1036,15 @@ def _optional_string(value: Any) -> str | None:
     if isinstance(value, str) and value.strip():
         return value.strip()
     return None
+
+
+def _parse_backend(value: str, field_name: str, allow_mixed: bool) -> str:
+    allowed = {"toy", "isaac"}
+    if allow_mixed:
+        allowed.add("mixed")
+    if value not in allowed:
+        raise ValueError(f"{field_name} must be one of: {', '.join(sorted(allowed))}")
+    return value
 
 
 def _positive_or_zero_int(value: Any, field_name: str) -> int:

@@ -1,0 +1,209 @@
+{
+  "experiment_name": "block_a_navigation_prompt_runtime_expanded",
+  "description": "Expanded M6 block A navigation-only prompt x runtime sweep across a larger toy task set plus a small Isaac-backed slice.",
+  "task_family": "navigation",
+  "execution_mode": "sequential",
+  "backend": "mixed",
+  "planner_backend": "mock_block_a",
+  "summary_basename": "block_a_summary",
+  "summary_title": "Block A Summary",
+  "results_root": "results/block_a_navigation_prompt_runtime_expanded",
+  "output_dir": "results/processed/block_a_navigation_prompt_runtime_expanded",
+  "defaults": {
+    "backend": "toy",
+    "robot_id": "agent_point_robot",
+    "seed": 0,
+    "success_radius_m": 0.2,
+    "step_size_m": 0.5,
+    "control_dt_sec": 0.5
+  },
+  "prompt_variants": [
+    {
+      "id": "P0",
+      "label": "direct_next_action",
+      "response_mode": "direct_action_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous direct action. Return one valid JSON action only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P0. Task: navigation. Goal pose: ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Output the next action directly as one JSON object and keep it minimal.",
+      "notes": "Direct minimal prompt that emits one action JSON object."
+    },
+    {
+      "id": "P1",
+      "label": "structured_tool_json",
+      "response_mode": "tool_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous tool call. Return one valid JSON object with tool_name and arguments only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P1. Task: navigation. Start pose: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}). Goal pose: ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Choose one tool from the provided tools and emit typed JSON with tool_name and arguments.",
+      "notes": "Structured tool-call prompt with typed JSON arguments."
+    },
+    {
+      "id": "P2",
+      "label": "structured_tool_json_with_self_check",
+      "response_mode": "tool_json_with_self_check",
+      "self_check_required": true,
+      "repair_instruction_template": "Repair the previous tool call. Return one JSON object with tool_name, arguments, and a brief self_check. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P2. Task: navigation. Start pose: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}). Goal pose: ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Choose one tool from the provided tools, emit typed JSON arguments, and include one brief self_check field before execution.",
+      "notes": "Structured tool prompt plus a short explicit self-check field."
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "R0",
+      "label": "bare_no_validation_no_retry",
+      "runtime_policy": "block_a_r0_bare",
+      "validate_actions": false,
+      "max_retries_per_step": 0,
+      "max_invalid_actions": 1,
+      "notes": "No validation and no retry."
+    },
+    {
+      "id": "R1",
+      "label": "validate_single_retry",
+      "runtime_policy": "block_a_r1_validate_retry",
+      "validate_actions": true,
+      "max_retries_per_step": 1,
+      "max_invalid_actions": 2,
+      "notes": "Validation plus one retry on invalid action."
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "toy_nav_short_forward",
+      "scene_id": "easy_empty_stage_a",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "max_steps": 6,
+      "max_time_sec": 6.0,
+      "notes": "Toy backend short forward reference task."
+    },
+    {
+      "task_id": "toy_nav_long_forward",
+      "scene_id": "easy_empty_stage_b",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.5,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "max_steps": 8,
+      "max_time_sec": 8.0,
+      "notes": "Toy backend longer straight-line task."
+    },
+    {
+      "task_id": "toy_nav_diagonal_ne",
+      "scene_id": "easy_empty_stage_c",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 1.0,
+        "yaw": 0.0
+      },
+      "max_steps": 10,
+      "max_time_sec": 10.0,
+      "notes": "Toy backend diagonal northeast task."
+    },
+    {
+      "task_id": "toy_nav_diagonal_nw",
+      "scene_id": "easy_empty_stage_d",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": -1.0,
+        "y": 1.0,
+        "yaw": 0.0
+      },
+      "max_steps": 10,
+      "max_time_sec": 10.0,
+      "notes": "Toy backend diagonal northwest task."
+    },
+    {
+      "task_id": "toy_nav_lateral_up",
+      "scene_id": "easy_empty_stage_e",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 0.0,
+        "y": 1.5,
+        "yaw": 0.0
+      },
+      "max_steps": 8,
+      "max_time_sec": 8.0,
+      "notes": "Toy backend pure lateral translation task."
+    },
+    {
+      "task_id": "toy_nav_offset_start",
+      "scene_id": "easy_empty_stage_f",
+      "start_pose": {
+        "x": -0.5,
+        "y": -0.5,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.5,
+        "yaw": 0.0
+      },
+      "max_steps": 10,
+      "max_time_sec": 10.0,
+      "notes": "Toy backend offset-start navigation task."
+    },
+    {
+      "task_id": "isaac_nav_short_forward",
+      "scene_id": "minimal_isaac_stage_a",
+      "backend": "isaac",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "max_steps": 6,
+      "max_time_sec": 6.0,
+      "notes": "Small Isaac-backed reference task."
+    },
+    {
+      "task_id": "isaac_nav_diagonal",
+      "scene_id": "minimal_isaac_stage_b",
+      "backend": "isaac",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 1.0,
+        "yaw": 0.0
+      },
+      "max_steps": 10,
+      "max_time_sec": 10.0,
+      "notes": "Small Isaac-backed diagonal task."
+    }
+  ]
+}

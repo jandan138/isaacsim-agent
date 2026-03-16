@@ -55,7 +55,7 @@ class MinimalIsaacNavigationEnvironment:
         try:
             from isaacsim import SimulationApp  # type: ignore
         except ModuleNotFoundError as exc:
-            raise IsaacBackendUnavailableError(
+            raise NavigationBackendUnavailableError(
                 "Isaac-backed navigation requires launching via ./scripts/isaac_python.sh."
             ) from exc
 
@@ -69,7 +69,7 @@ class MinimalIsaacNavigationEnvironment:
             from pxr import UsdPhysics  # type: ignore
         except ModuleNotFoundError as exc:
             self.close()
-            raise IsaacBackendUnavailableError(
+            raise NavigationBackendUnavailableError(
                 "Isaac Sim modules were not importable after starting SimulationApp."
             ) from exc
         try:

@@ -17,12 +17,32 @@ SUITE_SCRIPT = REPO_ROOT / "scripts" / "run_suite.py"
 BLOCK_A_CONFIG = (
     REPO_ROOT / "configs" / "experiments" / "block_a" / "navigation_prompt_runtime_pilot.yaml"
 )
+BLOCK_A_EXPANDED_CONFIG = (
+    REPO_ROOT / "configs" / "experiments" / "block_a" / "navigation_prompt_runtime_expanded.yaml"
+)
 
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 
 class BlockAPilotSmokeTest(unittest.TestCase):
+    def test_load_block_a_expanded_config_plans_mixed_backend_matrix(self) -> None:
+        from isaacsim_agent.experiments import load_pilot_experiment_config
+        from isaacsim_agent.experiments import plan_pilot_runs
+
+        config = load_pilot_experiment_config(BLOCK_A_EXPANDED_CONFIG)
+        planned_runs = plan_pilot_runs(config)
+
+        self.assertEqual(config.experiment_name, "block_a_navigation_prompt_runtime_expanded")
+        self.assertEqual(config.backend, "mixed")
+        self.assertEqual(config.summary_basename, "block_a_summary")
+        self.assertEqual(len(config.tasks), 8)
+        self.assertEqual({task.backend for task in config.tasks}, {"toy", "isaac"})
+        self.assertEqual(len(planned_runs), 48)
+        self.assertEqual({run.task.backend for run in planned_runs}, {"toy", "isaac"})
+        self.assertEqual(sum(1 for run in planned_runs if run.task.backend == "toy"), 36)
+        self.assertEqual(sum(1 for run in planned_runs if run.task.backend == "isaac"), 12)
+
     def test_run_block_a_pilot_writes_summary_and_retry_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             results_root = Path(temp_dir) / "results"
@@ -113,6 +133,8 @@ class BlockAPilotSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["metadata"]["prompt_variant"], "P2")
             self.assertEqual(manifest["metadata"]["runtime_variant"], "R0")
             self.assertEqual(manifest["metadata"]["runtime_policy"], "block_a_r0_bare")
+            self.assertEqual(manifest["metadata"]["task_id"], "easy_nav_short_forward")
+            self.assertEqual(manifest["metadata"]["scene_id"], "easy_empty_stage_a")
             self.assertTrue(any(item["parsed_action"].get("self_check") for item in planner_trace))
 
             pilot_summary = json.loads((output_dir / "block_a_pilot_summary.json").read_text(encoding="utf-8"))
@@ -120,6 +142,7 @@ class BlockAPilotSmokeTest(unittest.TestCase):
             self.assertEqual(pilot_summary["overall"]["successful_runs"], 15)
             self.assertEqual(pilot_summary["overall"]["total_retries"], 3)
             self.assertFalse(pilot_summary["missing_run_ids"])
+            self.assertEqual(pilot_summary["backends"], ["toy"])
 
             p0_r0_summary = next(
                 row
@@ -137,6 +160,16 @@ class BlockAPilotSmokeTest(unittest.TestCase):
             )
             self.assertEqual(p0_r1_summary["successful_runs"], 3)
             self.assertEqual(p0_r1_summary["total_retries"], 3)
+
+            by_backend = next(
+                row
+                for row in pilot_summary["by_backend_prompt_runtime"]
+                if row["backend_variant"] == "toy"
+                and row["prompt_variant"] == "P0"
+                and row["runtime_variant"] == "R0"
+            )
+            self.assertEqual(by_backend["successful_runs"], 0)
+            self.assertEqual(by_backend["total_invalid_actions"], 3)
 
 
 if __name__ == "__main__":
