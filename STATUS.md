@@ -34,12 +34,8 @@
   - `results/processed/block_a_master_summary/block_a_master_summary.md`
   - the existing processed Block A source slices referenced by the master summary
 - Existing uncommitted worktree changes outside this packaging task remained in place and were not reverted:
-  - `src/isaacsim_agent/experiments/pilot.py`
-  - `configs/experiments/block_a/navigation_prompt_runtime_robustness.yaml`
-  - `tests/test_block_a_robustness_smoke.py`
-  - `scripts/summarize_block_a_master.py`
-  - `src/isaacsim_agent/eval/block_a_master.py`
-  - `tests/test_block_a_master_summary.py`
+  - this was true during the packaging run, but a follow-up git hygiene run committed the outstanding M6 Block A changes as `a49d1d8`
+  - the worktree is expected to be clean after that follow-up commit
 - Agent teaming:
   - spawned two explorer sub-agents to inspect the master-summary schema and reusable paper-output conventions
   - both sub-agents showed no output or status change across three wait windows (`30s`, `60s`, `120s`)
@@ -190,6 +186,10 @@
     - `block_a_invalid_actions.png = 1680 x 920`
     - `block_a_planner_calls.png = 1680 x 920`
     - `block_a_tool_calls.png = 1680 x 920`
+- Follow-up git hygiene commit succeeded:
+  - commit: `a49d1d8`
+  - subject: `Finalize M6 Block A analysis and paper packaging`
+  - expected result: clean `git status`
 
 ## Blockers
 
