@@ -42,22 +42,29 @@ class PlannerAction:
 
     tool_name: str
     arguments: dict[str, JsonValue] = field(default_factory=dict)
+    self_check: str | None = None
 
     def to_dict(self) -> dict[str, JsonValue]:
-        return {
+        payload: dict[str, JsonValue] = {
             "tool_name": self.tool_name,
             "arguments": self.arguments,
         }
+        if self.self_check is not None:
+            payload["self_check"] = self.self_check
+        return payload
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "PlannerAction":
         tool_name = payload.get("tool_name")
         arguments = payload.get("arguments", {})
+        self_check = payload.get("self_check")
         if not isinstance(tool_name, str) or not tool_name:
             raise PlannerResponseError("planner action must include a non-empty string tool_name")
         if not isinstance(arguments, dict):
             raise PlannerResponseError("planner action arguments must be a JSON object")
-        return cls(tool_name=tool_name, arguments=arguments)
+        if self_check is not None and not isinstance(self_check, str):
+            raise PlannerResponseError("planner action self_check must be a string when provided")
+        return cls(tool_name=tool_name, arguments=arguments, self_check=self_check)
 
 
 @dataclass(frozen=True)
@@ -71,6 +78,10 @@ class PlannerRequest:
     state: dict[str, JsonValue]
     last_tool_result: dict[str, JsonValue] | None = None
     tool_history: list[str] = field(default_factory=list)
+    prompt_variant: str | None = None
+    runtime_variant: str | None = None
+    retry_index: int = 0
+    validation_error: str | None = None
 
     def to_dict(self) -> dict[str, JsonValue]:
         payload: dict[str, JsonValue] = {
@@ -83,6 +94,14 @@ class PlannerRequest:
         }
         if self.last_tool_result is not None:
             payload["last_tool_result"] = self.last_tool_result
+        if isinstance(self.prompt_variant, str) and self.prompt_variant:
+            payload["prompt_variant"] = self.prompt_variant
+        if isinstance(self.runtime_variant, str) and self.runtime_variant:
+            payload["runtime_variant"] = self.runtime_variant
+        if self.retry_index > 0:
+            payload["retry_index"] = self.retry_index
+        if isinstance(self.validation_error, str) and self.validation_error:
+            payload["validation_error"] = self.validation_error
         return payload
 
 

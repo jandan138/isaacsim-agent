@@ -9,6 +9,9 @@ from dataclasses import field
 from pathlib import Path
 from typing import Any
 
+from isaacsim_agent.agent import build_retry_instruction
+from isaacsim_agent.agent import normalize_prompt_variant
+from isaacsim_agent.agent import prompt_variant_definition
 from isaacsim_agent.contracts import EpisodeResult
 from isaacsim_agent.contracts import EventRecord
 from isaacsim_agent.contracts import EventType
@@ -60,7 +63,10 @@ class AgentRuntimeConfig:
     """Minimal runtime policy knobs for M4."""
 
     planner_config: PlannerConfig = field(default_factory=PlannerConfig)
+    policy_name: str = "agent_runtime_v0"
     max_invalid_actions: int = 1
+    validation_enabled: bool = True
+    max_validation_retries: int = 0
 
 
 @dataclass(frozen=True)
@@ -88,6 +94,7 @@ def build_minimal_agent_navigation_task_config(
     config.runtime_options.planner_enabled = True
     config.runtime_options.memory_enabled = False
     config.runtime_options.recovery_enabled = False
+    config.runtime_options.tool_validation_enabled = True
     config.runtime_options.collect_events = True
     config.runtime_options.extra_options["planner_backend"] = planner_backend
     config.runtime_options.extra_options["runtime_policy"] = "agent_runtime_v0"
@@ -197,6 +204,89 @@ def _navigation_instruction(config: TaskConfig) -> str:
     )
 
 
+def _prompt_variant(config: TaskConfig) -> str | None:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("prompt_variant")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    prompting = config.metadata.get("prompting")
+    if isinstance(prompting, dict):
+        metadata_value = prompting.get("prompt_variant")
+        if isinstance(metadata_value, str) and metadata_value.strip():
+            return metadata_value.strip()
+    return None
+
+
+def _runtime_variant(config: TaskConfig) -> str | None:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("runtime_variant")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    pilot_suite = config.metadata.get("pilot_suite")
+    if isinstance(pilot_suite, dict):
+        metadata_value = pilot_suite.get("runtime_variant")
+        if isinstance(metadata_value, str) and metadata_value.strip():
+            return metadata_value.strip()
+    return None
+
+
+def _runtime_policy_name(config: TaskConfig) -> str:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("runtime_policy")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return "agent_runtime_v0"
+
+
+def _suite_experiment_name(config: TaskConfig) -> str | None:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("suite_experiment")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _repair_instruction_template(config: TaskConfig) -> str | None:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("prompt_repair_instruction_template")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _repair_instruction_template(config: TaskConfig) -> str | None:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("prompt_repair_instruction_template")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    prompting = config.metadata.get("prompting")
+    if isinstance(prompting, dict):
+        metadata_value = prompting.get("repair_instruction_template")
+        if isinstance(metadata_value, str) and metadata_value.strip():
+            return metadata_value.strip()
+    return None
+
+
+def _manifest_metadata(config: TaskConfig, planner_backend: str) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "planner_backend": planner_backend,
+        "runtime_policy": _runtime_policy_name(config),
+    }
+    prompt_variant = _prompt_variant(config)
+    runtime_variant = _runtime_variant(config)
+    suite_experiment = _suite_experiment_name(config)
+    if prompt_variant is not None:
+        payload["prompt_variant"] = prompt_variant
+    if runtime_variant is not None:
+        payload["runtime_variant"] = runtime_variant
+    if suite_experiment is not None:
+        payload["suite_experiment"] = suite_experiment
+    return payload
+
+
 def _navigation_prompt_values(config: TaskConfig) -> dict[str, Any]:
     start_pose = Pose2D(x=0.0, y=0.0, yaw=0.0)
     navigation_metadata = config.metadata.get("navigation_baseline")
@@ -253,7 +343,6 @@ class AgentRuntime:
             )
         prepared_config.runtime_options.planner_enabled = True
         prepared_config.runtime_options.memory_enabled = False
-        prepared_config.runtime_options.recovery_enabled = False
         prepared_config.runtime_options.collect_events = True
 
         backend = _navigation_backend_from_config(prepared_config)
@@ -284,9 +373,14 @@ class AgentRuntime:
             scene_id=prepared_config.scene_id,
             robot_id=prepared_config.robot_id,
             seed=prepared_config.seed,
+            metadata=_manifest_metadata(
+                config=prepared_config,
+                planner_backend=self.planner_backend.backend_name,
+            ),
         )
         session = RuntimeSession(
             session_id=run_id,
+            policy_name=self.runtime_config.policy_name or _runtime_policy_name(prepared_config),
             planner_backend=self.planner_backend.backend_name,
         )
 
@@ -339,6 +433,19 @@ class AgentRuntime:
                 _tool_spec_to_payload(tool_spec)
                 for tool_spec in self.tool_registry.specs_for_task(prepared_config.task_type)
             ]
+            base_instruction = _navigation_instruction(prepared_config)
+            prompt_variant = normalize_prompt_variant(_prompt_variant(prepared_config))
+            prompt_definition = prompt_variant_definition(prompt_variant)
+            runtime_variant = _runtime_variant(prepared_config)
+            validation_enabled = bool(
+                self.runtime_config.validation_enabled
+                and prepared_config.runtime_options.tool_validation_enabled
+            )
+            max_validation_retries = (
+                self.runtime_config.max_validation_retries
+                if prepared_config.runtime_options.recovery_enabled
+                else 0
+            )
             start_payload: dict[str, Any] = {
                 "runtime_session": {
                     "session_id": session.session_id,
@@ -346,11 +453,15 @@ class AgentRuntime:
                     "planner_backend": session.planner_backend,
                 },
                 "available_tools": available_tools,
-                "instruction": _navigation_instruction(prepared_config),
+                "instruction": base_instruction,
                 "backend": backend,
                 "start_pose": observation.pose.to_dict(),
                 "goal_pose": prepared_config.navigation.goal_pose,
                 "success_radius_m": prepared_config.navigation.success_radius_m,
+                "prompt_variant": prompt_variant,
+                "runtime_variant": runtime_variant,
+                "validation_enabled": validation_enabled,
+                "max_validation_retries": max_validation_retries,
             }
             if stage_settings is not None:
                 start_payload["isaac"] = stage_settings
@@ -366,6 +477,7 @@ class AgentRuntime:
             planner_call_count = 0
             tool_call_count = 0
             invalid_action_count = 0
+            retry_count = 0
             runtime_step_count = 0
             planner_latency_sec = 0.0
             token_usage = TokenUsage()
@@ -373,7 +485,15 @@ class AgentRuntime:
             tool_history: list[str] = []
             notes = [
                 "Minimal M4 runtime v0 using structured JSON planner actions.",
-                "No memory manager, retry policy, or complex recovery policy is enabled.",
+                (
+                    "Runtime policy: "
+                    f"{session.policy_name}; validation={'on' if validation_enabled else 'off'}; "
+                    f"max_validation_retries={max_validation_retries}."
+                ),
+                (
+                    "Prompt variant: "
+                    f"{prompt_variant} ({prompt_definition.response_format})."
+                ),
             ]
             termination_reason: TerminationReason | None = None
 
@@ -410,90 +530,246 @@ class AgentRuntime:
                     },
                 )
 
-                planner_request = PlannerRequest(
-                    task_type=prepared_config.task_type,
-                    instruction=_navigation_instruction(prepared_config),
-                    step_index=step_index,
-                    available_tools=available_tools,
-                    state={
-                        "robot_pose": observation.pose.to_dict(),
-                        "goal_pose": prepared_config.navigation.goal_pose,
-                        "distance_to_goal_m": round(observation.distance_to_goal_m, 6),
-                        "success_radius_m": round(prepared_config.navigation.success_radius_m, 6),
-                        "sim_time_sec": round(observation.sim_time_sec, 6),
-                    },
-                    last_tool_result=last_tool_result,
-                    tool_history=list(tool_history),
-                )
-                append_event(
-                    EventType.PLANNER_CALL,
-                    step_index=step_index,
-                    sim_time_sec=observation.sim_time_sec,
-                    payload=planner_request.to_dict(),
-                )
+                retry_index = 0
+                retry_validation_error: str | None = None
+                step_completed = False
+                step_invalid = False
 
-                planner_started = time.perf_counter()
-                planner_raw_response: PlannerRawResponse = self.planner_backend.plan(planner_request)
-                call_latency_sec = round(time.perf_counter() - planner_started, 6)
-                planner_latency_sec = round(planner_latency_sec + call_latency_sec, 6)
-                planner_call_count += 1
-                token_usage = _add_token_usage(token_usage, planner_raw_response.token_usage)
+                while not step_completed:
+                    instruction = base_instruction
+                    if retry_index > 0 and retry_validation_error is not None:
+                        instruction = build_retry_instruction(
+                            base_instruction=base_instruction,
+                            validation_error=retry_validation_error,
+                            repair_instruction_template=_repair_instruction_template(prepared_config),
+                        )
 
-                parsed_action: PlannerAction | None = None
-                validation_error: str | None = None
-                try:
-                    parsed_action = parse_planner_action(planner_raw_response.raw_response)
-                    validation_error = self._validate_navigation_action(
-                        action=parsed_action,
-                        observation=observation,
-                        config=prepared_config,
+                    planner_request = PlannerRequest(
+                        task_type=prepared_config.task_type,
+                        instruction=instruction,
+                        step_index=step_index,
+                        available_tools=available_tools,
+                        state={
+                            "robot_pose": observation.pose.to_dict(),
+                            "goal_pose": prepared_config.navigation.goal_pose,
+                            "distance_to_goal_m": round(observation.distance_to_goal_m, 6),
+                            "success_radius_m": round(prepared_config.navigation.success_radius_m, 6),
+                            "sim_time_sec": round(observation.sim_time_sec, 6),
+                        },
+                        last_tool_result=last_tool_result,
+                        tool_history=list(tool_history),
+                        prompt_variant=prompt_variant,
+                        runtime_variant=runtime_variant,
+                        retry_index=retry_index,
+                        validation_error=retry_validation_error,
                     )
-                except PlannerResponseError as exc:
-                    validation_error = str(exc)
-
-                append_event(
-                    EventType.PLANNER_RESPONSE,
-                    step_index=step_index,
-                    sim_time_sec=observation.sim_time_sec,
-                    planner_latency_sec=call_latency_sec,
-                    success=validation_error is None,
-                    payload={
-                        "raw_response": planner_raw_response.raw_response,
-                        "parsed_action": parsed_action.to_dict() if parsed_action is not None else None,
-                    },
-                )
-
-                planner_trace_entry = {
-                    "step_index": step_index,
-                    "request": planner_request.to_dict(),
-                    "raw_response": planner_raw_response.raw_response,
-                    "parsed_action": parsed_action.to_dict() if parsed_action is not None else None,
-                    "valid": validation_error is None,
-                    "validation_error": validation_error,
-                    "planner_latency_sec": call_latency_sec,
-                    "token_usage": {
-                        "prompt_tokens": planner_raw_response.token_usage.prompt_tokens,
-                        "completion_tokens": planner_raw_response.token_usage.completion_tokens,
-                        "total_tokens": planner_raw_response.token_usage.total_tokens,
-                        "estimated_cost_usd": planner_raw_response.token_usage.estimated_cost_usd,
-                    },
-                }
-                planner_trace.append(planner_trace_entry)
-
-                if validation_error is not None:
-                    invalid_action_count += 1
-                    notes.append(validation_error)
                     append_event(
-                        EventType.VALIDATION_WARNING,
+                        EventType.PLANNER_CALL,
                         step_index=step_index,
                         sim_time_sec=observation.sim_time_sec,
-                        success=False,
-                        payload={
-                            "reason": validation_error,
-                            "raw_response": planner_raw_response.raw_response,
-                        },
-                        notes=[validation_error],
+                        payload=planner_request.to_dict(),
                     )
+
+                    planner_started = time.perf_counter()
+                    planner_raw_response: PlannerRawResponse = self.planner_backend.plan(planner_request)
+                    call_latency_sec = round(time.perf_counter() - planner_started, 6)
+                    planner_latency_sec = round(planner_latency_sec + call_latency_sec, 6)
+                    planner_call_count += 1
+                    token_usage = _add_token_usage(token_usage, planner_raw_response.token_usage)
+
+                    parsed_action: PlannerAction | None = None
+                    action_error: str | None = None
+                    try:
+                        parsed_action = parse_planner_action(planner_raw_response.raw_response)
+                        if validation_enabled:
+                            action_error = self._validate_navigation_action(
+                                action=parsed_action,
+                                observation=observation,
+                                config=prepared_config,
+                            )
+                    except PlannerResponseError as exc:
+                        action_error = str(exc)
+
+                    append_event(
+                        EventType.PLANNER_RESPONSE,
+                        step_index=step_index,
+                        sim_time_sec=observation.sim_time_sec,
+                        planner_latency_sec=call_latency_sec,
+                        success=action_error is None,
+                        payload={
+                            "raw_response": planner_raw_response.raw_response,
+                            "parsed_action": parsed_action.to_dict() if parsed_action is not None else None,
+                            "retry_index": retry_index,
+                        },
+                    )
+
+                    planner_trace.append(
+                        {
+                            "step_index": step_index,
+                            "retry_index": retry_index,
+                            "request": planner_request.to_dict(),
+                            "raw_response": planner_raw_response.raw_response,
+                            "parsed_action": parsed_action.to_dict() if parsed_action is not None else None,
+                            "valid": action_error is None,
+                            "validation_error": action_error,
+                            "planner_latency_sec": call_latency_sec,
+                            "token_usage": {
+                                "prompt_tokens": planner_raw_response.token_usage.prompt_tokens,
+                                "completion_tokens": planner_raw_response.token_usage.completion_tokens,
+                                "total_tokens": planner_raw_response.token_usage.total_tokens,
+                                "estimated_cost_usd": planner_raw_response.token_usage.estimated_cost_usd,
+                            },
+                        }
+                    )
+
+                    if action_error is not None:
+                        invalid_action_count += 1
+                        notes.append(action_error)
+                        append_event(
+                            EventType.VALIDATION_WARNING,
+                            step_index=step_index,
+                            sim_time_sec=observation.sim_time_sec,
+                            success=False,
+                            payload={
+                                "reason": action_error,
+                                "raw_response": planner_raw_response.raw_response,
+                                "retry_index": retry_index,
+                                "retry_planned": retry_index < max_validation_retries,
+                            },
+                            notes=[action_error],
+                        )
+                        if retry_index < max_validation_retries:
+                            retry_count += 1
+                            retry_validation_error = action_error
+                            retry_index += 1
+                            append_event(
+                                EventType.RECOVERY,
+                                step_index=step_index,
+                                sim_time_sec=observation.sim_time_sec,
+                                success=True,
+                                payload={
+                                    "recovery_type": "planner_retry",
+                                    "retry_index": retry_index,
+                                    "reason": action_error,
+                                },
+                            )
+                            continue
+                        step_invalid = True
+                        break
+
+                    assert parsed_action is not None
+                    append_event(
+                        EventType.TOOL_CALL,
+                        step_index=step_index,
+                        sim_time_sec=observation.sim_time_sec,
+                        tool_name=parsed_action.tool_name,
+                        success=True,
+                        payload=parsed_action.to_dict(),
+                    )
+                    try:
+                        tool_result, next_observation, state_changed = self._dispatch_navigation_action(
+                            action=parsed_action,
+                            observation=observation,
+                            environment=environment,
+                            config=prepared_config,
+                        )
+                    except (KeyError, TypeError, ValueError) as exc:
+                        action_error = f"tool dispatch failed: {exc}"
+                        invalid_action_count += 1
+                        notes.append(action_error)
+                        append_event(
+                            EventType.TOOL_RESULT,
+                            step_index=step_index,
+                            sim_time_sec=observation.sim_time_sec,
+                            tool_name=parsed_action.tool_name,
+                            success=False,
+                            payload={
+                                "error": action_error,
+                                "tool_name": parsed_action.tool_name,
+                                "arguments": parsed_action.arguments,
+                            },
+                            notes=[action_error],
+                        )
+                        if retry_index < max_validation_retries:
+                            retry_count += 1
+                            retry_validation_error = action_error
+                            retry_index += 1
+                            append_event(
+                                EventType.RECOVERY,
+                                step_index=step_index,
+                                sim_time_sec=observation.sim_time_sec,
+                                success=True,
+                                payload={
+                                    "recovery_type": "planner_retry",
+                                    "retry_index": retry_index,
+                                    "reason": action_error,
+                                },
+                            )
+                            continue
+                        step_invalid = True
+                        break
+
+                    tool_call_count += 1
+                    tool_history.append(parsed_action.tool_name)
+                    last_tool_result = tool_result
+                    tool_trace.append(
+                        {
+                            "step_index": step_index,
+                            "tool_name": parsed_action.tool_name,
+                            "arguments": parsed_action.arguments,
+                            "success": True,
+                            "result": tool_result,
+                        }
+                    )
+                    append_event(
+                        EventType.TOOL_RESULT,
+                        step_index=step_index,
+                        sim_time_sec=next_observation.sim_time_sec,
+                        tool_name=parsed_action.tool_name,
+                        success=True,
+                        payload=tool_result,
+                    )
+                    if state_changed:
+                        append_event(
+                            EventType.ACTION_APPLIED,
+                            step_index=step_index,
+                            sim_time_sec=next_observation.sim_time_sec,
+                            action_ref=SCRIPTED_NAVIGATE_TOOL.name,
+                            tool_name=parsed_action.tool_name,
+                            success=True,
+                            payload={
+                                "executor": SCRIPTED_NAVIGATE_TOOL.name,
+                                "pose": next_observation.pose.to_dict(),
+                            },
+                            metrics={
+                                "navigation.final_goal_distance_m": round(
+                                    next_observation.distance_to_goal_m,
+                                    6,
+                                ),
+                            },
+                        )
+                    append_event(
+                        EventType.STEP_END,
+                        step_index=step_index,
+                        sim_time_sec=next_observation.sim_time_sec,
+                        success=True,
+                        payload={"tool_name": parsed_action.tool_name},
+                        metrics={
+                            "navigation.final_goal_distance_m": round(next_observation.distance_to_goal_m, 6),
+                        },
+                    )
+                    trajectory_entries.append(
+                        _build_trajectory_entry(
+                            step_index=step_index,
+                            observation=next_observation,
+                            tool_name=parsed_action.tool_name,
+                        )
+                    )
+                    observation = next_observation
+                    runtime_step_count = step_index
+                    step_completed = True
+
+                if step_invalid:
                     append_event(
                         EventType.STEP_END,
                         step_index=step_index,
@@ -506,80 +782,6 @@ class AgentRuntime:
                         termination_reason = TerminationReason.INVALID_ACTION_LIMIT
                         break
                     continue
-
-                assert parsed_action is not None
-                append_event(
-                    EventType.TOOL_CALL,
-                    step_index=step_index,
-                    sim_time_sec=observation.sim_time_sec,
-                    tool_name=parsed_action.tool_name,
-                    success=True,
-                    payload=parsed_action.to_dict(),
-                )
-                tool_result, next_observation, state_changed = self._dispatch_navigation_action(
-                    action=parsed_action,
-                    observation=observation,
-                    environment=environment,
-                    config=prepared_config,
-                )
-                tool_call_count += 1
-                tool_history.append(parsed_action.tool_name)
-                last_tool_result = tool_result
-                tool_trace.append(
-                    {
-                        "step_index": step_index,
-                        "tool_name": parsed_action.tool_name,
-                        "arguments": parsed_action.arguments,
-                        "success": True,
-                        "result": tool_result,
-                    }
-                )
-                append_event(
-                    EventType.TOOL_RESULT,
-                    step_index=step_index,
-                    sim_time_sec=next_observation.sim_time_sec,
-                    tool_name=parsed_action.tool_name,
-                    success=True,
-                    payload=tool_result,
-                )
-                if state_changed:
-                    append_event(
-                        EventType.ACTION_APPLIED,
-                        step_index=step_index,
-                        sim_time_sec=next_observation.sim_time_sec,
-                        action_ref=SCRIPTED_NAVIGATE_TOOL.name,
-                        tool_name=parsed_action.tool_name,
-                        success=True,
-                        payload={
-                            "executor": SCRIPTED_NAVIGATE_TOOL.name,
-                            "pose": next_observation.pose.to_dict(),
-                        },
-                        metrics={
-                            "navigation.final_goal_distance_m": round(
-                                next_observation.distance_to_goal_m,
-                                6,
-                            ),
-                        },
-                    )
-                append_event(
-                    EventType.STEP_END,
-                    step_index=step_index,
-                    sim_time_sec=next_observation.sim_time_sec,
-                    success=True,
-                    payload={"tool_name": parsed_action.tool_name},
-                    metrics={
-                        "navigation.final_goal_distance_m": round(next_observation.distance_to_goal_m, 6),
-                    },
-                )
-                trajectory_entries.append(
-                    _build_trajectory_entry(
-                        step_index=step_index,
-                        observation=next_observation,
-                        tool_name=parsed_action.tool_name,
-                    )
-                )
-                observation = next_observation
-                runtime_step_count = step_index
 
             elapsed_time_sec = round(time.perf_counter() - start_time, 6)
             final_observation = environment.observe()
@@ -598,7 +800,7 @@ class AgentRuntime:
                 sim_time_sec=final_observation.sim_time_sec,
                 invalid_action_count=invalid_action_count,
                 collision_count=0,
-                recovery_count=0,
+                recovery_count=retry_count,
                 tool_call_count=tool_call_count,
                 planner_call_count=planner_call_count,
                 token_usage=token_usage,
@@ -613,7 +815,12 @@ class AgentRuntime:
                     "navigation.motion_step_count": environment.step_count,
                     "navigation.stage_artifact_written": hasattr(environment, "stage_artifact_text"),
                     "navigation.runtime_policy": session.policy_name,
+                    "navigation.runtime_variant": runtime_variant,
                     "navigation.planner_backend": session.planner_backend,
+                    "prompt_variant": prompt_variant,
+                    "runtime.retry_count": retry_count,
+                    "runtime.validation_enabled": validation_enabled,
+                    "runtime.max_validation_retries": max_validation_retries,
                 },
             )
             append_event(
@@ -851,8 +1058,13 @@ def _build_failure_run_data(
             "navigation.backend": backend,
             "navigation.motion_step_count": 0,
             "navigation.stage_artifact_written": False,
-            "navigation.runtime_policy": "agent_runtime_v0",
+            "navigation.runtime_policy": _runtime_policy_name(config),
+            "navigation.runtime_variant": _runtime_variant(config),
             "navigation.planner_backend": planner_backend,
+            "prompt_variant": _prompt_variant(config),
+            "runtime.retry_count": 0,
+            "runtime.validation_enabled": bool(config.runtime_options.tool_validation_enabled),
+            "runtime.max_validation_retries": 0,
         },
     )
     return AgentRunData(
@@ -908,9 +1120,10 @@ def run_and_write_agent_v0(
     prepared_config = _clone_task_config(config)
     prepared_config.runtime_options.planner_enabled = True
     prepared_config.runtime_options.memory_enabled = False
-    prepared_config.runtime_options.recovery_enabled = False
     prepared_config.runtime_options.collect_events = True
     prepared_config.runtime_options.extra_options["planner_backend"] = planner_backend.backend_name
+    if runtime.runtime_config.policy_name:
+        prepared_config.runtime_options.extra_options["runtime_policy"] = runtime.runtime_config.policy_name
     metadata = dict(prepared_config.metadata)
     agent_metadata = dict(metadata.get("agent_runtime_v0", {}))
     agent_metadata["planner_backend"] = planner_backend.backend_name
@@ -925,6 +1138,10 @@ def run_and_write_agent_v0(
         scene_id=prepared_config.scene_id,
         robot_id=prepared_config.robot_id,
         seed=prepared_config.seed,
+        metadata=_manifest_metadata(
+            config=prepared_config,
+            planner_backend=planner_backend.backend_name,
+        ),
     )
     layout = RunArtifactsLayout(run_id=run_id, results_root=results_root)
     if layout.run_dir.exists() and any(layout.run_dir.iterdir()):

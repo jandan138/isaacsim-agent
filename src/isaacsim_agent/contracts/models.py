@@ -194,6 +194,7 @@ class RunManifest:
     scene_id: str
     robot_id: str
     seed: int
+    metadata: dict[str, JsonValue] = field(default_factory=dict)
     schema_version: str = "v1"
     created_at_utc: str = field(default_factory=_utc_now)
     artifact_convention: str = "results/runs/<run_id>/"

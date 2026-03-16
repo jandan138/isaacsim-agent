@@ -12,9 +12,11 @@ try:
 except ImportError:  # pragma: no cover - optional dependency
     yaml = None
 
+from isaacsim_agent.agent import render_prompt_template
 from isaacsim_agent.eval import SummaryBundle
 from isaacsim_agent.eval import summarize_results_root
 from isaacsim_agent.eval import write_summary_outputs
+from isaacsim_agent.planner import BlockAPilotPlannerBackend
 from isaacsim_agent.planner import MockPlannerBackend
 from isaacsim_agent.planner import PlannerConfig
 from isaacsim_agent.runtime import AgentRuntimeConfig
@@ -30,6 +32,9 @@ class PilotPromptVariant:
     variant_id: str
     label: str
     instruction_template: str
+    response_mode: str = "tool_json"
+    self_check_required: bool = False
+    repair_instruction_template: str | None = None
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,6 +42,9 @@ class PilotPromptVariant:
             "id": self.variant_id,
             "label": self.label,
             "instruction_template": self.instruction_template,
+            "response_mode": self.response_mode,
+            "self_check_required": self.self_check_required,
+            "repair_instruction_template": self.repair_instruction_template,
             "notes": self.notes,
         }
 
@@ -48,6 +56,8 @@ class PilotRuntimeVariant:
     variant_id: str
     label: str
     runtime_policy: str
+    validate_actions: bool
+    max_retries_per_step: int
     max_invalid_actions: int
     notes: str = ""
 
@@ -56,6 +66,8 @@ class PilotRuntimeVariant:
             "id": self.variant_id,
             "label": self.label,
             "runtime_policy": self.runtime_policy,
+            "validate_actions": self.validate_actions,
+            "max_retries_per_step": self.max_retries_per_step,
             "max_invalid_actions": self.max_invalid_actions,
             "notes": self.notes,
         }
@@ -108,6 +120,7 @@ class PilotExperimentConfig:
     prompt_variants: list[PilotPromptVariant]
     runtime_variants: list[PilotRuntimeVariant]
     tasks: list[PilotTaskSpec]
+    summary_basename: str = "pilot_summary"
     results_root: str | None = None
     output_dir: str | None = None
 
@@ -119,6 +132,7 @@ class PilotExperimentConfig:
             "execution_mode": self.execution_mode,
             "backend": self.backend,
             "planner_backend": self.planner_backend,
+            "summary_basename": self.summary_basename,
             "results_root": self.results_root,
             "output_dir": self.output_dir,
             "prompt_variants": [variant.to_dict() for variant in self.prompt_variants],
@@ -144,8 +158,12 @@ class PlannedRun:
             "robot_id": self.task.robot_id,
             "seed": self.task.seed,
             "prompt_variant": self.prompt_variant.variant_id,
+            "prompt_response_mode": self.prompt_variant.response_mode,
+            "prompt_self_check_required": self.prompt_variant.self_check_required,
             "runtime_variant": self.runtime_variant.variant_id,
             "runtime_policy": self.runtime_variant.runtime_policy,
+            "validate_actions": self.runtime_variant.validate_actions,
+            "max_retries_per_step": self.runtime_variant.max_retries_per_step,
             "max_invalid_actions": self.runtime_variant.max_invalid_actions,
         }
 
@@ -226,6 +244,7 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
         prompt_variants=prompt_variants,
         runtime_variants=runtime_variants,
         tasks=tasks,
+        summary_basename=_optional_string(payload.get("summary_basename")) or "pilot_summary",
         results_root=_optional_string(payload.get("results_root")),
         output_dir=_optional_string(payload.get("output_dir")),
     )
@@ -293,11 +312,14 @@ def run_pilot_suite(
         },
     )
 
-    planner_backend = MockPlannerBackend(planner_name=config.planner_backend)
+    planner_backend = _build_planner_backend(config.planner_backend)
     for run in planned_runs:
         task_config = _build_run_task_config(config=config, run=run)
         runtime_config = AgentRuntimeConfig(
             planner_config=PlannerConfig(backend=config.planner_backend),
+            policy_name=run.runtime_variant.runtime_policy,
+            validation_enabled=run.runtime_variant.validate_actions,
+            max_validation_retries=run.runtime_variant.max_retries_per_step,
             max_invalid_actions=run.runtime_variant.max_invalid_actions,
         )
         run_and_write_agent_v0(
@@ -319,8 +341,8 @@ def run_pilot_suite(
         bundle=bundle,
     )
 
-    pilot_summary_json_path = resolved_output_dir / "pilot_summary.json"
-    pilot_summary_md_path = resolved_output_dir / "pilot_summary.md"
+    pilot_summary_json_path = resolved_output_dir / f"{config.summary_basename}.json"
+    pilot_summary_md_path = resolved_output_dir / f"{config.summary_basename}.md"
     _write_json(pilot_summary_json_path, pilot_summary)
     pilot_summary_md_path.write_text(_render_pilot_summary_markdown(pilot_summary), encoding="utf-8")
 
@@ -385,6 +407,7 @@ def build_pilot_summary(
             "success_rate": bundle.aggregate.success_rate,
             "average_step_count": bundle.aggregate.average_step_count,
             "average_episode_time_s": bundle.aggregate.average_episode_time_s,
+            "total_retries": sum(summary.retries or 0 for summary in bundle.summaries),
         },
         "planned_run_ids": planned_run_ids,
         "missing_run_ids": sorted(planned_run_id_set - summarized_run_id_set),
@@ -419,11 +442,18 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
         step_size_m=run.task.step_size_m,
         control_dt_sec=run.task.control_dt_sec,
     )
+    task_config.runtime_options.tool_validation_enabled = run.runtime_variant.validate_actions
+    task_config.runtime_options.recovery_enabled = run.runtime_variant.max_retries_per_step > 0
 
     extra_options = dict(task_config.runtime_options.extra_options)
     extra_options["prompt_variant"] = run.prompt_variant.variant_id
+    extra_options["prompt_response_mode"] = run.prompt_variant.response_mode
+    extra_options["prompt_self_check_required"] = run.prompt_variant.self_check_required
+    extra_options["prompt_repair_instruction_template"] = run.prompt_variant.repair_instruction_template
     extra_options["runtime_variant"] = run.runtime_variant.variant_id
     extra_options["runtime_policy"] = run.runtime_variant.runtime_policy
+    extra_options["runtime_validate_actions"] = run.runtime_variant.validate_actions
+    extra_options["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
     extra_options["suite_experiment"] = config.experiment_name
     extra_options["planner_prompt_text"] = prompt_text
     task_config.runtime_options.extra_options = extra_options
@@ -434,6 +464,9 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
         "label": run.prompt_variant.label,
         "instruction_template": run.prompt_variant.instruction_template,
         "instruction_text": prompt_text,
+        "response_mode": run.prompt_variant.response_mode,
+        "self_check_required": run.prompt_variant.self_check_required,
+        "repair_instruction_template": run.prompt_variant.repair_instruction_template,
         "notes": run.prompt_variant.notes,
     }
     metadata["pilot_suite"] = {
@@ -441,6 +474,8 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
         "prompt_variant": run.prompt_variant.variant_id,
         "runtime_variant": run.runtime_variant.variant_id,
         "runtime_policy": run.runtime_variant.runtime_policy,
+        "validate_actions": run.runtime_variant.validate_actions,
+        "max_retries_per_step": run.runtime_variant.max_retries_per_step,
         "max_invalid_actions": run.runtime_variant.max_invalid_actions,
         "planner_backend": config.planner_backend,
         "task_family": config.task_family,
@@ -448,8 +483,12 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
 
     agent_metadata = dict(metadata.get("agent_runtime_v0", {}))
     agent_metadata["prompt_variant"] = run.prompt_variant.variant_id
+    agent_metadata["prompt_response_mode"] = run.prompt_variant.response_mode
+    agent_metadata["prompt_self_check_required"] = run.prompt_variant.self_check_required
     agent_metadata["runtime_variant"] = run.runtime_variant.variant_id
     agent_metadata["runtime_policy"] = run.runtime_variant.runtime_policy
+    agent_metadata["runtime_validate_actions"] = run.runtime_variant.validate_actions
+    agent_metadata["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
     agent_metadata["prompt_text"] = prompt_text
     metadata["agent_runtime_v0"] = agent_metadata
     task_config.metadata = metadata
@@ -483,11 +522,11 @@ def _render_prompt_text(run: PlannedRun) -> str:
         "goal_y": run.task.goal_pose.y,
         "goal_yaw": run.task.goal_pose.yaw,
         "success_radius_m": run.task.success_radius_m,
+        "prompt_variant": run.prompt_variant.variant_id,
+        "response_mode": run.prompt_variant.response_mode,
+        "self_check_required": str(run.prompt_variant.self_check_required).lower(),
     }
-    try:
-        return run.prompt_variant.instruction_template.format(**values)
-    except (KeyError, ValueError):
-        return run.prompt_variant.instruction_template
+    return render_prompt_template(run.prompt_variant.instruction_template, values)
 
 
 def _aggregate_summary_rows(
@@ -514,6 +553,10 @@ def _build_group_metrics(summaries: list[Any]) -> dict[str, Any]:
     step_counts = [summary.step_count for summary in summaries if summary.step_count is not None]
     planner_calls = [summary.planner_calls for summary in summaries if summary.planner_calls is not None]
     tool_calls = [summary.tool_calls for summary in summaries if summary.tool_calls is not None]
+    episode_times = [summary.episode_time_s for summary in summaries if summary.episode_time_s is not None]
+    planner_latencies = [
+        summary.planner_latency_s for summary in summaries if summary.planner_latency_s is not None
+    ]
     termination_reasons: dict[str, int] = {}
     for summary in summaries:
         if summary.termination_reason:
@@ -528,7 +571,12 @@ def _build_group_metrics(summaries: list[Any]) -> dict[str, Any]:
         "average_step_count": round(sum(step_counts) / len(step_counts), 6) if step_counts else None,
         "average_planner_calls": round(sum(planner_calls) / len(planner_calls), 6) if planner_calls else None,
         "average_tool_calls": round(sum(tool_calls) / len(tool_calls), 6) if tool_calls else None,
+        "average_episode_time_s": round(sum(episode_times) / len(episode_times), 6) if episode_times else None,
+        "average_planner_latency_s": round(sum(planner_latencies) / len(planner_latencies), 6)
+        if planner_latencies
+        else None,
         "total_invalid_actions": sum(summary.invalid_actions or 0 for summary in summaries),
+        "total_retries": sum(summary.retries or 0 for summary in summaries),
         "termination_reasons": termination_reasons,
         "run_ids": [summary.run_id for summary in summaries],
     }
@@ -543,6 +591,7 @@ def _failure_row(summary: Any) -> dict[str, Any]:
         "runtime_variant": summary.runtime_variant,
         "success": summary.success,
         "termination_reason": summary.termination_reason,
+        "retries": summary.retries,
         "run_complete": summary.run_complete,
         "contract_complete": summary.contract_complete,
         "validation_issue_codes": list(summary.validation_issue_codes),
@@ -587,6 +636,9 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "average_planner_calls",
                     "average_tool_calls",
                     "total_invalid_actions",
+                    "total_retries",
+                    "average_episode_time_s",
+                    "average_planner_latency_s",
                 ],
             ),
             "",
@@ -603,6 +655,8 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "successful_runs",
                     "success_rate",
                     "average_step_count",
+                    "total_invalid_actions",
+                    "total_retries",
                     "termination_reasons",
                 ],
             ),
@@ -624,7 +678,7 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
         for item in summary["unsuccessful_runs"]:
             lines.append(
                 f"- `{item['run_id']}`: termination={item['termination_reason']}, "
-                f"prompt={item['prompt_variant']}, runtime={item['runtime_variant']}"
+                f"prompt={item['prompt_variant']}, runtime={item['runtime_variant']}, retries={item['retries']}"
             )
     else:
         lines.append("- none")
@@ -684,10 +738,16 @@ def _load_mapping_file(path: Path) -> dict[str, Any]:
 def _parse_prompt_variant(payload: Any) -> PilotPromptVariant:
     if not isinstance(payload, dict):
         raise ValueError("each prompt variant must be a mapping")
+    self_check_required = payload.get("self_check_required", False)
+    if not isinstance(self_check_required, bool):
+        raise ValueError("prompt variant self_check_required must be a boolean")
     return PilotPromptVariant(
         variant_id=_required_string(payload, "id"),
         label=_optional_string(payload.get("label")) or _required_string(payload, "id"),
         instruction_template=_required_string(payload, "instruction_template"),
+        response_mode=_optional_string(payload.get("response_mode")) or "tool_json",
+        self_check_required=self_check_required,
+        repair_instruction_template=_optional_string(payload.get("repair_instruction_template")),
         notes=_optional_string(payload.get("notes")) or "",
     )
 
@@ -695,6 +755,12 @@ def _parse_prompt_variant(payload: Any) -> PilotPromptVariant:
 def _parse_runtime_variant(payload: Any) -> PilotRuntimeVariant:
     if not isinstance(payload, dict):
         raise ValueError("each runtime variant must be a mapping")
+    validate_actions = payload.get("validate_actions", True)
+    if not isinstance(validate_actions, bool):
+        raise ValueError("runtime variant validate_actions must be a boolean")
+    max_retries_per_step = payload.get("max_retries_per_step", 0)
+    if isinstance(max_retries_per_step, bool) or not isinstance(max_retries_per_step, int) or max_retries_per_step < 0:
+        raise ValueError("runtime variant max_retries_per_step must be a non-negative integer")
     max_invalid_actions = payload.get("max_invalid_actions", 1)
     if isinstance(max_invalid_actions, bool) or not isinstance(max_invalid_actions, int) or max_invalid_actions <= 0:
         raise ValueError("runtime variant max_invalid_actions must be a positive integer")
@@ -702,6 +768,8 @@ def _parse_runtime_variant(payload: Any) -> PilotRuntimeVariant:
         variant_id=_required_string(payload, "id"),
         label=_optional_string(payload.get("label")) or _required_string(payload, "id"),
         runtime_policy=_optional_string(payload.get("runtime_policy")) or "agent_runtime_v0",
+        validate_actions=validate_actions,
+        max_retries_per_step=max_retries_per_step,
         max_invalid_actions=max_invalid_actions,
         notes=_optional_string(payload.get("notes")) or "",
     )
@@ -738,6 +806,14 @@ def _parse_pose(payload: Any, field_name: str) -> Pose2D:
     if not isinstance(payload, dict):
         raise ValueError(f"{field_name} must be a mapping with x, y, yaw")
     return Pose2D.from_dict(payload)
+
+
+def _build_planner_backend(planner_backend: str):
+    if planner_backend == "mock_rule_based":
+        return MockPlannerBackend(planner_name=planner_backend)
+    if planner_backend == "mock_block_a":
+        return BlockAPilotPlannerBackend(planner_name=planner_backend)
+    raise ValueError(f"unsupported planner_backend for pilot runner: {planner_backend}")
 
 
 def _resolve_results_root(config: PilotExperimentConfig, override: str | Path | None) -> Path:

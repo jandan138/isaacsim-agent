@@ -38,8 +38,10 @@ class EpisodeSummary:
     model_variant: str | None
     prompt_variant: str | None
     runtime_variant: str | None
+    runtime_policy: str | None
     planner_backend: str | None
     tool_variant: str | None
+    retries: int | None
     contract_complete: bool
     run_complete: bool
     validation_issue_count: int
@@ -68,8 +70,10 @@ class EpisodeSummary:
             "model_variant": self.model_variant,
             "prompt_variant": self.prompt_variant,
             "runtime_variant": self.runtime_variant,
+            "runtime_policy": self.runtime_policy,
             "planner_backend": self.planner_backend,
             "tool_variant": self.tool_variant,
+            "retries": self.retries,
             "contract_complete": self.contract_complete,
             "run_complete": self.run_complete,
             "validation_issue_count": self.validation_issue_count,
@@ -99,6 +103,7 @@ class SummaryAggregate:
     total_planner_calls: int
     total_tool_calls: int
     total_invalid_actions: int
+    total_retries: int
     average_episode_time_s: float | None
     by_task_family: dict[str, dict[str, Any]]
 
@@ -115,6 +120,7 @@ class SummaryAggregate:
             "total_planner_calls": self.total_planner_calls,
             "total_tool_calls": self.total_tool_calls,
             "total_invalid_actions": self.total_invalid_actions,
+            "total_retries": self.total_retries,
             "average_episode_time_s": self.average_episode_time_s,
             "by_task_family": self.by_task_family,
         }
@@ -147,6 +153,7 @@ def build_episode_summary(record: RunRecord, validation: RunValidation) -> Episo
     episode_result = record.episode_result or {}
     runtime_options = task_config.get("runtime_options", {})
     metadata = task_config.get("metadata", {})
+    manifest_metadata = manifest.get("metadata", {}) if isinstance(manifest.get("metadata"), dict) else {}
     extra_options = runtime_options.get("extra_options", {}) if isinstance(runtime_options, dict) else {}
     metrics = episode_result.get("metrics", {}) if isinstance(episode_result.get("metrics"), dict) else {}
 
@@ -190,10 +197,12 @@ def build_episode_summary(record: RunRecord, validation: RunValidation) -> Episo
             metadata.get("model_variant") if isinstance(metadata, dict) else None,
             metrics.get("model_variant") if isinstance(metrics, dict) else None,
         ),
-        prompt_variant=_extract_prompt_variant(metadata, extra_options, metrics),
-        runtime_variant=_extract_runtime_variant(metadata, extra_options),
-        planner_backend=_extract_planner_backend(metadata, extra_options, metrics),
+        prompt_variant=_extract_prompt_variant(metadata, extra_options, metrics, manifest_metadata),
+        runtime_variant=_extract_runtime_variant(metadata, extra_options, manifest_metadata),
+        runtime_policy=_extract_runtime_policy(metadata, extra_options, metrics, manifest_metadata),
+        planner_backend=_extract_planner_backend(metadata, extra_options, metrics, manifest_metadata),
         tool_variant=_extract_tool_variant(metadata),
+        retries=_extract_retry_count(episode_result, metrics),
         contract_complete=validation.contract_complete,
         run_complete=validation.run_complete,
         validation_issue_count=len(validation.issues),
@@ -227,6 +236,7 @@ def aggregate_episode_summaries(summaries: list[EpisodeSummary]) -> SummaryAggre
                 "total_planner_calls": 0,
                 "total_tool_calls": 0,
                 "total_invalid_actions": 0,
+                "total_retries": 0,
             },
         )
         entry["run_count"] += 1
@@ -236,6 +246,7 @@ def aggregate_episode_summaries(summaries: list[EpisodeSummary]) -> SummaryAggre
         entry["total_planner_calls"] += summary.planner_calls or 0
         entry["total_tool_calls"] += summary.tool_calls or 0
         entry["total_invalid_actions"] += summary.invalid_actions or 0
+        entry["total_retries"] += summary.retries or 0
 
     for entry in by_task_family.values():
         run_count = entry["run_count"]
@@ -253,6 +264,7 @@ def aggregate_episode_summaries(summaries: list[EpisodeSummary]) -> SummaryAggre
         total_planner_calls=sum(summary.planner_calls or 0 for summary in summaries),
         total_tool_calls=sum(summary.tool_calls or 0 for summary in summaries),
         total_invalid_actions=sum(summary.invalid_actions or 0 for summary in summaries),
+        total_retries=sum(summary.retries or 0 for summary in summaries),
         average_episode_time_s=round(sum(episode_times) / len(episode_times), 6) if episode_times else None,
         by_task_family=by_task_family,
     )
@@ -347,7 +359,7 @@ def _extract_backend_variant(metadata: Any, metrics: Any) -> str | None:
     return None
 
 
-def _extract_runtime_variant(metadata: Any, extra_options: Any) -> str | None:
+def _extract_runtime_variant(metadata: Any, extra_options: Any, manifest_metadata: Any) -> str | None:
     if isinstance(extra_options, dict):
         runtime_variant = extra_options.get("runtime_variant")
         if isinstance(runtime_variant, str) and runtime_variant:
@@ -373,10 +385,45 @@ def _extract_runtime_variant(metadata: Any, extra_options: Any) -> str | None:
             return "navigation_baseline"
         if "manipulation_baseline" in metadata:
             return "manipulation_baseline"
+    if isinstance(manifest_metadata, dict):
+        runtime_variant = manifest_metadata.get("runtime_variant")
+        if isinstance(runtime_variant, str) and runtime_variant:
+            return runtime_variant
+        runtime_policy = manifest_metadata.get("runtime_policy")
+        if isinstance(runtime_policy, str) and runtime_policy:
+            return runtime_policy
     return None
 
 
-def _extract_prompt_variant(metadata: Any, extra_options: Any, metrics: Any) -> str | None:
+def _extract_runtime_policy(
+    metadata: Any,
+    extra_options: Any,
+    metrics: Any,
+    manifest_metadata: Any,
+) -> str | None:
+    candidates = []
+    if isinstance(extra_options, dict):
+        candidates.append(extra_options.get("runtime_policy"))
+    if isinstance(metadata, dict):
+        pilot_suite = metadata.get("pilot_suite")
+        if isinstance(pilot_suite, dict):
+            candidates.append(pilot_suite.get("runtime_policy"))
+        agent_runtime = metadata.get("agent_runtime_v0")
+        if isinstance(agent_runtime, dict):
+            candidates.append(agent_runtime.get("runtime_policy"))
+    if isinstance(manifest_metadata, dict):
+        candidates.append(manifest_metadata.get("runtime_policy"))
+    if isinstance(metrics, dict):
+        candidates.append(metrics.get("navigation.runtime_policy"))
+    return _first_string(*candidates)
+
+
+def _extract_prompt_variant(
+    metadata: Any,
+    extra_options: Any,
+    metrics: Any,
+    manifest_metadata: Any,
+) -> str | None:
     candidates = []
     if isinstance(extra_options, dict):
         candidates.append(extra_options.get("prompt_variant"))
@@ -387,12 +434,19 @@ def _extract_prompt_variant(metadata: Any, extra_options: Any, metrics: Any) -> 
         agent_runtime = metadata.get("agent_runtime_v0")
         if isinstance(agent_runtime, dict):
             candidates.append(agent_runtime.get("prompt_variant"))
+    if isinstance(manifest_metadata, dict):
+        candidates.append(manifest_metadata.get("prompt_variant"))
     if isinstance(metrics, dict):
         candidates.append(metrics.get("prompt_variant"))
     return _first_string(*candidates)
 
 
-def _extract_planner_backend(metadata: Any, extra_options: Any, metrics: Any) -> str | None:
+def _extract_planner_backend(
+    metadata: Any,
+    extra_options: Any,
+    metrics: Any,
+    manifest_metadata: Any,
+) -> str | None:
     candidates = []
     if isinstance(extra_options, dict):
         candidates.append(extra_options.get("planner_backend"))
@@ -400,6 +454,8 @@ def _extract_planner_backend(metadata: Any, extra_options: Any, metrics: Any) ->
         agent_runtime = metadata.get("agent_runtime_v0")
         if isinstance(agent_runtime, dict):
             candidates.append(agent_runtime.get("planner_backend"))
+    if isinstance(manifest_metadata, dict):
+        candidates.append(manifest_metadata.get("planner_backend"))
     if isinstance(metrics, dict):
         candidates.extend(
             [
@@ -408,6 +464,17 @@ def _extract_planner_backend(metadata: Any, extra_options: Any, metrics: Any) ->
             ]
         )
     return _first_string(*candidates)
+
+
+def _extract_retry_count(episode_result: dict[str, Any], metrics: Any) -> int | None:
+    retries = episode_result.get("recovery_count")
+    if isinstance(retries, int) and not isinstance(retries, bool):
+        return retries
+    if isinstance(metrics, dict):
+        value = metrics.get("runtime.retry_count")
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value
+    return None
 
 
 def _extract_tool_variant(metadata: Any) -> str | None:
