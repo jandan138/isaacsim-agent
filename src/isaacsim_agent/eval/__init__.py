@@ -1,5 +1,9 @@
 """Minimal M5 logging and evaluation harness helpers."""
 
+from .cross_family import CrossFamilySummaryResult
+from .cross_family import ProcessedSummarySource
+from .cross_family import build_cross_family_summary
+from .cross_family import summarize_cross_family_processed_dirs
 from .loader import REQUIRED_RUN_FILES
 from .loader import RunFileStatus
 from .loader import RunRecord
@@ -17,7 +21,9 @@ from .validate import validate_results_root
 from .validate import validate_run_record
 
 __all__ = [
+    "CrossFamilySummaryResult",
     "EpisodeSummary",
+    "ProcessedSummarySource",
     "REQUIRED_RUN_FILES",
     "RunFileStatus",
     "RunRecord",
@@ -25,9 +31,11 @@ __all__ = [
     "SummaryAggregate",
     "SummaryBundle",
     "ValidationIssue",
+    "build_cross_family_summary",
     "load_run_record",
     "resolve_runs_root",
     "scan_results_root",
+    "summarize_cross_family_processed_dirs",
     "summarize_results_root",
     "validate_results_root",
     "validate_run_record",
