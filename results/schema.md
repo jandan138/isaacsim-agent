@@ -13,6 +13,12 @@ results/
       episode_result.json
       events.jsonl
       artifacts/
+  processed/
+    <summary_batch>/
+      run_summary.jsonl
+      run_summary.csv
+      aggregate.json
+      validation.json
 ```
 
 ## Required files
@@ -28,4 +34,5 @@ results/
 - each file must be valid JSON or JSONL
 - per-task metrics should use namespaced keys in `episode_result.json`
 - ad hoc artifacts go under `artifacts/`
+- M5 processed summaries must not rewrite the canonical per-run layout; derived tables belong under `results/processed/`
 - future result processors should assume this layout unless `STATUS.md` explicitly records a later schema revision
