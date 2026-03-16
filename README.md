@@ -4,7 +4,7 @@ This repository hosts a milestone-driven scaffold for an embodied-agent study in
 
 ## Scaffold status
 
-This run only establishes the repository bootstrap needed before the plan-defined environment and simulator setup work. It does **not** claim that the Isaac Sim runtime, experiments, or paper artifacts are implemented yet.
+This repo now has the first minimal Isaac-backed task baseline in addition to the earlier scaffold and contract work. It still does **not** claim that LLM planning, memory, Nav2, manipulation, experiments, or paper artifacts are implemented.
 
 ## Current repository layout
 
@@ -61,16 +61,20 @@ Before task baselines begin, the repo now defines a project-wide contracts layer
 - Output schema guide: `results/schema.md`
 - Validation script: `scripts/validate_contracts.py`
 
-## M2 navigation baseline
+## M2.5 navigation baseline
 
-Milestone `M2` adds one minimal deterministic navigation baseline that stays lightweight on purpose: a point robot resets to a fixed start pose and moves in straight-line steps toward a single fixed goal pose until it reaches the success radius or terminates on `max_steps`, `max_time_sec`, or `robot_stuck`.
+Milestone `M2.5` upgrades the earlier toy navigation task into a minimal Isaac-backed baseline. The task stays tightly scoped on purpose: a procedural Isaac stage is created headlessly, a simple agent prim is reset to a fixed start pose, a fixed goal prim marks the target state, and a deterministic scripted controller moves the agent in straight-line steps until it reaches the success radius or terminates on `max_steps`, `max_time_sec`, or `robot_stuck`.
 
 Run it from the repo root:
 
 ```bash
-uv run python scripts/run_nav_baseline.py --run-id demo-nav-baseline
+./scripts/isaac_python.sh scripts/run_nav_baseline.py --backend isaac --run-id demo-nav-baseline
 ```
 
-The run writes canonical artifacts under `results/runs/<run_id>/`, including `manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/trajectory.json`.
+For a fast non-Isaac contract smoke path, the legacy toy backend is still available:
 
-This M2 baseline is intentionally pure Python so it is fast to validate and does not require launching Isaac Sim. The existing `scripts/isaac_python.sh` workflow remains the correct path for later milestones that need to import `isaacsim`, `omni.*`, or `pxr`.
+```bash
+uv run python scripts/run_nav_baseline.py --backend toy --run-id demo-nav-toy
+```
+
+The run writes canonical artifacts under `results/runs/<run_id>/`, including `manifest.json`, `task_config.json`, `episode_result.json`, `events.jsonl`, and `artifacts/trajectory.json`. Isaac-backed runs also export the minimal stage as `artifacts/stage.usda`.
