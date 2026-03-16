@@ -22,6 +22,7 @@ class ContractsTest(unittest.TestCase):
     def test_task_config_round_trip(self) -> None:
         from isaacsim_agent.contracts import DifficultyLevel
         from isaacsim_agent.contracts import NavigationSpec
+        from isaacsim_agent.contracts import PickPlaceSpec
         from isaacsim_agent.contracts import RuntimeOptions
         from isaacsim_agent.contracts import TaskConfig
         from isaacsim_agent.contracts import TaskType
@@ -46,6 +47,31 @@ class ContractsTest(unittest.TestCase):
 
         self.assertEqual(loaded.task_type.value, "navigation")
         self.assertEqual(loaded.navigation.goal_ref, "goal_A")
+
+        pick_place_config = TaskConfig(
+            task_type=TaskType.PICK_PLACE,
+            task_id="pick_place_round_trip",
+            scene_id="scene_B",
+            robot_id="robot_B",
+            seed=2,
+            max_steps=12,
+            max_time_sec=6.0,
+            headless=True,
+            render=False,
+            difficulty=DifficultyLevel.EASY,
+            runtime_options=RuntimeOptions(planner_enabled=False),
+            pick_place=PickPlaceSpec(
+                object_id="block_A",
+                source_id="source_zone_A",
+                target_id="target_zone_B",
+                target_pose={"x": 0.4, "y": 0.0, "z": 0.03},
+            ),
+        )
+
+        pick_place_loaded = TaskConfig.from_dict(pick_place_config.to_dict())
+        self.assertEqual(pick_place_loaded.task_type.value, "pick_place")
+        self.assertEqual(pick_place_loaded.pick_place.object_id, "block_A")
+        self.assertEqual(pick_place_loaded.pick_place.target_pose["z"], 0.03)
 
     def test_validation_script_writes_canonical_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
