@@ -1,0 +1,38 @@
+# Python environments and caches
+.venv/
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+
+# Build metadata
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Generated result artifacts
+results/*
+!results/README.md
+!results/schema.md
+
+# Local validation outputs and temp files
+*.log
+*.tmp
+*.temp
+*.pid
