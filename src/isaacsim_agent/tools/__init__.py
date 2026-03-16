@@ -11,7 +11,9 @@ from .navigation import Pose2D
 from .navigation import compute_direct_navigation_step
 from .navigation import compute_path_length
 from .navigation import distance_between_poses
+from .registry import ToolRegistry
 from .registry import ToolSpec
+from .registry import build_navigation_tool_registry
 
 __all__ = [
     "DirectNavigationAction",
@@ -20,7 +22,9 @@ __all__ = [
     "SCRIPTED_PICKPLACE_TOOL",
     "SCRIPTED_NAVIGATE_TOOL",
     "ScriptedPickPlaceAction",
+    "ToolRegistry",
     "ToolSpec",
+    "build_navigation_tool_registry",
     "compute_pose_path_length",
     "compute_direct_navigation_step",
     "compute_path_length",

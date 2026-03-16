@@ -16,6 +16,7 @@ from .metrics import TASK_SPECIFIC_METRICS
 from .models import EpisodeResult
 from .models import EventRecord
 from .models import InstructionFollowingSpec
+from .models import JsonValue
 from .models import NavigationSpec
 from .models import PickPlaceSpec
 from .models import RunManifest
@@ -30,6 +31,7 @@ __all__ = [
     "EventRecord",
     "EventType",
     "InstructionFollowingSpec",
+    "JsonValue",
     "NavigationSpec",
     "OPTIONAL_EPISODE_METRICS",
     "PickPlaceSpec",
