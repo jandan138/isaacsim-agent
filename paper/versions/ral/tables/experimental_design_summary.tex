@@ -1,20 +1,20 @@
-\begin{table}[!t]
-\centering
-\caption{Experimental design summary. The main factorial comparison covers a shared easy slice plus one harder slice per task family. Two compact ablations isolate action-interface and runtime-validation effects.}
-\label{tab:experimental-design-summary}
-\footnotesize
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{llllrrl}
-\hline
-Block & Family & Slice & Varying axes & Runs/cell & Runs & Role \\
-\hline
-Main Factorial & Navigation & Easy & P0/P1/P2 x R0/R1 & 11 & 66 & Main Contract X Runtime Ordering \\
-Main Factorial & Manipulation & Easy & P0/P1/P2 x R0/R1 & 3 & 18 & Main Contract X Runtime Ordering \\
-Main Factorial & Navigation & Harder & P0/P1/P2 x R0/R1 & 4 & 24 & Harder-Task Robustness \\
-Main Factorial & Manipulation & Harder & P0/P1/P2 x R0/R1 & 3 & 18 & Harder-Task Robustness \\
-Action-Interface Ablation & Mixed & Easy Shared Subset & P0/P1/P2 at fixed R0 & 4 & 12 & Invalid Actions And P2 Overhead \\
-Runtime-Only Ablation & Mixed & Recoverable Easy Probes & R0/R1 at fixed P1 & 4 & 8 & Recovery And Retry Value \\
-\hline
-\end{tabular}%
-}
-\end{table}
+\begin{table*}[!t]
+  \centering
+  \caption{Evaluation matrix used by the manuscript. The main factorial sweep remains frozen, while the two compact ablations isolate contract and runtime effects without adding new experiments.}
+  \label{tab:experimental-design-summary}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \rowcolors{2}{ralPanel}{white}
+  \begin{tabularx}{\textwidth}{L{2.2cm} L{1.5cm} L{1.9cm} L{2.6cm} >{\centering\arraybackslash}p{0.9cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.1cm} Y}
+    \toprule
+    Block & Family & Slice & Varying axes & Tasks & Runs/cell & Runs & Role \\
+    \midrule
+    Main factorial & Navigation & Easy & P0/P1/P2 x R0/R1 & 11 & 11 & 66 & Main contract/runtime ordering \\
+    Main factorial & Manipulation & Easy & P0/P1/P2 x R0/R1 & 3 & 3 & 18 & Main contract/runtime ordering \\
+    Main factorial & Navigation & Harder & P0/P1/P2 x R0/R1 & 4 & 4 & 24 & Harder-task robustness \\
+    Main factorial & Manipulation & Harder & P0/P1/P2 x R0/R1 & 3 & 3 & 18 & Harder-task robustness \\
+    Action-interface ablation & Mixed & Easy shared subset & P0/P1/P2 at fixed R0 & 4 & 4 & 12 & Invalid-action mechanism check \\
+    Runtime-only ablation & Mixed & Recoverable probes & R0/R1 at fixed P1 & 4 & 4 & 8 & Validation/retry mechanism check \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}

@@ -1,6 +1,45 @@
-\begin{figure*}[!t]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\textwidth]{figures/invalid_actions_recovery.png}
-  \caption{Invalid actions under the fixed-\texttt{R0} action-interface ablation (top) and retries under the fixed-\texttt{P1} runtime-only ablation (bottom). Typed tool-call contracts remove invalid actions in both families, and validate-and-retry \texttt{R1} adds retries only on recoverable invalid-first-action probes while raising success from 0.5 to 1.0.}
+  \begin{tikzpicture}
+    \begin{groupplot}[
+      group style={group size=2 by 2, horizontal sep=1.15cm, vertical sep=0.95cm},
+      width=0.39\columnwidth,
+      height=0.32\columnwidth,
+      ybar,
+      ymin=0, ymax=1.00,
+      ylabel={Average per run},
+      symbolic x coords={P0/R0,P0/R1,P1/R0,P1/R1,P2/R0,P2/R1,P0,P1,P2,R0,R1,P1-P,P1-T,P2-P,P2-T},
+      xtick=data,
+      xticklabel style={font=\scriptsize, rotate=35, anchor=east},
+      ymajorgrids=true,
+      grid style={draw=ralGrid},
+      axis line style={draw=ralBorder},
+      tick style={draw=ralBorder},
+      title style={font=\small\bfseries, text=ralSlate},
+      label style={font=\footnotesize, text=ralSlate},
+      tick label style={font=\scriptsize, text=ralMuted},
+      every axis plot/.append style={draw opacity=1, fill opacity=1},
+    ]
+      \nextgroupplot[title={Navigation Invalid}]
+      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0,1.000000)};
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1,0.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2,0.000000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed R0 contract ablation};
+      \nextgroupplot[title={Manipulation Invalid}]
+      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0,1.000000)};
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1,0.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2,0.000000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed R0 contract ablation};
+      \nextgroupplot[title={Navigation Retries}]
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(R0,0.000000)};
+      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(R1,0.500000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed P1 runtime ablation};
+      \nextgroupplot[title={Manipulation Retries}]
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(R0,0.000000)};
+      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(R1,0.500000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed P1 runtime ablation};
+    \end{groupplot}
+  \end{tikzpicture}
+  \caption{Invalid actions in the fixed-\texttt{R0} contract comparison (top row) and retries in the fixed-\texttt{P1} runtime comparison (bottom row). Typed contracts eliminate the invalid-action mode in the shared ablation slice, while \texttt{R1} adds retry work only on recoverable invalid-first-action probes.}
   \label{fig:invalid-actions-recovery}
-\end{figure*}
+\end{figure}

@@ -8,16 +8,15 @@ contract, the action interface that mediates the handoff, and the runtime
 validation policy that decides whether a bad first emission should terminate
 the run or be repaired.
 
-This execution boundary is easy to overlook in current embodied-agent
-literature, where broader evaluations and stronger end-to-end models often
-dominate the narrative
+This execution boundary often remains implicit in embodied-agent studies, where
+broader evaluations and stronger end-to-end models dominate the narrative
 \cite{driess2023palme,brohan2023rt2,yang2025embodiedbench,lu2025isbench,kachaev2025mindmotionaligned}.
-Those directions matter, but they make it harder to isolate execution-stack
-design from model quality or task coverage. We therefore ask a narrower
+Those studies are valuable, but they entangle execution-stack design with
+backend scale and benchmark breadth. We therefore ask a narrower
 robotics-systems question: when the simulator setting and task families are
-held fixed, how much do
-planner-to-executor contract design and lightweight runtime validation affect
-invalid actions, recovery, success, and planner/tool overhead?
+held fixed, how much do planner-to-executor contract design and lightweight
+runtime validation affect invalid actions, recovery, success, and
+planner/tool overhead?
 
 We study two task families in Isaac Sim: language-conditioned navigation and
 tabletop manipulation. The matrix compares three contract variants: an
@@ -36,8 +35,8 @@ eliminate the invalid-action failure mode in the fixed-R0 slice; and P2 is
 associated with lower planner/tool overhead than P1 in the covered
 comparisons. Harder tasks increase planner and tool activity without reversing
 the ordering. The paper is limited to this controlled simulator study and
-argues for bounded execution-design lessons rather than a new-model or
-benchmark claim.
+draws bounded execution-design lessons rather than new-model or benchmark
+claims.
 
 This paper makes three contributions:
 
@@ -54,3 +53,12 @@ design, runtime validation, and a brief planner-side self-check are separate
 systems levers that shape reliability and planner/tool overhead without
 changing the underlying task matrix.
 \end{enumerate}
+
+Fig.~\ref{fig:system-overview} summarizes the evaluated boundary: a task
+instruction reaches the planner, the planner emits one of three
+planner-to-executor contracts, the runtime applies either bare dispatch or
+validate-and-retry, and the executor records the outcome metrics used
+throughout the paper. The same figure also carries the compact failure-repair
+trace that anchors the recovery discussion.
+
+\input{figures/system_overview.tex}

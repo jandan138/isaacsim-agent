@@ -1,11 +1,11 @@
-panel_label,panel_note,bar_label,value
-NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P0,1
-NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P1,0
-NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P2,0
-MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P0,1
-MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P1,0
-MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P2,0
-NAVIGATION RETRIES,Fixed P1 runtime-only ablation,R0,0
-NAVIGATION RETRIES,Fixed P1 runtime-only ablation,R1,0.5
-MANIPULATION RETRIES,Fixed P1 runtime-only ablation,R0,0
-MANIPULATION RETRIES,Fixed P1 runtime-only ablation,R1,0.5
+panel,note,bar_label,value,color
+Navigation Invalid,Fixed R0 contract ablation,P0,1.0,ralP0R0
+Navigation Invalid,Fixed R0 contract ablation,P1,0.0,ralP1R0
+Navigation Invalid,Fixed R0 contract ablation,P2,0.0,ralP2R0
+Manipulation Invalid,Fixed R0 contract ablation,P0,1.0,ralP0R0
+Manipulation Invalid,Fixed R0 contract ablation,P1,0.0,ralP1R0
+Manipulation Invalid,Fixed R0 contract ablation,P2,0.0,ralP2R0
+Navigation Retries,Fixed P1 runtime ablation,R0,0.0,ralP1R0
+Navigation Retries,Fixed P1 runtime ablation,R1,0.5,ralP1R1
+Manipulation Retries,Fixed P1 runtime ablation,R0,0.0,ralP1R0
+Manipulation Retries,Fixed P1 runtime ablation,R1,0.5,ralP1R1

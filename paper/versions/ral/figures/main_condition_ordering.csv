@@ -1,25 +1,25 @@
-panel_label,panel_note,bar_label,value
-NAVIGATION EASY,11 runs per cell,P0/R0,0
-NAVIGATION EASY,11 runs per cell,P0/R1,1
-NAVIGATION EASY,11 runs per cell,P1/R0,1
-NAVIGATION EASY,11 runs per cell,P1/R1,1
-NAVIGATION EASY,11 runs per cell,P2/R0,1
-NAVIGATION EASY,11 runs per cell,P2/R1,1
-MANIPULATION EASY,3 runs per cell,P0/R0,0
-MANIPULATION EASY,3 runs per cell,P0/R1,1
-MANIPULATION EASY,3 runs per cell,P1/R0,1
-MANIPULATION EASY,3 runs per cell,P1/R1,1
-MANIPULATION EASY,3 runs per cell,P2/R0,1
-MANIPULATION EASY,3 runs per cell,P2/R1,1
-NAVIGATION HARDER,4 runs per cell,P0/R0,0
-NAVIGATION HARDER,4 runs per cell,P0/R1,1
-NAVIGATION HARDER,4 runs per cell,P1/R0,1
-NAVIGATION HARDER,4 runs per cell,P1/R1,1
-NAVIGATION HARDER,4 runs per cell,P2/R0,1
-NAVIGATION HARDER,4 runs per cell,P2/R1,1
-MANIPULATION HARDER,3 runs per cell,P0/R0,0
-MANIPULATION HARDER,3 runs per cell,P0/R1,1
-MANIPULATION HARDER,3 runs per cell,P1/R0,1
-MANIPULATION HARDER,3 runs per cell,P1/R1,1
-MANIPULATION HARDER,3 runs per cell,P2/R0,1
-MANIPULATION HARDER,3 runs per cell,P2/R1,1
+panel,note,bar_label,value,color
+Navigation Easy,11 runs/cell,P0/R0,0.0,ralP0R0
+Navigation Easy,11 runs/cell,P0/R1,1.0,ralP0R1
+Navigation Easy,11 runs/cell,P1/R0,1.0,ralP1R0
+Navigation Easy,11 runs/cell,P1/R1,1.0,ralP1R1
+Navigation Easy,11 runs/cell,P2/R0,1.0,ralP2R0
+Navigation Easy,11 runs/cell,P2/R1,1.0,ralP2R1
+Manipulation Easy,3 runs/cell,P0/R0,0.0,ralP0R0
+Manipulation Easy,3 runs/cell,P0/R1,1.0,ralP0R1
+Manipulation Easy,3 runs/cell,P1/R0,1.0,ralP1R0
+Manipulation Easy,3 runs/cell,P1/R1,1.0,ralP1R1
+Manipulation Easy,3 runs/cell,P2/R0,1.0,ralP2R0
+Manipulation Easy,3 runs/cell,P2/R1,1.0,ralP2R1
+Navigation Harder,4 runs/cell,P0/R0,0.0,ralP0R0
+Navigation Harder,4 runs/cell,P0/R1,1.0,ralP0R1
+Navigation Harder,4 runs/cell,P1/R0,1.0,ralP1R0
+Navigation Harder,4 runs/cell,P1/R1,1.0,ralP1R1
+Navigation Harder,4 runs/cell,P2/R0,1.0,ralP2R0
+Navigation Harder,4 runs/cell,P2/R1,1.0,ralP2R1
+Manipulation Harder,3 runs/cell,P0/R0,0.0,ralP0R0
+Manipulation Harder,3 runs/cell,P0/R1,1.0,ralP0R1
+Manipulation Harder,3 runs/cell,P1/R0,1.0,ralP1R0
+Manipulation Harder,3 runs/cell,P1/R1,1.0,ralP1R1
+Manipulation Harder,3 runs/cell,P2/R0,1.0,ralP2R0
+Manipulation Harder,3 runs/cell,P2/R1,1.0,ralP2R1

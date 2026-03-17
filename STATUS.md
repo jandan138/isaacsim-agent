@@ -7,239 +7,224 @@
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `M11. Paper drafting`
 - Milestone state:
-  - this run completed `RA-L submission-polish pass`
+  - this run completed `RA-L reviewer-facing artifact overhaul`
 - Completion level:
-  - the active RA-L LaTeX draft remains a 7-page compiled manuscript with
-    bibliography included
-  - `paper/versions/ral/refs/references.bib` has been upgraded from a merely
-    working BibTeX file to a more submission-facing bibliography with fuller
-    author metadata and verified venue / DOI / page fields where safely
-    confirmed
-  - the active `.tex` sources no longer contain inline author-year references
-  - terminology, captions, and support-only asset wording have been normalized
-    toward the contract / interface / runtime-validation framing
-  - `paper/versions/ral/figure_table_binding.md`, `README.md`, and the RA-L
-    notes now record the current main-text versus support-only boundary and the
-    system-diagram decision
+  - the RA-L stack is now split into:
+    - initial anonymous reviewer-facing submission:
+      `paper/versions/ral/reviewer_submission/main.pdf`
+    - accepted-version journal scaffold:
+      `paper/versions/ral/main.pdf`
+  - the reviewer-facing submission variant compiles successfully at `7` pages
+  - the journal scaffold compiles successfully at `6` pages
+  - the active manuscript now includes a reviewer-facing Figure 1 system
+    overview, vector-first main figures, split reviewer-facing main tables, and
+    a setup-level implementation snapshot
 
 ## Run context
 
 - This run stayed within the requested boundaries:
   - no new experiments
-  - no experiment-code changes
+  - no experiment-code changes beyond manuscript asset generation
   - no venue switch
-  - no figure/table overhaul
-  - no change to the paper's contract / interface / runtime-validation framing
-  - no change to the underlying results or result ordering
+  - no change to the paper's contract / runtime-validation framing
+  - no reversion to prompt-first framing
+  - no overstated P2 efficiency claims
+  - no invented numbers or citations
 - Source-of-truth docs consumed in this run:
   - `plan.md`
   - `AGENTS.md`
-  - `STATUS.md`
+  - prior `STATUS.md` from `HEAD`
   - `docs/ral_writing_playbook.md`
-  - `paper/README.md`
-  - `paper/shared/core_claim.md`
-  - `paper/shared/contributions.md`
-  - `paper/shared/findings.md`
-  - `paper/shared/limitations.md`
-  - `paper/shared/terminology.md`
-  - `paper/shared/figures_and_tables.md`
-  - `paper/versions/ral/README.md`
-  - `paper/versions/ral/full_draft_v1.md`
-  - `paper/versions/ral/full_draft_v1_notes.md`
-  - `paper/versions/ral/figure_table_binding.md`
-  - `paper/versions/ral/page_pressure_plan.md`
-  - `paper/versions/ral/asset_manifest.md`
-  - `paper/versions/ral/latex_assembly_notes.md`
   - `paper/versions/ral/main.tex`
   - `paper/versions/ral/sections/`
   - `paper/versions/ral/figures/`
   - `paper/versions/ral/tables/`
   - `paper/versions/ral/refs/`
-- Result assets and packaging code inspected in this run:
+  - `paper/versions/ral/latex_assembly_notes.md`
   - `results/processed/block_a_final_closure/`
-  - `results/processed/block_a_master_summary/`
   - `scripts/package_block_a_ral_assets.py`
   - `src/isaacsim_agent/eval/block_a_ral_assets.py`
 - Agent teaming:
-  - spawned two explorer sub-agents:
-    - citation / bibliography audit
-    - terminology / caption / float / system-diagram audit
-  - waited for both explorers to complete and integrated their findings
-  - no sub-agent stall, interruption, or reassignment occurred
+  - spawned two explorer sub-agents for:
+    - variant split / LaTeX-structure audit
+    - citation / intro-cleanup audit
+  - waited on both agents with cumulative wait windows of roughly:
+    - `1s`
+    - `10s`
+    - `30s`
+    - `10s` after a focused status check
+  - observed no returned output or blocker summary from either agent
+  - sent one focused progress check to each agent, then closed both as stalled
+    because the main task no longer depended on their result
+  - action taken:
+    abandoned sub-agent integration and completed the overhaul locally
 
 ## Milestone summary
 
 - Completed in this run:
-  - audited the current submission-facing gaps in the RA-L compiled draft
-  - performed reference metadata polish:
-    - expanded cited embodied-planning entries from placeholder-style author
-      fields to fuller author metadata
-    - upgraded safe publication metadata for:
-      - `macenski2022ros2`
-      - `martin2021plansys2`
-      - `colledanchise2018behaviortrees`
-      - `garrett2020pddlstream`
-      - `garrett2021integratedtamp`
-    - cleaned the ROS 2 actions entry and renamed its key to
-      `biggs2019ros2actions`
-    - added title-case protection for terms that IEEEtran would otherwise
-      downcase
-    - added an official Isaac Sim documentation reference and cite
-  - performed sentence-level compression and local prose cleanup in:
-    - `paper/versions/ral/sections/abstract.tex`
-    - `paper/versions/ral/sections/intro.tex`
-    - `paper/versions/ral/sections/setup.tex`
-    - `paper/versions/ral/sections/results.tex`
-    - `paper/versions/ral/sections/discussion.tex`
-    - `paper/versions/ral/sections/conclusion.tex`
-  - normalized terminology / caption consistency:
-    - replaced the remaining `runtime policy` wording with
-      `runtime validation policy`
-    - replaced the remaining `action-interface-only` wording with
-      `action-interface ablation`
-    - kept the contract / interface / runtime-validation framing intact
-  - performed low-risk float / width / spacing polish:
-    - regenerated figure/table wrappers through
-      `scripts/package_block_a_ral_assets.py`
-    - updated wrapper captions for a more consistent submission-facing style
-    - switched generated wrapper float specifiers to `[!t]`
-    - rewrote dormant support-only captions so they no longer carry workflow
-      language
-    - tightened the setup tool-vocabulary sentence to reduce line-breaking
-      pressure without changing meaning
-  - kept the main-text vs support-only asset boundary unchanged and recorded it:
-    - main-text:
+  - split the manuscript packaging into:
+    - reviewer-facing anonymous RA-L submission variant:
+      `paper/versions/ral/reviewer_submission/`
+    - journal-style accepted-version scaffold:
+      `paper/versions/ral/`
+  - added the new Figure 1 system overview:
+    - task -> planner -> contract variant -> runtime policy -> Isaac Sim
+      executor -> metrics/outcomes
+    - navigation and tabletop environment insets grounded in frozen layouts
+    - compact failure-repair trace inset covering:
+      `move_to_goal` / `move_object` -> non-dispatchable -> validation/retry ->
+      corrected tool
+  - professionalized the main manuscript figures:
+    - reviewer-facing figures now compile from vector-first TikZ/PGF assets
+    - active figure captions use systems wording rather than prompt-engineering
+      wording
+    - retained main result figures:
       `main_condition_ordering`, `invalid_actions_recovery`,
-      `planner_tool_overhead`, `experimental_design_summary`,
-      `final_closure_result_summary`
-    - support-only:
-      `focused_ablation_summary`, `harder_task_summary`
-  - completed the system-diagram audit and recorded:
-    - recommendation: `defer`
-    - rationale: current manuscript is self-contained, and the existing
-      full-width float queue already delays the ablation figure
-  - rebuilt and verified the manuscript
+      `planner_tool_overhead`
+  - reworked the tables for readability:
+    - `experimental_design_summary` is now the readable reviewer-facing matrix
+      table
+    - main dense result reporting is split into:
+      - `main_outcome_summary`
+      - `planner_tool_overhead_summary`
+    - `final_closure_result_summary` is retained as support-only
+  - added a setup-level implementation snapshot covering:
+    - local planner identity / access path
+    - deterministic JSON decoding and lack of temperature / top-$p$
+    - P0/P1/P2 realizations
+    - R0/R1 realizations
+    - executor tool namespaces
+  - kept the contract / runtime-validation framing intact while tightening the
+    introduction wording
+  - kept safe publication-backed citations in `refs/references.bib` and left
+    unresolved arXiv-only items untouched where no safer archival replacement
+    was applied in this pass
+  - regenerated manuscript assets and rebuilt both PDFs
   - updated:
+    - `README.md`
     - `paper/versions/ral/README.md`
     - `paper/versions/ral/figure_table_binding.md`
     - `paper/versions/ral/latex_assembly_notes.md`
-    - `paper/versions/ral/full_draft_v1_notes.md`
-    - `paper/versions/ral/refs/references_note.tex`
+    - `paper/versions/ral/reviewer_submission/README.md`
     - `STATUS.md`
 - Not completed in this run:
   - no new experiments or result changes
-  - no system diagram authoring
-  - no aggressive float redesign; the ablation figure still floats late in the
-    compiled PDF
+  - no literal simulator screenshot capture workflow
+  - no final author-side line edit or anonymity pass
 
 ## Files changed
 
+- `README.md`
 - `STATUS.md`
 - `paper/versions/ral/README.md`
+- `paper/versions/ral/asset_manifest.md`
 - `paper/versions/ral/figure_table_binding.md`
+- `paper/versions/ral/figures/invalid_actions_recovery.csv`
 - `paper/versions/ral/figures/invalid_actions_recovery.tex`
+- `paper/versions/ral/figures/main_condition_ordering.csv`
 - `paper/versions/ral/figures/main_condition_ordering.tex`
+- `paper/versions/ral/figures/planner_tool_overhead.csv`
 - `paper/versions/ral/figures/planner_tool_overhead.tex`
-- `paper/versions/ral/full_draft_v1_notes.md`
+- `paper/versions/ral/figures/system_overview.csv`
+- `paper/versions/ral/figures/system_overview.tex`
 - `paper/versions/ral/latex_assembly_notes.md`
 - `paper/versions/ral/main.pdf`
+- `paper/versions/ral/main.tex`
+- `paper/versions/ral/preamble_shared.tex`
 - `paper/versions/ral/refs/references.bib`
-- `paper/versions/ral/refs/references_note.tex`
-- `paper/versions/ral/sections/abstract.tex`
-- `paper/versions/ral/sections/conclusion.tex`
-- `paper/versions/ral/sections/discussion.tex`
+- `paper/versions/ral/reviewer_submission/README.md`
+- `paper/versions/ral/reviewer_submission/main.pdf`
+- `paper/versions/ral/reviewer_submission/main.tex`
 - `paper/versions/ral/sections/intro.tex`
-- `paper/versions/ral/sections/related_work.tex`
 - `paper/versions/ral/sections/results.tex`
 - `paper/versions/ral/sections/setup.tex`
+- `paper/versions/ral/tables/experimental_design_summary.csv`
 - `paper/versions/ral/tables/experimental_design_summary.tex`
+- `paper/versions/ral/tables/final_closure_result_summary.csv`
 - `paper/versions/ral/tables/final_closure_result_summary.tex`
+- `paper/versions/ral/tables/focused_ablation_summary.csv`
 - `paper/versions/ral/tables/focused_ablation_summary.tex`
+- `paper/versions/ral/tables/harder_task_summary.csv`
 - `paper/versions/ral/tables/harder_task_summary.tex`
+- `paper/versions/ral/tables/main_outcome_summary.csv`
+- `paper/versions/ral/tables/main_outcome_summary.tex`
+- `paper/versions/ral/tables/planner_tool_overhead_summary.csv`
+- `paper/versions/ral/tables/planner_tool_overhead_summary.tex`
 - `src/isaacsim_agent/eval/block_a_ral_assets.py`
 
 ## Commands run
 
 - Source-of-truth and repo-state reads:
-  - `sed -n '1,260p' plan.md`
-  - `sed -n '1,260p' AGENTS.md`
-  - `sed -n '1,360p' STATUS.md`
+  - `sed -n '1,220p' plan.md`
+  - `sed -n '1,220p' AGENTS.md`
+  - `git show HEAD:STATUS.md`
   - `sed -n '1,260p' docs/ral_writing_playbook.md`
-  - `sed -n '1,260p' paper/README.md`
-  - `sed -n '1,320p' paper/shared/*.md`
-  - `sed -n '1,260p' paper/versions/ral/*.md`
   - `sed -n '1,260p' paper/versions/ral/main.tex`
-  - `sed -n '1,240p' paper/versions/ral/sections/*.tex`
-  - `sed -n '1,260p' paper/versions/ral/figures/*.tex`
-  - `sed -n '1,260p' paper/versions/ral/tables/*.tex`
+  - `sed -n '1,220p' paper/versions/ral/sections/*.tex`
+  - `sed -n '1,220p' paper/versions/ral/figures/*.tex`
+  - `sed -n '1,220p' paper/versions/ral/tables/*.tex`
   - `sed -n '1,260p' paper/versions/ral/refs/references.bib`
-  - `sed -n '1,200p' paper/versions/ral/refs/references_note.tex`
   - `find results/processed/block_a_final_closure -maxdepth 2 -type f | sort`
-  - `find results/processed/block_a_master_summary -maxdepth 2 -type f | sort`
   - `git status --short --untracked-files=all`
-- Search / audit commands:
-  - `rg -n '\\cite{...}' paper/versions/ral/sections paper/versions/ral/main.tex`
-  - `rg -n 'prompt engineering study|prompt-first|state of the art|...' ...`
-  - `rg -n 'runtime policy|action-interface-only|...' ...`
-  - `rg -n '[A-Z][A-Za-z ...] et al\\.|...' paper/versions/ral/sections paper/versions/ral/main.tex`
-- External metadata checks used for safe bibliography upgrades:
-  - `python - <<'PY' ... arXiv API metadata lookups for cited papers ... PY`
-  - `python - <<'PY' ... DOI / Crossref lookups for Macenski, PlanSys2, Behavior Trees, PDDLStream, Integrated TAMP ... PY`
-  - `python - <<'PY' ... inspect ROS 2 actions design article metadata ... PY`
-  - `python - <<'PY' ... inspect Isaac Sim documentation title ... PY`
+- Result and artifact inspection:
+  - `sed -n '1,260p' results/processed/block_a_final_closure/block_a_final_closure_summary.{md,json}`
+  - `sed -n '1,260p' results/processed/block_a_final_closure/run_summary.jsonl`
+  - `sed -n '1,260p' results/block_a_runtime_only_ablation/.../events.jsonl`
+  - `sed -n '1,260p' results/block_a_prompt_only_ablation/.../events.jsonl`
+  - `sed -n '1,260p' results/.../artifacts/planner_trace.json`
+  - `sed -n '1,260p' results/.../artifacts/trajectory.json`
 - Asset regeneration and compile validation:
   - `python scripts/package_block_a_ral_assets.py`
+  - `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    with working directory `paper/versions/ral`
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
     with working directory `paper/versions/ral`
-  - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-    with working directory `paper/versions/ral`
+  - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    with working directory `paper/versions/ral/reviewer_submission`
   - `pdfinfo main.pdf | sed -n '1,20p'`
-  - `pdftoppm -png main.pdf /tmp/ral_polish_page`
-  - `find paper/versions/ral -maxdepth 1 \( -name 'main.aux' -o -name 'main.bbl' -o -name 'main.blg' \) -delete`
+    with working directories:
+    - `paper/versions/ral`
+    - `paper/versions/ral/reviewer_submission`
 
 ## Validation results
 
-- Bibliography / citation state:
-  - `paper/versions/ral/refs/references.bib` is materially more complete and
-    consistent than the prior cleanup pass
-  - no inline author-year citations remain in the active RA-L `.tex` sources
-  - `paper/versions/ral/main.log` no longer has final-pass undefined citation
-    blockers
-- Terminology and framing:
-  - the LaTeX draft remains anchored to planner-to-executor contract design,
-    action-interface specification, runtime validation, invalid actions,
-    recovery, and planner/tool overhead
-  - no prompt-first headline wording or overclaim language was reintroduced
-- Main-text vs support-only asset state:
-  - main-text asset set remains the same five assets listed above
-  - `focused_ablation_summary` and `harder_task_summary` remain support-only
-- Compile result:
-  - `paper/versions/ral/main.pdf` regenerated successfully
+- Reviewer-facing submission:
+  - `paper/versions/ral/reviewer_submission/main.pdf` compiles successfully
   - `pdfinfo` reports `Pages: 7`
-- Visual / float check:
-  - the manuscript remains visually stable after the polish pass
-  - the ablation figure still floats late to page 6; this is acceptable but
-    remains the main non-blocker layout issue
+- Journal scaffold:
+  - `paper/versions/ral/main.pdf` compiles successfully
+  - `pdfinfo` reports `Pages: 6`
+- Figure / table state:
+  - Figure 1 is present in the shared manuscript source and compiles in both
+    variants
+  - the three main result figures remain active manuscript figures
+  - the main dense result reporting is split across `main_outcome_summary` and
+    `planner_tool_overhead_summary`
+- Framing check:
+  - no prompt-first headline wording was reintroduced
+  - no new experiments or invented numbers were added
+  - P2 workload wording remains descriptive rather than overstated
 - Remaining warnings:
-  - only underfull-box warnings remain, mainly from narrow two-column line
-    breaking and float-page composition
-  - no fatal compile blockers remain
+  - underfull-box warnings remain from narrow-column line breaking
+  - the reviewer-facing `conference` build emits the standard final camera-
+    ready column-balance reminder
 
 ## Remaining gaps
 
 - do the final author-side line edit and anonymity pass
-- decide whether the late page-6 placement of the ablation figure is acceptable
-  or whether authors want a float swap
-- decide whether `focused_ablation_summary` should stay support-only or replace
-  another main-text float
-- optionally replace any arXiv-only bibliography entries with later archival
-  versions if authors prefer them
+- decide whether the schematic Figure 1 environment insets should remain as
+  reviewer-facing surrogates or be replaced by literal simulator screenshots
+- decide whether the support-only dense result summary should remain support-
+  only in the final submission package
+- optionally replace any remaining arXiv-only references if authors later
+  confirm archival versions they prefer
 
 ## Next recommended sub-milestone
 
-- Move from `submission-polish draft` to `author final-edit / submission prep`
-  by:
-  - reviewing the current 7-page PDF line by line
-  - keeping the present contract/runtime framing intact
-  - preserving the current asset boundary unless authors explicitly choose a
-    float swap
+- Move from `reviewer-facing artifact overhaul` to `author final-edit /
+  submission prep` by:
+  - reviewing `paper/versions/ral/reviewer_submission/main.pdf` line by line
+  - checking the 7-page reviewer-facing PDF for anonymity and final float
+    locality
+  - preserving the current contract/runtime framing unless authors explicitly
+    request another scope change

@@ -1,13 +1,13 @@
 \newif\ifieeefallback
 \IfFileExists{IEEEtran.cls}{
   \ieeefallbackfalse
-  \documentclass[letterpaper,10pt,journal]{IEEEtran}
+  \documentclass[letterpaper,10pt,conference]{IEEEtran}
 }{
   \ieeefallbacktrue
   \documentclass[10pt,twocolumn]{article}
 }
 
-\input{preamble_shared}
+\input{../preamble_shared}
 
 \ifieeefallback
 \setlength{\textwidth}{7.0in}
@@ -18,6 +18,12 @@
 \setlength{\columnsep}{0.24in}
 \fi
 
+\makeatletter
+\def\input@path{{../}}
+\makeatother
+
+\graphicspath{{../figures/}}
+
 \title{A Controlled Study of Planner-to-Executor Contract Design and Runtime Validation for Embodied-Agent Execution in Isaac Sim}
 \author{Anonymous Authors}
 
@@ -25,14 +31,14 @@
 
 \maketitle
 
-\input{sections/abstract}
-\input{sections/intro}
-\input{sections/related_work}
-\input{sections/setup}
-\input{sections/results}
-\input{sections/discussion}
-\input{sections/conclusion}
+\input{../sections/abstract}
+\input{../sections/intro}
+\input{../sections/related_work}
+\input{../sections/setup}
+\input{../sections/results}
+\input{../sections/discussion}
+\input{../sections/conclusion}
 \bibliographystyle{IEEEtran}
-\bibliography{refs/references}
+\bibliography{../refs/references}
 
 \end{document}

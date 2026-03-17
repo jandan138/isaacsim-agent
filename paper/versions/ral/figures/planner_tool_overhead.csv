@@ -1,17 +1,17 @@
-panel_label,panel_note,bar_label,value
-NAVIGATION EASY,Fixed R0 action-interface ablation,P1-P,5
-NAVIGATION EASY,Fixed R0 action-interface ablation,P1-T,5
-NAVIGATION EASY,Fixed R0 action-interface ablation,P2-P,4
-NAVIGATION EASY,Fixed R0 action-interface ablation,P2-T,4
-MANIPULATION EASY,Fixed R0 action-interface ablation,P1-P,10
-MANIPULATION EASY,Fixed R0 action-interface ablation,P1-T,10
-MANIPULATION EASY,Fixed R0 action-interface ablation,P2-P,8
-MANIPULATION EASY,Fixed R0 action-interface ablation,P2-T,8
-MANIPULATION HARDER R0,Harder manipulation summary,P1-P,11.666667
-MANIPULATION HARDER R0,Harder manipulation summary,P1-T,11.666667
-MANIPULATION HARDER R0,Harder manipulation summary,P2-P,9.666667
-MANIPULATION HARDER R0,Harder manipulation summary,P2-T,9.666667
-MANIPULATION HARDER R1,Harder manipulation summary,P1-P,11.666667
-MANIPULATION HARDER R1,Harder manipulation summary,P1-T,11.666667
-MANIPULATION HARDER R1,Harder manipulation summary,P2-P,9.666667
-MANIPULATION HARDER R1,Harder manipulation summary,P2-T,9.666667
+panel,note,bar_label,value,color
+Navigation Easy,Fixed R0 contract ablation,P1-P,5.0,ralP1R0
+Navigation Easy,Fixed R0 contract ablation,P1-T,5.0,ralP1R0
+Navigation Easy,Fixed R0 contract ablation,P2-P,4.0,ralP2R0
+Navigation Easy,Fixed R0 contract ablation,P2-T,4.0,ralP2R0
+Manipulation Easy,Fixed R0 contract ablation,P1-P,10.0,ralP1R0
+Manipulation Easy,Fixed R0 contract ablation,P1-T,10.0,ralP1R0
+Manipulation Easy,Fixed R0 contract ablation,P2-P,8.0,ralP2R0
+Manipulation Easy,Fixed R0 contract ablation,P2-T,8.0,ralP2R0
+Manipulation Harder R0,Harder manipulation slice,P1-P,11.67,ralP1R0
+Manipulation Harder R0,Harder manipulation slice,P1-T,11.67,ralP1R0
+Manipulation Harder R0,Harder manipulation slice,P2-P,9.67,ralP2R0
+Manipulation Harder R0,Harder manipulation slice,P2-T,9.67,ralP2R0
+Manipulation Harder R1,Harder manipulation slice,P1-P,11.67,ralP1R1
+Manipulation Harder R1,Harder manipulation slice,P1-T,11.67,ralP1R1
+Manipulation Harder R1,Harder manipulation slice,P2-P,9.67,ralP2R1
+Manipulation Harder R1,Harder manipulation slice,P2-T,9.67,ralP2R1

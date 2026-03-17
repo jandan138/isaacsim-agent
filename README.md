@@ -4,7 +4,15 @@ This repository hosts a milestone-driven scaffold for an embodied-agent study in
 
 ## Scaffold status
 
-This repo now has the first minimal Isaac-backed task baseline in addition to the earlier scaffold and contract work. It still does **not** claim that LLM planning, memory, Nav2, manipulation, experiments, or paper artifacts are implemented.
+This repo now carries:
+
+- minimal Isaac-backed and toy embodied-agent baselines
+- frozen Block A evaluation artifacts under `results/processed/`
+- the active RA-L manuscript stack under `paper/versions/ral/`
+
+It still does **not** claim that later roadmap items such as memory, broader
+Nav2 integration, or post-Block-A experiment blocks are implemented beyond the
+current frozen scope.
 
 ## Current repository layout
 
@@ -28,6 +36,31 @@ This repo now has the first minimal Isaac-backed task baseline in addition to th
 │   ├── experiments/
 │   └── paper/
 └── tests/
+```
+
+## Paper artifacts
+
+The active RA-L manuscript sources live under `paper/versions/ral/`.
+
+- Initial anonymous reviewer-facing RA-L submission:
+  `paper/versions/ral/reviewer_submission/`
+- Accepted-version journal assembly scaffold:
+  `paper/versions/ral/`
+- Shared manuscript assets:
+  `paper/versions/ral/sections/`, `figures/`, `tables/`, `refs/`, and
+  `preamble_shared.tex`
+- Shared figure/table asset generator:
+  `scripts/package_block_a_ral_assets.py`
+- Shared manuscript asset code:
+  `src/isaacsim_agent/eval/block_a_ral_assets.py`
+- Current compiled PDFs:
+  `paper/versions/ral/reviewer_submission/main.pdf` and
+  `paper/versions/ral/main.pdf`
+
+Regenerate manuscript assets from the repo root with:
+
+```bash
+python scripts/package_block_a_ral_assets.py
 ```
 
 ## Milestone 1 bootstrap notes

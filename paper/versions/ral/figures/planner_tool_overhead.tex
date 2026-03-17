@@ -1,6 +1,51 @@
-\begin{figure*}[!t]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\textwidth]{figures/planner_tool_overhead.png}
-  \caption{Planner and tool calls in the retained \texttt{P1} versus \texttt{P2} comparisons across the fixed-\texttt{R0} action-interface ablation and the harder manipulation slice. Under the covered conditions, \texttt{P2} matches \texttt{P1} on success while using fewer planner/tool calls. This is a descriptive slice-level comparison, not a broader statistical claim.}
+  \begin{tikzpicture}
+    \begin{groupplot}[
+      group style={group size=2 by 2, horizontal sep=1.15cm, vertical sep=0.95cm},
+      width=0.39\columnwidth,
+      height=0.32\columnwidth,
+      ybar,
+      ymin=0, ymax=12.00,
+      ylabel={Calls per run},
+      symbolic x coords={P0/R0,P0/R1,P1/R0,P1/R1,P2/R0,P2/R1,P0,P1,P2,R0,R1,P1-P,P1-T,P2-P,P2-T},
+      xtick=data,
+      xticklabel style={font=\scriptsize, rotate=35, anchor=east},
+      ymajorgrids=true,
+      grid style={draw=ralGrid},
+      axis line style={draw=ralBorder},
+      tick style={draw=ralBorder},
+      title style={font=\small\bfseries, text=ralSlate},
+      label style={font=\footnotesize, text=ralSlate},
+      tick label style={font=\scriptsize, text=ralMuted},
+      every axis plot/.append style={draw opacity=1, fill opacity=1},
+    ]
+      \nextgroupplot[title={Navigation Easy}]
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-P,5.000000)};
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-T,5.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-P,4.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-T,4.000000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed R0 contract ablation};
+      \nextgroupplot[title={Manipulation Easy}]
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-P,10.000000)};
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-T,10.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-P,8.000000)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-T,8.000000)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Fixed R0 contract ablation};
+      \nextgroupplot[title={Manipulation Harder R0}]
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-P,11.666667)};
+      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1-T,11.666667)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-P,9.666667)};
+      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2-T,9.666667)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Harder manipulation slice};
+      \nextgroupplot[title={Manipulation Harder R1}]
+      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1-P,11.666667)};
+      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1-T,11.666667)};
+      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2-P,9.666667)};
+      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2-T,9.666667)};
+      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {Harder manipulation slice};
+    \end{groupplot}
+  \end{tikzpicture}
+  \caption{Planner and tool calls in the retained \texttt{P1} versus \texttt{P2} comparisons across the fixed-\texttt{R0} contract ablation and the harder manipulation slice. The figure is descriptive: in the covered slices, \texttt{P2} matches the success profile of \texttt{P1} while using fewer planner/tool calls.}
   \label{fig:planner-tool-overhead}
-\end{figure*}
+\end{figure}

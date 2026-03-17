@@ -1,0 +1,73 @@
+\begin{figure*}[!t]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[x=1cm,y=1cm,>=Latex]
+    \tikzstyle{stagebox}=[draw=ralBorder, rounded corners=2pt, fill=ralPanel, minimum height=1.3cm, align=center, font=\small\bfseries, text=ralSlate]
+    \tikzstyle{smallnote}=[font=\scriptsize, text=ralMuted, align=center]
+    \tikzstyle{tracegood}=[draw=ralRepair, fill=ralRepair!12, rounded corners=1.5pt, minimum width=1.05cm, minimum height=0.45cm, align=center, font=\ttfamily\tiny, text=ralInk]
+    \tikzstyle{tracewarn}=[draw=ralWarn, fill=ralWarn!12, rounded corners=1.5pt, minimum width=1.1cm, minimum height=0.45cm, align=center, font=\ttfamily\tiny, text=ralInk]
+    \tikzstyle{traceinfo}=[draw=ralWarm, fill=ralWarm!12, rounded corners=1.5pt, minimum width=1.05cm, minimum height=0.45cm, align=center, font=\scriptsize, text=ralInk]
+    \node[stagebox, minimum width=2.15cm, font=\small\bfseries] (task) at (1.2,6.25) {\shortstack{Task\\navigation or tabletop}};
+    \node[stagebox, minimum width=2.25cm, font=\small\bfseries] (planner) at (4.1,6.25) {\shortstack{Planner\\local \texttt{mock\_block\_a}}};
+    \node[stagebox, minimum width=3.2cm, font=\small\bfseries] (contract) at (7.75,6.25) {\shortstack{Contract variant\\P0: direct action\\P1: typed tool call\\P2: typed tool call + self-check}};
+    \node[stagebox, minimum width=2.55cm, font=\small\bfseries] (runtime) at (11.4,6.25) {\shortstack{Runtime policy\\R0: bare dispatch\\R1: validate + 1 retry}};
+    \node[stagebox, minimum width=2.6cm, font=\small\bfseries] (executor) at (14.7,6.25) {\shortstack{Isaac Sim executor\\task-scoped tool namespace}};
+    \node[stagebox, minimum width=2.4cm, font=\small\bfseries] (metrics) at (18.0,6.25) {\shortstack{Metrics / outcomes\\success, invalid, retry, P/T calls}};
+    \draw[thick, draw=ralMuted, ->] (task) -- (planner);
+    \draw[thick, draw=ralMuted, ->] (planner) -- (contract);
+    \draw[thick, draw=ralMuted, ->] (contract) -- (runtime);
+    \draw[thick, draw=ralMuted, ->] (runtime) -- (executor);
+    \draw[thick, draw=ralMuted, ->] (executor) -- (metrics);
+    \node[smallnote] at (9.6,5.25) {The study manipulates the planner-to-executor contract and the runtime validation boundary while keeping the task families fixed.};
+    \begin{scope}[shift={(0.2,0.05)}]
+      \draw[draw=ralBorder, fill=white, rounded corners=2pt] (0,0) rectangle (9.1,4.45);
+      \node[anchor=north west, font=\small\bfseries, text=ralSlate] at (0.18,4.22) {Navigation environment inset};
+      \node[anchor=north west, font=\scriptsize, text=ralMuted] at (0.18,3.92) {Representative frozen run: recoverable \texttt{move\_to\_goal} handoff under \texttt{P1/R1}.};
+      \fill[ralPanel] (0.22,1.55) rectangle (4.55,3.55);
+      \draw[draw=ralBorder] (0.22,1.55) rectangle (4.55,3.55);
+      \draw[draw=ralGrid, step=0.48] (0.45,1.78) grid (4.35,3.32);
+      \draw[very thick, draw=ralP1R0] (0.900,1.958) -- (0.900,1.958) -- (0.900,1.958) -- (1.732,2.286) -- (2.564,2.615) -- (3.396,2.943) -- (3.900,3.142);
+      \filldraw[fill=ralP0R0, draw=ralP0R0] (0.900,1.958) circle (0.08);
+      \filldraw[fill=ralP2R0, draw=ralP2R0] (3.900,3.142) rectangle ++(0.16,0.16);
+      \node[anchor=south west, font=\scriptsize, text=ralSlate] at (0.960,2.018) {start};
+      \node[anchor=south east, font=\scriptsize, text=ralSlate] at (3.880,3.322) {goal};
+      \node[anchor=south east, font=\scriptsize, text=ralMuted] at (4.35,1.58) {path from frozen trajectory};
+      \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.22,1.16) {Failure-repair trace};
+      \node[tracewarn] (tracenav0) at (0.35,0.48) {move\_to\_goal};
+      \node[traceinfo] (tracenav1) at (1.73,0.48) {non-\\dispatchable};
+      \node[traceinfo] (tracenav2) at (3.11,0.48) {R1 retry};
+      \node[tracegood] (tracenav3) at (4.49,0.48) {navigate\_to};
+      \draw[draw=ralMuted, ->, thick] (tracenav0) -- (tracenav1);
+      \draw[draw=ralMuted, ->, thick] (tracenav1) -- (tracenav2);
+      \draw[draw=ralMuted, ->, thick] (tracenav2) -- (tracenav3);
+    \end{scope}
+    \begin{scope}[shift={(9.6,0.05)}]
+      \draw[draw=ralBorder, fill=white, rounded corners=2pt] (0,0) rectangle (9.1,4.45);
+      \node[anchor=north west, font=\small\bfseries, text=ralSlate] at (0.18,4.22) {Tabletop environment inset};
+      \node[anchor=north west, font=\scriptsize, text=ralMuted] at (0.18,3.92) {Representative frozen run: recoverable \texttt{move\_object} handoff under \texttt{P1/R1}.};
+      \fill[ralPanel] (0.22,1.55) rectangle (4.55,3.55);
+      \draw[draw=ralBorder] (0.22,1.55) rectangle (4.55,3.55);
+      \fill[ralGrid!35] (0.72,2.00) rectangle (4.10,3.10);
+      \draw[draw=ralBorder] (0.72,2.00) rectangle (4.10,3.10);
+      \draw[thick, draw=ralSlate] (1.379,2.010) -- (1.379,2.010) -- (1.379,2.010) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.236,3.090) -- (3.236,3.090) -- (3.236,3.090) -- (3.236,3.090);
+      \draw[thick, draw=ralWarm, dashed] (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.421,2.539) -- (3.236,3.090) -- (3.236,3.090) -- (3.236,3.090) -- (3.236,3.090);
+      \filldraw[fill=ralP0R0, draw=ralP0R0] (3.421,2.539) rectangle ++(0.14,0.14);
+      \draw[draw=ralP2R0, line width=0.8pt, dashed] (3.116,2.970) rectangle (3.356,3.210);
+      \filldraw[fill=ralP1R0, draw=ralP1R0] (1.379,2.010) circle (0.07);
+      \node[anchor=north west, font=\scriptsize, text=ralSlate] at (3.581,2.589) {object};
+      \node[anchor=south east, font=\scriptsize, text=ralSlate] at (3.216,3.250) {target};
+      \node[anchor=south east, font=\scriptsize, text=ralMuted] at (4.35,1.58) {solid: gripper, dashed: object};
+      \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.22,1.16) {Failure-repair trace};
+      \node[tracewarn] (tracemanip0) at (0.35,0.48) {move\_object};
+      \node[traceinfo] (tracemanip1) at (1.73,0.48) {non-\\dispatchable};
+      \node[traceinfo] (tracemanip2) at (3.11,0.48) {R1 retry};
+      \node[tracegood] (tracemanip3) at (4.49,0.48) {scripted\_pick\_place\_step};
+      \draw[draw=ralMuted, ->, thick] (tracemanip0) -- (tracemanip1);
+      \draw[draw=ralMuted, ->, thick] (tracemanip1) -- (tracemanip2);
+      \draw[draw=ralMuted, ->, thick] (tracemanip2) -- (tracemanip3);
+    \end{scope}
+  \end{tikzpicture}
+  }
+  \caption{System overview of the evaluated planner-to-executor boundary. A task is mapped by the planner into one of three contract variants, then passed through bare dispatch \texttt{R0} or validate-and-retry \texttt{R1} before the Isaac Sim executor. Insets show representative navigation and tabletop task scenes together with compact failure-repair traces in which non-dispatchable verbs are rejected and corrected into executor-visible tools.}
+  \label{fig:system-overview}
+\end{figure*}

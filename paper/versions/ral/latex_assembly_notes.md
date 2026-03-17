@@ -1,74 +1,103 @@
 # LaTeX Assembly Notes
 
-## Scope
+## Scope of this pass
 
-- This pass maps `full_draft_v1.md` into a minimal IEEE/RA-L-style LaTeX
-  scaffold under `paper/versions/ral/`.
-- The current goal is a submission-polish draft state with stable figure/table
-  hookups, bounded local prose cleanup, and honest handoff notes, not a fresh
-  assembly or broad rewrite.
+- Preserve the journal-style scaffold under `paper/versions/ral/`.
+- Keep the existing anonymous reviewer-facing submission entry under
+  `paper/versions/ral/reviewer_submission/`.
+- Keep the contract / runtime-validation framing intact.
+- Do not add experiments, invent numbers, or widen the evidence base.
 
-## Minimal prose adjustments
+## Variant split
 
-- Converted Markdown sectioning into LaTeX `\section{}` and `\subsection{}`
-  structure while keeping the heading order unchanged.
-- Replaced figure/table planning markers with `\input{}` calls that point to the
-  regenerated assets under `figures/` and `tables/`.
-- Removed Markdown backticks and converted only the executor tool names that
-  require escaped underscores into `\texttt{...}`.
-- Switched the compiled draft from the old references-note placeholder to a real
-  BibTeX-backed bibliography path in `main.tex`.
+- Initial RA-L submission artifact:
+  `paper/versions/ral/reviewer_submission/main.tex`
+  - class mode:
+    `IEEEtran` conference style
+  - current compiled PDF:
+    `paper/versions/ral/reviewer_submission/main.pdf`
+  - current page count:
+    `7`
+- Accepted-version journal assembly scaffold:
+  `paper/versions/ral/main.tex`
+  - class mode:
+    `IEEEtran` journal style
+  - current compiled PDF:
+    `paper/versions/ral/main.pdf`
+  - current page count:
+    `6`
+- Shared content for both:
+  - `sections/`
+  - `figures/`
+  - `tables/`
+  - `refs/`
+  - `preamble_shared.tex`
 
-## Compiled-Draft Cleanup Pass
+## Figure assembly changes
 
-- Populated `refs/references.bib` with conservative grounded entries using only
-  source-verified titles, years, URLs, and minimal safe metadata.
-- Normalized the Related Work and Discussion citations to `\cite{}` form
-  without doing a broad prose rewrite.
-- Bundled `IEEEtran.bst` locally because the host TeX distribution did not ship
-  that bibliography style file.
-- Removed `\input{tables/focused_ablation_summary.tex}` from the current main
-  text to keep float pressure lower while leaving the table available as a
-  support/overflow asset.
-- Shortened the three figure captions slightly so the compiled draft stays
-  tighter without changing the scientific claim.
+- Added `figures/system_overview.tex` as the new Figure 1.
+- Folded the compact failure trace into Figure 1 rather than allocating a
+  separate main-text float.
+- Replaced the manuscript-facing raster wrappers with vector-first TikZ/PGF
+  assets for:
+  - `main_condition_ordering`
+  - `invalid_actions_recovery`
+  - `planner_tool_overhead`
+- Removed the old debug-style visual treatment from the active manuscript
+  figures: no packaging annotations, no beige debug canvas, and no raster-first
+  dependence in the active reviewer-facing build.
 
-## Submission-Polish Pass
+## Table assembly changes
 
-- Performed a sentence-level compression pass in:
-  - `sections/abstract.tex`
-  - `sections/intro.tex`
-  - `sections/setup.tex`
-  - `sections/results.tex`
-  - `sections/discussion.tex`
-  - `sections/conclusion.tex`
-- Normalized local terminology drift so the active LaTeX draft now prefers
-  `runtime validation policy` and `action-interface ablation` wording over the
-  older `runtime policy` and `action-interface-only` labels.
-- Added one compact literature-positioning citation cluster in the introduction
-  and one official Isaac Sim documentation citation at first technical mention
-  in the setup section.
-- Upgraded `refs/references.bib` from minimal safe placeholders to a more
-  submission-facing state:
-  - fuller author metadata for the cited embodied-planning references
-  - verified venue / DOI / page metadata where it was safely confirmed
-  - case protection for terms such as `3D`, `AI`, `VLM`, and `IsaacSim`
-  - a cleaner ROS 2 actions entry and an official Isaac Sim documentation entry
-- Regenerated the figure/table wrappers through
-  `scripts/package_block_a_ral_assets.py` after updating the asset generator so
-  caption style, support-only caption wording, and `[!t]` float specifiers stay
-  reproducible.
-- Kept the main-text asset boundary unchanged:
-  `focused_ablation_summary` and `harder_task_summary` remain support-only.
-- System-diagram decision:
-  `defer`
-  because the manuscript is currently self-contained and the existing full-width
-  float queue already delays the ablation figure in the compiled PDF.
+- Reformatted `experimental_design_summary.tex` into a full-width reviewer-
+  facing matrix table.
+- Replaced the former dense combined result table in the main text with:
+  - `tables/main_outcome_summary.tex`
+  - `tables/planner_tool_overhead_summary.tex`
+- Kept `tables/final_closure_result_summary.tex`,
+  `tables/focused_ablation_summary.tex`, and `tables/harder_task_summary.tex`
+  as support-only assets.
 
-## Known follow-up work
+## Reproducibility wording
 
-- Do the final author-side line edit and anonymity pass on the compiled PDF.
-- Review whether the late page-6 placement of the ablation figure is acceptable
-  or whether authors want to swap one full-width float.
-- Decide whether any remaining arXiv-only references should be replaced by
-  later archival versions before submission.
+- Added a compact implementation snapshot in `sections/setup.tex` covering:
+  - planner identity and local access path
+  - deterministic JSON decoding / no temperature or top-$p$
+  - P0/P1/P2 realizations
+  - R0/R1 realizations
+  - executor tool namespaces
+
+## Citation and prose cleanup
+
+- Tightened the introduction wording without rewriting the manuscript around a
+  new thesis.
+- Kept the safer formal-venue replacements already present in
+  `refs/references.bib`; remaining arXiv-only items stay only where no safer
+  archival replacement was applied in this pass.
+
+## Build verification
+
+- Shared asset regeneration:
+  `python scripts/package_block_a_ral_assets.py`
+- Journal scaffold:
+  `cd paper/versions/ral && pdflatex ... && bibtex main && pdflatex ...`
+  - compile status:
+    success
+  - page count:
+    `6`
+- Reviewer-facing submission:
+  `cd paper/versions/ral/reviewer_submission && pdflatex ... && bibtex main && pdflatex ...`
+  - compile status:
+    success
+  - page count:
+    `7`
+
+## Remaining non-blockers
+
+- Underfull-box warnings remain from narrow-column line breaking and float-page
+  composition.
+- The reviewer-facing system-overview insets are schematic renderings grounded
+  in frozen layouts and traces; authors may still swap in literal simulator
+  screenshots later if desired.
+- The `IEEEtran` conference build emits the standard last-page column-balance
+  reminder for camera-ready handling.

@@ -14,6 +14,11 @@ P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. The same ordering holds
 across both task families and persists as tasks become harder.
 
 \input{figures/main_condition_ordering.tex}
+\input{tables/main_outcome_summary.tex}
+
+Table~\ref{tab:main-outcome-summary} records the same retained cohorts
+in a reviewer-facing layout that keeps success, invalid-action exposure, and
+retries readable without forcing planner/tool counts into every cell.
 
 The same comparison separates the roles of contract design and runtime
 validation. Invalid-action failures are concentrated in the P0 cells, showing
@@ -21,11 +26,16 @@ that loose task-level verbs are brittle at the planner/executor boundary. Once
 the planner is forced into a typed tool namespace, the dominant failure mode
 disappears in the covered fixed-R0 slice. Within the successful structured
 conditions, P2 matches P1 on success while showing lower planner/tool
-overhead on the shared easy slice and the harder manipulation slice. We
+overhead on the shared easy slice and the harder manipulation slice.
+Table~\ref{tab:planner-tool-overhead-summary} isolates that workload
+comparison so the manuscript can report it without overloading the outcome
+table. We
 interpret that pattern as a workload association within already-strong
 contracts, not as evidence of a new success regime.
 
 \input{figures/planner_tool_overhead.tex}
+
+\input{tables/planner_tool_overhead_summary.tex}
 
 \subsection{Action-Interface and Runtime-Only Ablations}
 
@@ -63,6 +73,9 @@ executor accepts \texttt{navigate\_to} and
 catches the unknown tool before dispatch, returns a validation error, and
 allows a corrected retry. The runtime does not erase the contract violation; it
 turns a terminating handoff failure into a recoverable one.
+Figure~\ref{fig:system-overview} includes compact navigation and manipulation
+traces for exactly that
+non-dispatchable-to-corrected transition.
 
 \subsection{Harder-Task Robustness}
 

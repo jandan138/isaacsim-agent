@@ -25,7 +25,7 @@ The dispatch vocabulary is family-specific and explicit. Navigation exposes
 state getters and \texttt{navigate\_to}; manipulation exposes state getters
 and \texttt{scripted\_pick\_place\_step}. The study therefore asks whether the
 planner can hand the executor a dispatchable request under a specified
-interface, not whether it can describe the task in natural language.
+interface, not whether it can merely describe the task in natural language.
 
 \subsection{Contract and Runtime Variants}
 
@@ -47,6 +47,28 @@ still slip through.
 
 \input{tables/experimental_design_summary.tex}
 
+\subsection{Implementation Snapshot}
+
+The frozen Block A evidence uses the repo-local \texttt{mock\_block\_a}
+planner backend rather than a hosted foundation-model API. In the archived run
+summaries, \texttt{planner\_backend=mock\_block\_a} and
+\texttt{model\_variant=null}; the access path is the local implementation in
+\texttt{src/isaacsim\_agent/planner/mock.py}. The planner emits one
+deterministic JSON action per call, so there are no temperature, top-$p$, or
+stochastic decoding settings to tune in this frozen study. P0 realizes a
+direct-action JSON contract, P1 realizes typed tool JSON, and P2 keeps the
+same typed tool JSON while adding a planner-side \texttt{self\_check} field.
+R0 performs bare dispatch, while R1 validates tool name and arguments against
+the active task-specific namespace and allows one repair attempt before
+termination. Navigation exposes \texttt{get\_robot\_state},
+\texttt{get\_goal\_state}, and \texttt{navigate\_to}. Manipulation exposes
+\texttt{get\_gripper\_state}, \texttt{get\_object\_state},
+\texttt{get\_target\_state}, and \texttt{scripted\_pick\_place\_step}.
+Representative task configs and trajectories also record the backend
+realization directly, including archived \texttt{backend\_variant} values and
+the stored Isaac-backed navigation runtime metadata
+(\texttt{kit\_version}=106.5.0).
+
 \subsection{Metrics and Evaluation Protocol}
 
 Success rate is the primary task outcome. An invalid action is an emitted
@@ -62,5 +84,3 @@ summaries.
 The final closure summary provides the canonical aggregate view, while the
 slice-specific summaries support the ablations and the failure-case
 interpretation.
-
-\input{tables/final_closure_result_summary.tex}

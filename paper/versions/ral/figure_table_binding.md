@@ -1,78 +1,53 @@
-# Figure and Table Binding for `full_draft_v1.md`
+# Figure and Table Binding
 
-This document records the **actual** binding state of the current RA-L compiled
-draft. The manuscript-facing assets now live under `paper/versions/ral/`, while
-the immutable evidence remains under `results/processed/`.
+This file records the current reviewer-facing binding state for the RA-L
+artifact stack after the artifact-overhaul pass.
 
-## Binding summary
+## Main-text bindings
 
-| Draft placeholder | Regenerated asset | LaTeX insertion point | Main-text status | Evidence binding | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `[Fig: main condition ordering]` | `paper/versions/ral/figures/main_condition_ordering.{png,csv,tex}` | `paper/versions/ral/sections/results.tex` in Section 4.1 via `\input{figures/main_condition_ordering.tex}` | main-text asset | Final-closure umbrella, with cohort-level support from `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Primary success-rate figure. Legacy `results/processed/block_a_master_summary/paper_figures/block_a_success_rate.png` remains a template only. |
-| `[Fig: invalid actions and recovery]` | `paper/versions/ral/figures/invalid_actions_recovery.{png,csv,tex}` | `paper/versions/ral/sections/results.tex` in Section 4.2 via `\input{figures/invalid_actions_recovery.tex}` | main-text asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.{json,md}` | Main mechanism figure for fixed-`R0` contract effect and fixed-`P1` runtime recovery. Legacy `block_a_invalid_actions.png` is not evidence. |
-| `[Fig: planner/tool overhead]` | `paper/versions/ral/figures/planner_tool_overhead.{png,csv,tex}` | `paper/versions/ral/sections/results.tex` in Section 4.1, with the same figure serving the narrower `P2` references in Sections 4.2 and 4.3 | main-text asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.{json,md}` | Caption and prose keep the effect descriptive: lower planner/tool overhead in the covered slices, not a broader statistical efficiency claim. |
-| `[Table: experimental design summary]` | `paper/versions/ral/tables/experimental_design_summary.{tex,csv}` | `paper/versions/ral/sections/setup.tex` in Section 3.2 via `\input{tables/experimental_design_summary.tex}` | main-text asset | Final-closure umbrella plus the retained ablation and harder-manipulation summaries, with run-count context from `results/processed/block_a_master_summary/block_a_master_summary.json` | Keeps the variant inventory table-driven for page control. No legacy table template is reused as evidence. |
-| `[Table: final closure result summary]` | `paper/versions/ral/tables/final_closure_result_summary.{tex,csv}` | `paper/versions/ral/sections/setup.tex` at the end of Section 3.3 via `\input{tables/final_closure_result_summary.tex}` | main-text asset | Final-closure umbrella, with retained cohort-level support from `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | The table is generated and hooked once in the compiled draft, then referenced by the Results prose. |
-| `[Table: focused ablation summary]` | `paper/versions/ral/tables/focused_ablation_summary.{tex,csv}` | not currently inserted in `main.tex` | support / overflow asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.{json,md}` | Kept support-only in the submission-polish draft. Restore it only if authors explicitly trade away another main-text float. |
+| Asset | Regenerated file(s) | Inserted from | Evidence binding | Notes |
+| --- | --- | --- | --- | --- |
+| Figure 1: system overview | `paper/versions/ral/figures/system_overview.{csv,tex}` | `sections/intro.tex` via `\input{figures/system_overview.tex}` | Frozen task layouts plus runtime-only run traces under `results/block_a_runtime_only_ablation/` | Reviewer-facing method figure. The environment insets and compact traces are schematic renderings grounded in frozen layouts and traces, not new experiments. |
+| Main condition ordering | `paper/versions/ral/figures/main_condition_ordering.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Vector-first PGF/TikZ replacement for the old packaged success-rate figure. |
+| Invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Main mechanism figure for invalid-action elimination and runtime-assisted repair. |
+| Planner/tool overhead | `paper/versions/ral/figures/planner_tool_overhead.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Caption and prose keep the effect descriptive rather than overstating P2 efficiency. |
+| Table I: experimental design | `paper/versions/ral/tables/experimental_design_summary.{csv,tex}` | `sections/setup.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` plus retained ablation and harder-manipulation summaries | Reformatted as a full-width reviewer-facing matrix summary. |
+| Table II: outcomes | `paper/versions/ral/tables/main_outcome_summary.{csv,tex}` | `sections/results.tex` | Main retained cohorts from final closure, master summary, and harder manipulation | Splits success / invalid / retries away from workload metrics. |
+| Table III: planner/tool overhead | `paper/versions/ral/tables/planner_tool_overhead_summary.{csv,tex}` | `sections/results.tex` | Main retained cohorts from final closure, master summary, and harder manipulation | Keeps workload cells separate from outcome cells. |
 
-## Final asset-boundary decision for the current draft
+## Support-only bindings
 
-- Main-text assets retained:
-  - `main_condition_ordering`
-  - `invalid_actions_recovery`
-  - `planner_tool_overhead`
-  - `experimental_design_summary`
-  - `final_closure_result_summary`
-- Support-only / overflow assets:
-  - `focused_ablation_summary`
-  - `harder_task_summary`
-- Other main-text assets:
-  - none beyond the five assets listed above
-- Float-locality note:
-  the current three-figure stack already places the ablation figure late in the
-  compiled PDF, so the draft should not add another full-width main-text float
-  unless one existing float is removed.
+- `paper/versions/ral/tables/final_closure_result_summary.{csv,tex}`
+  - Evidence:
+    retained cohorts from final closure, master summary, and harder
+    manipulation
+  - Status:
+    generated but not inserted in the main manuscript
+- `paper/versions/ral/tables/focused_ablation_summary.{csv,tex}`
+  - Evidence:
+    `results/processed/block_a_prompt_only_ablation/` and
+    `results/processed/block_a_runtime_only_ablation/`
+  - Status:
+    generated but not inserted in the main manuscript
+- `paper/versions/ral/tables/harder_task_summary.{csv,tex}`
+  - Evidence:
+    `results/processed/block_a_master_summary/` and
+    `results/processed/block_a_manipulation_harder/`
+  - Status:
+    generated but not inserted in the main manuscript
 
-## Support-only asset
+## Variant hookup check
 
-- `paper/versions/ral/tables/harder_task_summary.{tex,csv}`
-  - Current status:
-    generated but not inserted in `main.tex`
-  - Evidence binding:
-    `results/processed/block_a_master_summary/block_a_master_summary.json` and
-    `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json`
-  - Intended role:
-    overflow/support table for the harder-task paragraph or an appendix-style
-    author handoff, not a current main-text float
+- Journal scaffold:
+  `paper/versions/ral/main.tex`
+  - uses the shared `sections/`, `figures/`, `tables/`, `refs/`, and
+    `preamble_shared.tex`
+- Reviewer-facing initial submission:
+  `paper/versions/ral/reviewer_submission/main.tex`
+  - points at the same shared assets through `\input@path{{../}}`
 
-## Legacy packaging status
+## Asset format note
 
-- `results/processed/block_a_master_summary/paper_figures/`
-  and `results/processed/block_a_master_summary/paper_tables/`
-  were inspected only as layout/style precedents.
-- Those legacy packaged assets are **not** the final evidence base because they
-  predate the final-closure additions.
-
-## Current manuscript hookup check
-
-- `paper/versions/ral/sections/setup.tex` currently inserts:
-  - `tables/experimental_design_summary.tex`
-  - `tables/final_closure_result_summary.tex`
-- `paper/versions/ral/sections/results.tex` currently inserts:
-  - `figures/main_condition_ordering.tex`
-  - `figures/planner_tool_overhead.tex`
-  - `figures/invalid_actions_recovery.tex`
-- `focused_ablation_summary.tex` and `harder_task_summary.tex` both exist but
-  are not currently inserted in the compiled draft.
-
-## System diagram status
-
-- `full_draft_v1.md` still has no dedicated system-diagram placeholder.
-- Decision for the current submission-polish draft:
-  `defer`
-- Rationale:
-  the current manuscript is self-consistent without a system diagram, and a
-  new full-width figure would likely worsen float delay unless it replaces an
-  existing result asset.
-- If a schematic is added later, it should remain author-drawn method artwork,
-  not a derived result asset.
+- The manuscript-facing figures are now TeX/TikZ vector assets.
+- The dormant PNG files from earlier packaging are no longer the
+  manuscript-facing source of truth.

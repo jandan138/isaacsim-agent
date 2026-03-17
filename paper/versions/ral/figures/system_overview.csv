@@ -1,0 +1,9 @@
+panel,kind,index,value
+navigation,trace,0,move_to_goal
+navigation,trace,1,non-dispatchable
+navigation,trace,2,R1 retry
+navigation,trace,3,navigate_to
+manipulation,trace,0,move_object
+manipulation,trace,1,non-dispatchable
+manipulation,trace,2,R1 retry
+manipulation,trace,3,scripted_pick_place_step

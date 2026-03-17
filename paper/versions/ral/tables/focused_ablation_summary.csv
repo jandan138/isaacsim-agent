@@ -1,6 +1,6 @@
-comparison,cell,run_count,success,invalid_action_runs,successful_recoveries,avg_retries,planner_tool
-action-interface ablation,P0/R0,4,0/4 (0.0),4,0,0.0,1.0/0.0
-action-interface ablation,P1/R0,4,4/4 (1.0),0,0,0.0,7.5/7.5
-action-interface ablation,P2/R0,4,4/4 (1.0),0,0,0.0,6.0/6.0
-runtime-only ablation,P1/R0,4,2/4 (0.5),2,0,0.0,4.0/3.5
-runtime-only ablation,P1/R1,4,4/4 (1.0),2,2,0.5,8.0/7.5
+comparison,cell,runs,success,invalid_runs,recoveries,avg_retries,planner_tool
+Action-interface,P0/R0,4,0/4 (0.0),4,0,0.0,1.0/0.0
+Action-interface,P1/R0,4,4/4 (1.0),0,0,0.0,7.5/7.5
+Action-interface,P2/R0,4,4/4 (1.0),0,0,0.0,6.0/6.0
+Runtime-only,P1/R0,4,2/4 (0.5),2,0,0.0,4.0/3.5
+Runtime-only,P1/R1,4,4/4 (1.0),2,2,0.5,8.0/7.5
