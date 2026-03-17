@@ -7,34 +7,34 @@ high-level language intent is translated into executable robot behavior in
 simulation or on robots, including closed-loop language feedback, embodied
 multimodal models, vision-language-action policies, model-based language
 grounding, and systems-first integration pipelines such as Inner Monologue
-(Huang et al., 2022), PaLM-E (Driess et al., 2023), RT-2 (Brohan et al.,
-2023), VoxPoser (Huang et al., 2023), and OK-Robot (Liu et al., 2024). This
-includes language-conditioned skill selection, code-generating control, and
-program-like robot planning directions exemplified by SayCan (Ahn et al.,
-2022), Code as Policies (Liang et al., 2022), and ProgPrompt (Singh et al.,
-2022). That literature makes planner quality visible, but it often leaves less
-room to isolate what happens at the boundary between planner output and
-dispatch. Our paper is narrower: it holds the Isaac Sim setting fixed and
-studies how planner-to-executor contract design changes invalid actions,
-recovery, success, and planner/tool overhead.
+\cite{huang2022inner,driess2023palme,brohan2023rt2,huang2023voxposer,liu2024okrobot}.
+This also includes language-conditioned skill selection, code-generating
+control, and program-like robot planning directions exemplified by SayCan,
+Code as Policies, and ProgPrompt
+\cite{ahn2022saycan,liang2022codeaspolicies,singh2022progprompt}. That
+literature makes planner quality visible, but it often leaves less room to
+isolate what happens at the boundary between planner output and dispatch. Our
+paper is narrower: it holds the Isaac Sim setting fixed and studies how
+planner-to-executor contract design changes invalid actions, recovery, success,
+and planner/tool overhead.
 
 \subsection{Execution Contracts, Runtime Validation, and Robotics Middleware}
 
 A second line of work addresses execution architecture rather than only planner
 quality. Relevant threads include ROS 2 middleware and action semantics
-(Macenski et al., 2022; Biggs et al., 2019/2020), planning frameworks such as
-PlanSys2 (Martin et al., 2021), behavior-tree execution stacks and libraries
-such as BehaviorTree.CPP (Colledanchise and Ogren, 2018;
-BehaviorTree.CPP documentation), and task-and-motion planning interfaces such
-as PDDLStream and the broader TAMP literature (Garrett et al., 2020; Garrett
-et al., 2021). The shared intuition is that planner outputs should not
-be treated as executable by default; they need an explicit interface to the
-execution stack. The present study is closest to that execution-boundary view.
-Its runtime layer is intentionally lightweight: R1 validates an emitted
-action or tool call against the active contract and allows one repair attempt.
-The contribution is therefore evidence about a small validation-and-retry
-mechanism in a controlled simulator setting, not a claim of a complete
-middleware stack or end-to-end safety case.
+\cite{macenski2022ros2,biggs20192020actions}, planning frameworks such as
+PlanSys2 \cite{martin2021plansys2}, behavior-tree execution stacks and
+libraries such as Behavior Trees in Robotics and AI and BehaviorTree.CPP
+\cite{colledanchise2018behaviortrees,behaviortreecppdocs}, and task-and-motion
+planning interfaces such as PDDLStream and the broader TAMP literature
+\cite{garrett2020pddlstream,garrett2021integratedtamp}. The shared intuition is
+that planner outputs should not be treated as executable by default; they need
+an explicit interface to the execution stack. The present study is closest to
+that execution-boundary view. Its runtime layer is intentionally lightweight:
+R1 validates an emitted action or tool call against the active contract and
+allows one repair attempt. The contribution is therefore evidence about a small
+validation-and-retry mechanism in a controlled simulator setting, not a claim
+of a complete middleware stack or end-to-end safety case.
 
 \subsection{Controlled Design Studies and Broader Evaluations}
 
@@ -43,9 +43,9 @@ breadth. Broader embodied-agent evaluations such as EmbodiedBench, IS-Bench,
 and the Isaac Sim-based Mind and Motion Aligned benchmark are valuable because
 they expose long-horizon execution difficulty, safety failures, or integrated
 planning-and-control behavior across larger task sets or evaluation matrices
-(Yang et al., 2025; Lu et al., 2025; Kachaev et al., 2025). By varying only
-the action interface and runtime validation policy within a fixed Isaac Sim
-setting, we instead use a narrower study design to attribute differences in
-invalid actions, recovery, success, and planner/tool overhead to explicit
-execution-design choices. This complements broader embodied-agent evaluations
-rather than competing with them.
+\cite{yang2025embodiedbench,lu2025isbench,kachaev2025mindmotionaligned}. By
+varying only the action interface and runtime validation policy within a fixed
+Isaac Sim setting, we instead use a narrower study design to attribute
+differences in invalid actions, recovery, success, and planner/tool overhead to
+explicit execution-design choices. This complements broader embodied-agent
+evaluations rather than competing with them.

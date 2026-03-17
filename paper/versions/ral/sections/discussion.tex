@@ -19,13 +19,13 @@ At a higher level, the studied boundary maps cleanly onto execution
 architectures already familiar in robotics. The contract specifies the form of
 a dispatchable request in much the same way that ROS 2 actions expose explicit
 goal, feedback, and result semantics, while runtime validation decides whether
-a malformed request should be rejected before execution (Biggs et al.,
-2019/2020; Macenski et al., 2022; Martin et al., 2021). The same separation
-appears in behavior-tree and TAMP systems: contract checks act like
+a malformed request should be rejected before execution
+\cite{biggs20192020actions,macenski2022ros2,martin2021plansys2}. The same
+separation appears in behavior-tree and TAMP systems: contract checks act like
 precondition guards on callable nodes or operators, and runtime validation acts
 like an execution guard that determines whether a proposed action can continue
-to the executor interface (Colledanchise and Ogren, 2018;
-BehaviorTree.CPP documentation; Garrett et al., 2020; Garrett et al., 2021).
+to the executor interface
+\cite{colledanchise2018behaviortrees,behaviortreecppdocs,behaviortreecppconditions,garrett2020pddlstream,garrett2021integratedtamp}.
 
 The P2 pattern suggests a second, narrower lesson. In the covered slices, a
 brief planner-side self-check leaves the success profile unchanged while

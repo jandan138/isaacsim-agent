@@ -110,3 +110,14 @@
 - Bibliography preparation:
   added `bibliography_candidates.md` as a grouped reference list for the later
   LaTeX / BibTeX pass without attempting final bibliography formatting yet.
+
+## Compiled-Draft Cleanup Pass
+
+- Normalized the current LaTeX scaffold from the former references-note
+  placeholder to a real BibTeX-backed bibliography flow.
+- Kept the citation cleanup conservative: Related Work and Discussion now use
+  `\cite{}` commands, while the manuscript structure and findings wording stay
+  otherwise intact.
+- Removed the focused ablation table from the current main-text float stack and
+  left it as the first support/overflow asset to restore only if authors later
+  decide the page budget allows it.

@@ -1,6 +1,6 @@
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/invalid_actions_recovery.png}
-  \caption{Top: under fixed bare dispatch \texttt{R0}, typed tool-call contracts drive invalid actions to zero in both families. Bottom: under fixed \texttt{P1}, validate-and-retry \texttt{R1} adds retries only for the recoverable invalid-first-action probes and is accompanied by a 0.5 to 1.0 success change in both families.}
+  \caption{Top: under fixed \texttt{R0}, typed tool-call contracts remove invalid actions in both families. Bottom: under fixed \texttt{P1}, validate-and-retry \texttt{R1} adds retries only on recoverable invalid-first-action probes and raises success from 0.5 to 1.0 in both families.}
   \label{fig:invalid-actions-recovery}
 \end{figure*}
