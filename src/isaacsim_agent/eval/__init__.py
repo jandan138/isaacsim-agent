@@ -1,5 +1,10 @@
 """Minimal M5 logging and evaluation harness helpers."""
 
+from .block_a_final_closure import BlockAFinalClosureProcessedSource
+from .block_a_final_closure import BlockAFinalClosureReferenceSummary
+from .block_a_final_closure import BlockAFinalClosureSummaryResult
+from .block_a_final_closure import build_block_a_final_closure_summary
+from .block_a_final_closure import summarize_block_a_final_closure_processed_dirs
 from .block_a_master import BlockAMasterProcessedSource
 from .block_a_master import BlockAMasterReferenceSummary
 from .block_a_master import BlockAMasterSummaryResult
@@ -29,6 +34,9 @@ from .validate import validate_results_root
 from .validate import validate_run_record
 
 __all__ = [
+    "BlockAFinalClosureProcessedSource",
+    "BlockAFinalClosureReferenceSummary",
+    "BlockAFinalClosureSummaryResult",
     "BlockAMasterProcessedSource",
     "BlockAMasterReferenceSummary",
     "BlockAMasterSummaryResult",
@@ -43,6 +51,7 @@ __all__ = [
     "SummaryAggregate",
     "SummaryBundle",
     "ValidationIssue",
+    "build_block_a_final_closure_summary",
     "build_block_a_master_summary",
     "build_cross_family_summary",
     "package_block_a_master_summary",
@@ -50,6 +59,7 @@ __all__ = [
     "load_run_record",
     "resolve_runs_root",
     "scan_results_root",
+    "summarize_block_a_final_closure_processed_dirs",
     "summarize_block_a_master_processed_dirs",
     "summarize_cross_family_processed_dirs",
     "summarize_results_root",

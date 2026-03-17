@@ -49,6 +49,7 @@ class PickPlaceTaskDefinition:
     control_dt_sec: float
     max_steps: int
     max_time_sec: float
+    transfer_waypoints: tuple[Pose3D, ...] = ()
 
     def source_hover_pose(self) -> Pose3D:
         return Pose3D(
@@ -123,7 +124,7 @@ def _build_scripted_sequence(definition: PickPlaceTaskDefinition) -> list[Script
     source_hover_pose = definition.source_hover_pose()
     target_hover_pose = definition.target_hover_pose()
 
-    return [
+    sequence = [
         ScriptedPickPlaceAction(
             phase_name="move_to_pregrasp",
             target_gripper_pose=source_hover_pose,
@@ -142,25 +143,57 @@ def _build_scripted_sequence(definition: PickPlaceTaskDefinition) -> list[Script
             phase_name="lift_object",
             target_gripper_pose=source_hover_pose,
         ),
-        ScriptedPickPlaceAction(
-            phase_name="transfer_to_target",
-            target_gripper_pose=target_hover_pose,
-        ),
-        ScriptedPickPlaceAction(
-            phase_name="descend_to_place",
-            target_gripper_pose=definition.target_pose,
-        ),
-        ScriptedPickPlaceAction(
-            phase_name="open_gripper_and_release",
-            target_gripper_pose=definition.target_pose,
-            gripper_command="open",
-            release_object=True,
-        ),
-        ScriptedPickPlaceAction(
-            phase_name="retreat_from_place",
-            target_gripper_pose=target_hover_pose,
-        ),
     ]
+    sequence.extend(
+        ScriptedPickPlaceAction(
+            phase_name=f"transfer_via_waypoint_{index}",
+            target_gripper_pose=waypoint_pose,
+        )
+        for index, waypoint_pose in enumerate(definition.transfer_waypoints, start=1)
+    )
+    sequence.extend(
+        [
+            ScriptedPickPlaceAction(
+                phase_name="transfer_to_target",
+                target_gripper_pose=target_hover_pose,
+            ),
+            ScriptedPickPlaceAction(
+                phase_name="descend_to_place",
+                target_gripper_pose=definition.target_pose,
+            ),
+            ScriptedPickPlaceAction(
+                phase_name="open_gripper_and_release",
+                target_gripper_pose=definition.target_pose,
+                gripper_command="open",
+                release_object=True,
+            ),
+            ScriptedPickPlaceAction(
+                phase_name="retreat_from_place",
+                target_gripper_pose=target_hover_pose,
+            ),
+        ]
+    )
+    return sequence
+
+
+def _normalize_transfer_waypoints(
+    payload: list[Pose3D | dict[str, float]] | tuple[Pose3D | dict[str, float], ...] | None,
+) -> tuple[Pose3D, ...]:
+    if payload is None:
+        return ()
+    if not isinstance(payload, (list, tuple)):
+        raise ValueError("transfer_waypoints must be a list of Pose3D values or pose dictionaries")
+
+    normalized: list[Pose3D] = []
+    for index, item in enumerate(payload):
+        if isinstance(item, Pose3D):
+            normalized.append(item)
+            continue
+        if isinstance(item, dict):
+            normalized.append(Pose3D.from_dict(item))
+            continue
+        raise ValueError(f"transfer_waypoints[{index}] must be a Pose3D or pose dictionary")
+    return tuple(normalized)
 
 
 class BasePickPlaceEnvironment:
@@ -362,6 +395,8 @@ def build_minimal_pickplace_task_config(
     gripper_start_pose: Pose3D | None = None,
     object_start_pose: Pose3D | None = None,
     target_pose: Pose3D | None = None,
+    transfer_waypoints: list[Pose3D | dict[str, float]] | tuple[Pose3D | dict[str, float], ...] | None = None,
+    transfer_waypoint_poses: list[Pose3D | dict[str, float]] | tuple[Pose3D | dict[str, float], ...] | None = None,
     hover_offset_m: float = 0.12,
     grasp_tolerance_m: float = 0.01,
     place_tolerance_m: float = 0.02,
@@ -372,14 +407,20 @@ def build_minimal_pickplace_task_config(
 
     if backend not in {"toy", "isaac"}:
         raise ValueError(f"unsupported manipulation backend: {backend}")
+    if transfer_waypoints is not None and transfer_waypoint_poses is not None:
+        raise ValueError("provide only one of transfer_waypoints or transfer_waypoint_poses")
 
     gripper_start_pose = gripper_start_pose or Pose3D(x=-0.2, y=-0.25, z=0.18)
     object_start_pose = object_start_pose or Pose3D(x=0.0, y=0.0, z=0.03)
     target_pose = target_pose or Pose3D(x=0.35, y=0.0, z=0.03)
+    normalized_transfer_waypoints = _normalize_transfer_waypoints(
+        transfer_waypoints if transfer_waypoints is not None else transfer_waypoint_poses
+    )
     definition = PickPlaceTaskDefinition(
         gripper_start_pose=gripper_start_pose,
         object_start_pose=object_start_pose,
         target_pose=target_pose,
+        transfer_waypoints=normalized_transfer_waypoints,
         hover_offset_m=hover_offset_m,
         grasp_tolerance_m=grasp_tolerance_m,
         place_tolerance_m=place_tolerance_m,
@@ -454,6 +495,7 @@ def build_minimal_pickplace_task_config(
                     "object_attached": False,
                 },
                 "source_pose": object_start_pose.to_dict(),
+                "transfer_waypoints": [pose.to_dict() for pose in normalized_transfer_waypoints],
                 "success_condition": "object released within place_tolerance_m of pick_place.target_pose",
                 "termination_conditions": ["success", "max_steps", "max_time_sec", "tool_failure"],
                 "scripted_sequence": scripted_sequence,
@@ -512,6 +554,9 @@ def _manipulation_definition_from_config(config: TaskConfig) -> PickPlaceTaskDef
     grasp_tolerance_m = float(controller.get("grasp_tolerance_m", 0.01))
     place_tolerance_m = float(controller.get("place_tolerance_m", 0.02))
     control_dt_sec = float(controller.get("control_dt_sec", 0.5))
+    transfer_waypoints = _normalize_transfer_waypoints(
+        metadata.get("transfer_waypoints", metadata.get("transfer_waypoint_poses"))
+    )
 
     if hover_offset_m <= 0:
         raise ValueError("controller.hover_offset_m must be positive")
@@ -530,6 +575,7 @@ def _manipulation_definition_from_config(config: TaskConfig) -> PickPlaceTaskDef
         gripper_start_pose=Pose3D.from_dict(gripper_start_pose),
         object_start_pose=Pose3D.from_dict(object_start_pose),
         target_pose=Pose3D.from_dict(config.pick_place.target_pose),
+        transfer_waypoints=transfer_waypoints,
         hover_offset_m=hover_offset_m,
         grasp_tolerance_m=grasp_tolerance_m,
         place_tolerance_m=place_tolerance_m,

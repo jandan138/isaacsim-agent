@@ -91,6 +91,7 @@ class BlockAPilotPlannerBackend(PlannerBackend):
 
     def plan(self, request: PlannerRequest) -> PlannerRawResponse:
         prompt_variant = normalize_prompt_variant(request.prompt_variant)
+        runtime_probe_invalid_first_action = bool(request.state.get("runtime_probe_invalid_first_action"))
 
         if request.task_type == TaskType.NAVIGATION:
             goal_pose = request.state.get("goal_pose")
@@ -102,6 +103,14 @@ class BlockAPilotPlannerBackend(PlannerBackend):
                     payload = {"tool_name": "move_to_goal", "arguments": {}}
                 else:
                     payload = {"tool_name": "navigate_to", "arguments": {"target_pose": goal_pose}}
+                raw_response = json.dumps(payload, sort_keys=True)
+                return PlannerRawResponse(
+                    raw_response=raw_response,
+                    token_usage=_token_usage_for_request(request=request, raw_response=raw_response),
+                )
+
+            if prompt_variant == "P1" and runtime_probe_invalid_first_action and request.retry_index == 0 and not request.tool_history:
+                payload = {"tool_name": "move_to_goal", "arguments": {}}
                 raw_response = json.dumps(payload, sort_keys=True)
                 return PlannerRawResponse(
                     raw_response=raw_response,
@@ -150,6 +159,14 @@ class BlockAPilotPlannerBackend(PlannerBackend):
                         "tool_name": "scripted_pick_place_step",
                         "arguments": {"phase_name": next_phase},
                     }
+                raw_response = json.dumps(payload, sort_keys=True)
+                return PlannerRawResponse(
+                    raw_response=raw_response,
+                    token_usage=_token_usage_for_request(request=request, raw_response=raw_response),
+                )
+
+            if prompt_variant == "P1" and runtime_probe_invalid_first_action and request.retry_index == 0 and not request.tool_history:
+                payload = {"tool_name": "move_object", "arguments": {}}
                 raw_response = json.dumps(payload, sort_keys=True)
                 return PlannerRawResponse(
                     raw_response=raw_response,

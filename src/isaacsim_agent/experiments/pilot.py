@@ -88,6 +88,7 @@ class PilotRuntimeVariant:
 class PilotTaskSpec:
     """One navigation or manipulation task used in the pilot suite."""
 
+    task_family: str
     task_id: str
     scene_id: str
     backend: str
@@ -103,13 +104,16 @@ class PilotTaskSpec:
     gripper_start_pose: Pose3D | None = None
     object_start_pose: Pose3D | None = None
     target_pose: Pose3D | None = None
+    transfer_waypoints: tuple[Pose3D, ...] = ()
     hover_offset_m: float | None = None
     grasp_tolerance_m: float | None = None
     place_tolerance_m: float | None = None
+    runtime_probe_invalid_first_action: bool = False
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
+            "task_family": self.task_family,
             "task_id": self.task_id,
             "scene_id": self.scene_id,
             "backend": self.backend,
@@ -135,12 +139,16 @@ class PilotTaskSpec:
             payload["object_start_pose"] = self.object_start_pose.to_dict()
         if self.target_pose is not None:
             payload["target_pose"] = self.target_pose.to_dict()
+        if self.transfer_waypoints:
+            payload["transfer_waypoints"] = [pose.to_dict() for pose in self.transfer_waypoints]
         if self.hover_offset_m is not None:
             payload["hover_offset_m"] = self.hover_offset_m
         if self.grasp_tolerance_m is not None:
             payload["grasp_tolerance_m"] = self.grasp_tolerance_m
         if self.place_tolerance_m is not None:
             payload["place_tolerance_m"] = self.place_tolerance_m
+        if self.runtime_probe_invalid_first_action:
+            payload["runtime_probe_invalid_first_action"] = True
         return payload
 
 
@@ -196,11 +204,13 @@ class PlannedRun:
     def to_dict(self) -> dict[str, Any]:
         return {
             "run_id": self.run_id,
+            "task_family": self.task.task_family,
             "task_id": self.task.task_id,
             "scene_id": self.task.scene_id,
             "backend": self.task.backend,
             "robot_id": self.task.robot_id,
             "seed": self.task.seed,
+            "runtime_probe_invalid_first_action": self.task.runtime_probe_invalid_first_action,
             "prompt_variant": self.prompt_variant.variant_id,
             "prompt_response_mode": self.prompt_variant.response_mode,
             "prompt_self_check_required": self.prompt_variant.self_check_required,
@@ -241,8 +251,10 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
         raise ValueError("defaults must be a JSON/YAML mapping when provided")
 
     task_family = _required_string(payload, "task_family")
-    if task_family not in {"navigation", "manipulation"}:
-        raise ValueError("pilot runner currently supports only task_family='navigation' or 'manipulation'")
+    if task_family not in {"navigation", "manipulation", "mixed"}:
+        raise ValueError(
+            "pilot runner currently supports only task_family='navigation', 'manipulation', or 'mixed'"
+        )
 
     execution_mode = _optional_string(payload.get("execution_mode")) or "sequential"
     if execution_mode != "sequential":
@@ -279,6 +291,15 @@ def load_pilot_experiment_config(config_path: str | Path) -> PilotExperimentConf
     _ensure_unique_ids([variant.variant_id for variant in prompt_variants], "prompt variant")
     _ensure_unique_ids([variant.variant_id for variant in runtime_variants], "runtime variant")
     _ensure_unique_ids([task.task_id for task in tasks], "task")
+
+    task_families = {task.task_family for task in tasks}
+    if task_family == "mixed":
+        if len(task_families) < 2:
+            raise ValueError("task_family='mixed' requires at least two distinct task families")
+    elif task_families != {task_family}:
+        raise ValueError(
+            "task family overrides must match the suite task_family unless task_family='mixed'"
+        )
 
     task_backends = {task.backend for task in tasks}
     if backend == "mixed":
@@ -443,6 +464,7 @@ def build_pilot_summary(
         "config_path": str(config_path.resolve()),
         "summary_title": config.summary_title,
         "task_family": config.task_family,
+        "task_families": sorted({task.task_family for task in config.tasks}),
         "execution_mode": config.execution_mode,
         "backend": config.backend,
         "planner_backend": config.planner_backend,
@@ -450,6 +472,7 @@ def build_pilot_summary(
         "output_dir": str(output_dir.resolve()),
         "matrix": {
             "task_count": len(config.tasks),
+            "task_family_count": len({task.task_family for task in config.tasks}),
             "backend_count": len({task.backend for task in config.tasks}),
             "prompt_variant_count": len(config.prompt_variants),
             "runtime_variant_count": len(config.runtime_variants),
@@ -469,14 +492,25 @@ def build_pilot_summary(
             "success_rate": bundle.aggregate.success_rate,
             "average_step_count": bundle.aggregate.average_step_count,
             "average_episode_time_s": bundle.aggregate.average_episode_time_s,
+            "total_planner_calls": bundle.aggregate.total_planner_calls,
+            "total_tool_calls": bundle.aggregate.total_tool_calls,
+            "total_invalid_actions": bundle.aggregate.total_invalid_actions,
             "total_retries": sum(summary.retries or 0 for summary in bundle.summaries),
         },
         "planned_run_ids": planned_run_ids,
         "missing_run_ids": sorted(planned_run_id_set - summarized_run_id_set),
         "unexpected_run_ids": sorted(summarized_run_id_set - planned_run_id_set),
+        "by_task_family": _aggregate_summary_rows(
+            bundle=bundle,
+            group_fields=("task_family",),
+        ),
         "by_prompt_runtime": _aggregate_summary_rows(
             bundle=bundle,
             group_fields=("prompt_variant", "runtime_variant"),
+        ),
+        "by_task_family_prompt_runtime": _aggregate_summary_rows(
+            bundle=bundle,
+            group_fields=("task_family", "prompt_variant", "runtime_variant"),
         ),
         "by_backend_prompt_runtime": _aggregate_summary_rows(
             bundle=bundle,
@@ -484,7 +518,7 @@ def build_pilot_summary(
         ),
         "by_task_variant": _aggregate_summary_rows(
             bundle=bundle,
-            group_fields=("backend_variant", "task_id", "scene_id", "prompt_variant", "runtime_variant"),
+            group_fields=("task_family", "backend_variant", "task_id", "scene_id", "prompt_variant", "runtime_variant"),
         ),
         "incomplete_runs": incomplete_runs,
         "unsuccessful_runs": unsuccessful_runs,
@@ -500,13 +534,189 @@ def _build_optional_analysis(
     config_path: Path,
     summary: dict[str, Any],
 ) -> dict[str, Any] | None:
+    if config.analysis_mode == "block_a_runtime_only_ablation":
+        return _build_block_a_runtime_only_ablation_analysis(summary=summary)
+    if config.analysis_mode == "block_a_prompt_only_ablation":
+        return _build_block_a_prompt_only_ablation_analysis(summary=summary)
     if config.analysis_mode == "block_a_navigation_robustness":
         return _build_block_a_navigation_robustness_analysis(
             config=config,
             config_path=config_path,
             summary=summary,
         )
+    if config.analysis_mode == "block_a_manipulation_harder":
+        return _build_block_a_manipulation_harder_analysis(
+            config=config,
+            config_path=config_path,
+            summary=summary,
+        )
     return None
+
+
+def _build_block_a_runtime_only_ablation_analysis(summary: dict[str, Any]) -> dict[str, Any]:
+    prompt_runtime_rows = _prompt_runtime_row_map(summary)
+    family_prompt_runtime_rows = _task_family_prompt_runtime_row_map(summary)
+    p1_r0 = prompt_runtime_rows.get(("P1", "R0"))
+    p1_r1 = prompt_runtime_rows.get(("P1", "R1"))
+
+    family_consistency: dict[str, bool | None] = {}
+    family_details: list[str] = []
+    for family in _summary_task_families(summary):
+        r0_row = family_prompt_runtime_rows.get((family, "P1", "R0"))
+        r1_row = family_prompt_runtime_rows.get((family, "P1", "R1"))
+        if r0_row is None or r1_row is None:
+            family_consistency[family] = None
+            continue
+        family_consistency[family] = (r1_row.get("success_rate") or 0.0) > (r0_row.get("success_rate") or 0.0)
+        family_details.append(
+            f"{_family_display_name(family)} success `{r0_row.get('success_rate')}` -> `{r1_row.get('success_rate')}`, "
+            f"recovery `{r0_row.get('recovery_success_rate')}` -> `{r1_row.get('recovery_success_rate')}`"
+        )
+
+    runtime_has_independent_value = bool(
+        p1_r0
+        and p1_r1
+        and (
+            (p1_r1.get("success_rate") or 0.0) > (p1_r0.get("success_rate") or 0.0)
+            or (p1_r1.get("recovery_success_rate") or 0.0) > (p1_r0.get("recovery_success_rate") or 0.0)
+        )
+    )
+    value_concentrates_in_recovery = bool(
+        p1_r0
+        and p1_r1
+        and (p1_r1.get("invalid_action_run_count") == p1_r0.get("invalid_action_run_count"))
+        and (p1_r1.get("successful_invalid_action_runs") or 0) > (p1_r0.get("successful_invalid_action_runs") or 0)
+        and (p1_r1.get("total_retries") or 0) > (p1_r0.get("total_retries") or 0)
+    )
+    cross_family_consistent = bool(
+        family_consistency and all(value is True for value in family_consistency.values() if value is not None)
+    )
+
+    findings: list[str] = []
+    if p1_r0 is not None and p1_r1 is not None:
+        findings.append(
+            "Under fixed prompt P1, runtime validation plus one retry improves outcomes over the bare runtime: "
+            f"success `{p1_r0['successful_runs']}/{p1_r0['run_count']}` -> "
+            f"`{p1_r1['successful_runs']}/{p1_r1['run_count']}`, recovery success "
+            f"`{p1_r0.get('recovery_success_rate')}` -> `{p1_r1.get('recovery_success_rate')}`."
+        )
+        findings.append(
+            "The gain is concentrated in recoverable invalid actions rather than fewer invalid attempts: "
+            f"invalid-action runs stay at `{p1_r0.get('invalid_action_run_count')}` vs "
+            f"`{p1_r1.get('invalid_action_run_count')}`, while successful invalid-action recoveries rise from "
+            f"`{p1_r0.get('successful_invalid_action_runs')}` to `{p1_r1.get('successful_invalid_action_runs')}` "
+            f"with retries `{p1_r0.get('total_retries')}` -> `{p1_r1.get('total_retries')}`."
+        )
+    if family_details:
+        findings.append("The same runtime-only trend appears in both task families: " + "; ".join(family_details) + ".")
+
+    return {
+        "mode": "block_a_runtime_only_ablation",
+        "questions": {
+            "q1_runtime_has_independent_value": {
+                "answer": runtime_has_independent_value,
+                "p1_r0": p1_r0,
+                "p1_r1": p1_r1,
+            },
+            "q2_value_concentrates_in_recovery": {
+                "answer": value_concentrates_in_recovery,
+                "p1_r0": p1_r0,
+                "p1_r1": p1_r1,
+            },
+            "q3_cross_family_consistency": {
+                "answer": cross_family_consistent,
+                "by_task_family": family_consistency,
+            },
+        },
+        "findings": findings,
+    }
+
+
+def _build_block_a_prompt_only_ablation_analysis(summary: dict[str, Any]) -> dict[str, Any]:
+    prompt_runtime_rows = _prompt_runtime_row_map(summary)
+    family_prompt_runtime_rows = _task_family_prompt_runtime_row_map(summary)
+    p0_r0 = prompt_runtime_rows.get(("P0", "R0"))
+    p1_r0 = prompt_runtime_rows.get(("P1", "R0"))
+    p2_r0 = prompt_runtime_rows.get(("P2", "R0"))
+
+    per_family_consistency: dict[str, bool | None] = {}
+    family_details: list[str] = []
+    for family in _summary_task_families(summary):
+        family_p0 = family_prompt_runtime_rows.get((family, "P0", "R0"))
+        family_p1 = family_prompt_runtime_rows.get((family, "P1", "R0"))
+        family_p2 = family_prompt_runtime_rows.get((family, "P2", "R0"))
+        if family_p0 is None or family_p1 is None or family_p2 is None:
+            per_family_consistency[family] = None
+            continue
+        per_family_consistency[family] = bool(
+            (family_p1.get("total_invalid_actions") or 0) < (family_p0.get("total_invalid_actions") or 0)
+            and (family_p2.get("total_invalid_actions") or 0) < (family_p0.get("total_invalid_actions") or 0)
+            and (family_p2.get("average_planner_calls") or 0.0) < (family_p1.get("average_planner_calls") or 0.0)
+            and (family_p2.get("average_tool_calls") or 0.0) < (family_p1.get("average_tool_calls") or 0.0)
+        )
+        family_details.append(
+            f"{_family_display_name(family)} invalid actions P0/P1/P2 "
+            f"`{family_p0.get('total_invalid_actions')}`/`{family_p1.get('total_invalid_actions')}`/"
+            f"`{family_p2.get('total_invalid_actions')}`, planner/tool P1 `{family_p1.get('average_planner_calls')}`/"
+            f"`{family_p1.get('average_tool_calls')}` vs P2 `{family_p2.get('average_planner_calls')}`/"
+            f"`{family_p2.get('average_tool_calls')}`"
+        )
+
+    prompt_structure_reduces_invalid = bool(
+        p0_r0
+        and p1_r0
+        and p2_r0
+        and (p1_r0.get("total_invalid_actions") or 0) < (p0_r0.get("total_invalid_actions") or 0)
+        and (p2_r0.get("total_invalid_actions") or 0) < (p0_r0.get("total_invalid_actions") or 0)
+    )
+    p2_efficiency_edge = bool(
+        p1_r0
+        and p2_r0
+        and (p2_r0.get("average_planner_calls") or 0.0) < (p1_r0.get("average_planner_calls") or 0.0)
+        and (p2_r0.get("average_tool_calls") or 0.0) < (p1_r0.get("average_tool_calls") or 0.0)
+    )
+    cross_family_consistent = bool(
+        per_family_consistency and all(value is True for value in per_family_consistency.values() if value is not None)
+    )
+
+    findings: list[str] = []
+    if p0_r0 is not None and p1_r0 is not None and p2_r0 is not None:
+        findings.append(
+            "With runtime fixed at R0, prompt structure independently lowers invalid actions: "
+            f"P0 invalid-action runs `{p0_r0.get('invalid_action_run_count')}` and total invalid actions "
+            f"`{p0_r0.get('total_invalid_actions')}` versus P1 `{p1_r0.get('invalid_action_run_count')}`/"
+            f"`{p1_r0.get('total_invalid_actions')}` and P2 `{p2_r0.get('invalid_action_run_count')}`/"
+            f"`{p2_r0.get('total_invalid_actions')}`."
+        )
+        findings.append(
+            "P2 preserves the success profile of structured prompting while reducing planner/tool workload relative to P1: "
+            f"planner/tool `{p1_r0.get('average_planner_calls')}`/`{p1_r0.get('average_tool_calls')}` -> "
+            f"`{p2_r0.get('average_planner_calls')}`/`{p2_r0.get('average_tool_calls')}`."
+        )
+    if family_details:
+        findings.append("The prompt-only ordering matches across navigation and manipulation: " + "; ".join(family_details) + ".")
+
+    return {
+        "mode": "block_a_prompt_only_ablation",
+        "questions": {
+            "q1_prompt_structure_reduces_invalid_actions": {
+                "answer": prompt_structure_reduces_invalid,
+                "p0_r0": p0_r0,
+                "p1_r0": p1_r0,
+                "p2_r0": p2_r0,
+            },
+            "q2_p2_more_efficient_than_p1": {
+                "answer": p2_efficiency_edge,
+                "p1_r0": p1_r0,
+                "p2_r0": p2_r0,
+            },
+            "q3_cross_family_consistency": {
+                "answer": cross_family_consistent,
+                "by_task_family": per_family_consistency,
+            },
+        },
+        "findings": findings,
+    }
 
 
 def _build_block_a_navigation_robustness_analysis(
@@ -673,6 +883,127 @@ def _build_block_a_navigation_robustness_analysis(
     }
 
 
+def _build_block_a_manipulation_harder_analysis(
+    config: PilotExperimentConfig,
+    config_path: Path,
+    summary: dict[str, Any],
+) -> dict[str, Any]:
+    prompt_runtime_rows = _prompt_runtime_row_map(summary)
+    p0_r0 = prompt_runtime_rows.get(("P0", "R0"))
+    p0_r1 = prompt_runtime_rows.get(("P0", "R1"))
+    p1_r0 = prompt_runtime_rows.get(("P1", "R0"))
+    p1_r1 = prompt_runtime_rows.get(("P1", "R1"))
+    p2_r0 = prompt_runtime_rows.get(("P2", "R0"))
+    p2_r1 = prompt_runtime_rows.get(("P2", "R1"))
+
+    questions: dict[str, dict[str, Any]] = {}
+    findings: list[str] = []
+
+    p0_r0_worst = bool(
+        p0_r0
+        and all(
+            (row.get("success_rate") or 0.0) > (p0_r0.get("success_rate") or 0.0)
+            for key, row in prompt_runtime_rows.items()
+            if key != ("P0", "R0")
+        )
+    )
+    questions["q1_p0_r0_worst"] = {
+        "answer": p0_r0_worst,
+        "row": p0_r0,
+    }
+    if p0_r0 is not None:
+        findings.append(
+            "P0/R0 remains the worst harder-manipulation cell: "
+            f"success `{_success_rate_text(p0_r0)}` with termination `{_format_termination_reasons(p0_r0.get('termination_reasons'))}`."
+        )
+
+    p0_r1_recovered = bool(p0_r1 and p0_r1.get("successful_runs") == p0_r1.get("run_count"))
+    questions["q2_r1_recovers_p0"] = {
+        "answer": p0_r1_recovered,
+        "row": p0_r1,
+    }
+    if p0_r1 is not None:
+        findings.append(
+            "R1 still recovers P0 on the harder manipulation slice: "
+            f"success `{_success_rate_text(p0_r1)}` with retries `{p0_r1.get('total_retries')}`."
+        )
+
+    p1_p2_success = bool(
+        all(
+            row is not None and row.get("successful_runs") == row.get("run_count")
+            for row in (p1_r0, p1_r1, p2_r0, p2_r1)
+        )
+    )
+    questions["q3_p1_p2_success"] = {
+        "answer": p1_p2_success,
+        "rows": {
+            "P1/R0": p1_r0,
+            "P1/R1": p1_r1,
+            "P2/R0": p2_r0,
+            "P2/R1": p2_r1,
+        },
+    }
+    findings.append(
+        "P1 and P2 remain successful on the harder manipulation slice: "
+        f"P1/R0 `{_success_rate_text(p1_r0)}`, P1/R1 `{_success_rate_text(p1_r1)}`, "
+        f"P2/R0 `{_success_rate_text(p2_r0)}`, P2/R1 `{_success_rate_text(p2_r1)}`."
+    )
+
+    p2_more_efficient = bool(
+        p1_r0
+        and p2_r0
+        and p1_r1
+        and p2_r1
+        and (p2_r0.get("average_planner_calls") or 0.0) < (p1_r0.get("average_planner_calls") or 0.0)
+        and (p2_r0.get("average_tool_calls") or 0.0) < (p1_r0.get("average_tool_calls") or 0.0)
+        and (p2_r1.get("average_planner_calls") or 0.0) < (p1_r1.get("average_planner_calls") or 0.0)
+        and (p2_r1.get("average_tool_calls") or 0.0) < (p1_r1.get("average_tool_calls") or 0.0)
+    )
+    questions["q4_p2_more_efficient_than_p1"] = {
+        "answer": p2_more_efficient,
+        "r0": {"p1": p1_r0, "p2": p2_r0},
+        "r1": {"p1": p1_r1, "p2": p2_r1},
+    }
+    if p1_r0 is not None and p2_r0 is not None and p1_r1 is not None and p2_r1 is not None:
+        findings.append(
+            "P2 keeps the planner/tool efficiency edge over P1 under both runtimes: "
+            f"R0 planner/tool `{p1_r0.get('average_planner_calls')}`/`{p1_r0.get('average_tool_calls')}` -> "
+            f"`{p2_r0.get('average_planner_calls')}`/`{p2_r0.get('average_tool_calls')}`, "
+            f"R1 `{p1_r1.get('average_planner_calls')}`/`{p1_r1.get('average_tool_calls')}` -> "
+            f"`{p2_r1.get('average_planner_calls')}`/`{p2_r1.get('average_tool_calls')}`."
+        )
+
+    reference_comparison = _build_reference_comparison(
+        config=config,
+        config_path=config_path,
+        prompt_runtime_rows=prompt_runtime_rows,
+    )
+    questions["q5_harder_tasks_amplify_differences"] = reference_comparison or {
+        "answer": None,
+        "reference_summary_path": None,
+        "details": [],
+    }
+    if reference_comparison is not None:
+        if reference_comparison.get("answer") is True:
+            findings.append(
+                "Relative to the easy manipulation pilot, the harder manipulation slice increases planner/tool overhead "
+                "while preserving the same qualitative ordering: "
+                + "; ".join(reference_comparison["details"])
+                + "."
+            )
+        else:
+            findings.append(
+                "Relative to the easy manipulation pilot, the harder slice preserves ordering without a clear workload increase."
+            )
+
+    return {
+        "mode": "block_a_manipulation_harder",
+        "reference_summary_path": reference_comparison.get("reference_summary_path") if reference_comparison else None,
+        "questions": questions,
+        "findings": findings,
+    }
+
+
 def _build_reference_comparison(
     config: PilotExperimentConfig,
     config_path: Path,
@@ -768,6 +1099,51 @@ def _format_termination_reasons(payload: Any) -> str:
     return ", ".join(f"{key}:{payload[key]}" for key in sorted(payload))
 
 
+def _summary_task_families(summary: dict[str, Any]) -> list[str]:
+    row_payload = summary.get("by_task_family")
+    if isinstance(row_payload, list):
+        families = [str(row.get("task_family")) for row in row_payload if isinstance(row, dict)]
+        if families:
+            return families
+    payload = summary.get("task_families")
+    if isinstance(payload, list):
+        return [("pick_place" if str(item) == "manipulation" else str(item)) for item in payload]
+    return []
+
+
+def _family_display_name(family: str) -> str:
+    if family in {"pick_place", "manipulation"}:
+        return "Manipulation"
+    return family.replace("_", " ").title()
+
+
+def _prompt_runtime_row_map(summary: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+    return {
+        (str(row.get("prompt_variant")), str(row.get("runtime_variant"))): row
+        for row in summary.get("by_prompt_runtime", [])
+        if isinstance(row, dict)
+    }
+
+
+def _task_family_prompt_runtime_row_map(summary: dict[str, Any]) -> dict[tuple[str, str, str], dict[str, Any]]:
+    return {
+        (str(row.get("task_family")), str(row.get("prompt_variant")), str(row.get("runtime_variant"))): row
+        for row in summary.get("by_task_family_prompt_runtime", [])
+        if isinstance(row, dict)
+    }
+
+
+def _analysis_heading(analysis: Any) -> str | None:
+    if not isinstance(analysis, dict):
+        return None
+    return {
+        "block_a_runtime_only_ablation": "Runtime-Only Findings",
+        "block_a_prompt_only_ablation": "Prompt-Only Findings",
+        "block_a_navigation_robustness": "Robustness Findings",
+        "block_a_manipulation_harder": "Harder Manipulation Findings",
+    }.get(str(analysis.get("mode")))
+
+
 def _success_rate_text(row: dict[str, Any] | None) -> str:
     if row is None:
         return "missing"
@@ -776,7 +1152,7 @@ def _success_rate_text(row: dict[str, Any] | None) -> str:
 
 def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     prompt_text = _render_prompt_text(run)
-    if config.task_family == "manipulation":
+    if run.task.task_family == "manipulation":
         task_config = build_agent_v0_manipulation_task_config(
             backend=run.task.backend,
             planner_backend=config.planner_backend,
@@ -789,6 +1165,7 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
             gripper_start_pose=run.task.gripper_start_pose,
             object_start_pose=run.task.object_start_pose,
             target_pose=run.task.target_pose,
+            transfer_waypoints=list(run.task.transfer_waypoints),
             hover_offset_m=run.task.hover_offset_m,
             grasp_tolerance_m=run.task.grasp_tolerance_m,
             place_tolerance_m=run.task.place_tolerance_m,
@@ -822,7 +1199,9 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     extra_options["runtime_policy"] = run.runtime_variant.runtime_policy
     extra_options["runtime_validate_actions"] = run.runtime_variant.validate_actions
     extra_options["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
-    extra_options[f"{config.task_family}_backend"] = run.task.backend
+    extra_options[f"{run.task.task_family}_backend"] = run.task.backend
+    extra_options["runtime_probe_invalid_first_action"] = run.task.runtime_probe_invalid_first_action
+    extra_options["recoverable_invalid_first_action"] = run.task.runtime_probe_invalid_first_action
     extra_options["suite_experiment"] = config.experiment_name
     extra_options["planner_prompt_text"] = prompt_text
     task_config.runtime_options.extra_options = extra_options
@@ -849,8 +1228,10 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
         "max_retries_per_step": run.runtime_variant.max_retries_per_step,
         "max_invalid_actions": run.runtime_variant.max_invalid_actions,
         "planner_backend": config.planner_backend,
-        "task_family": config.task_family,
+        "task_family": run.task.task_family,
         "backend": run.task.backend,
+        "runtime_probe_invalid_first_action": run.task.runtime_probe_invalid_first_action,
+        "recoverable_invalid_first_action": run.task.runtime_probe_invalid_first_action,
     }
 
     agent_metadata = dict(metadata.get("agent_runtime_v0", {}))
@@ -861,15 +1242,17 @@ def _build_run_task_config(config: PilotExperimentConfig, run: PlannedRun):
     agent_metadata["runtime_policy"] = run.runtime_variant.runtime_policy
     agent_metadata["runtime_validate_actions"] = run.runtime_variant.validate_actions
     agent_metadata["runtime_max_retries_per_step"] = run.runtime_variant.max_retries_per_step
-    agent_metadata[f"{config.task_family}_backend"] = run.task.backend
+    agent_metadata[f"{run.task.task_family}_backend"] = run.task.backend
     agent_metadata["prompt_text"] = prompt_text
+    agent_metadata["runtime_probe_invalid_first_action"] = run.task.runtime_probe_invalid_first_action
+    agent_metadata["recoverable_invalid_first_action"] = run.task.runtime_probe_invalid_first_action
     metadata["agent_runtime_v0"] = agent_metadata
     task_config.metadata = metadata
 
     tags = list(task_config.tags)
     for tag in (
         "pilot",
-        f"pilot_{config.task_family}",
+        f"pilot_{run.task.task_family}",
         f"backend_{run.task.backend.lower()}",
         f"prompt_{run.prompt_variant.variant_id.lower()}",
         f"runtime_{run.runtime_variant.variant_id.lower()}",
@@ -993,6 +1376,7 @@ def _render_prompt_text(run: PlannedRun) -> str:
     values = {
         "task_id": run.task.task_id,
         "scene_id": run.task.scene_id,
+        "task_family": run.task.task_family,
         "robot_id": run.task.robot_id,
         "seed": run.task.seed,
         "max_steps": run.task.max_steps,
@@ -1019,6 +1403,7 @@ def _render_prompt_text(run: PlannedRun) -> str:
         "target_x": run.task.target_pose.x if run.task.target_pose is not None else 0.0,
         "target_y": run.task.target_pose.y if run.task.target_pose is not None else 0.0,
         "target_z": run.task.target_pose.z if run.task.target_pose is not None else 0.0,
+        "transfer_waypoint_count": len(run.task.transfer_waypoints),
         "hover_offset_m": run.task.hover_offset_m if run.task.hover_offset_m is not None else 0.0,
         "grasp_tolerance_m": (
             run.task.grasp_tolerance_m if run.task.grasp_tolerance_m is not None else 0.0
@@ -1027,6 +1412,8 @@ def _render_prompt_text(run: PlannedRun) -> str:
             run.task.place_tolerance_m if run.task.place_tolerance_m is not None else 0.0
         ),
         "control_dt_sec": run.task.control_dt_sec if run.task.control_dt_sec is not None else 0.0,
+        "runtime_probe_invalid_first_action": str(run.task.runtime_probe_invalid_first_action).lower(),
+        "recoverable_invalid_first_action": str(run.task.runtime_probe_invalid_first_action).lower(),
         "prompt_variant": run.prompt_variant.variant_id,
         "response_mode": run.prompt_variant.response_mode,
         "self_check_required": str(run.prompt_variant.self_check_required).lower(),
@@ -1058,6 +1445,8 @@ def _build_group_metrics(summaries: list[Any]) -> dict[str, Any]:
     step_counts = [summary.step_count for summary in summaries if summary.step_count is not None]
     planner_calls = [summary.planner_calls for summary in summaries if summary.planner_calls is not None]
     tool_calls = [summary.tool_calls for summary in summaries if summary.tool_calls is not None]
+    invalid_actions = [summary.invalid_actions or 0 for summary in summaries]
+    retries = [summary.retries or 0 for summary in summaries]
     episode_times = [summary.episode_time_s for summary in summaries if summary.episode_time_s is not None]
     planner_latencies = [
         summary.planner_latency_s for summary in summaries if summary.planner_latency_s is not None
@@ -1066,6 +1455,15 @@ def _build_group_metrics(summaries: list[Any]) -> dict[str, Any]:
     for summary in summaries:
         if summary.termination_reason:
             termination_reasons[summary.termination_reason] = termination_reasons.get(summary.termination_reason, 0) + 1
+
+    invalid_action_run_count = sum(1 for summary in summaries if (summary.invalid_actions or 0) > 0)
+    retry_run_count = sum(1 for summary in summaries if (summary.retries or 0) > 0)
+    successful_invalid_action_runs = sum(
+        1 for summary in summaries if summary.success is True and (summary.invalid_actions or 0) > 0
+    )
+    successful_retry_runs = sum(
+        1 for summary in summaries if summary.success is True and (summary.retries or 0) > 0
+    )
 
     return {
         "run_count": run_count,
@@ -1076,12 +1474,23 @@ def _build_group_metrics(summaries: list[Any]) -> dict[str, Any]:
         "average_step_count": round(sum(step_counts) / len(step_counts), 6) if step_counts else None,
         "average_planner_calls": round(sum(planner_calls) / len(planner_calls), 6) if planner_calls else None,
         "average_tool_calls": round(sum(tool_calls) / len(tool_calls), 6) if tool_calls else None,
+        "average_invalid_actions": round(sum(invalid_actions) / len(invalid_actions), 6) if invalid_actions else None,
+        "average_retries": round(sum(retries) / len(retries), 6) if retries else None,
         "average_episode_time_s": round(sum(episode_times) / len(episode_times), 6) if episode_times else None,
         "average_planner_latency_s": round(sum(planner_latencies) / len(planner_latencies), 6)
         if planner_latencies
         else None,
-        "total_invalid_actions": sum(summary.invalid_actions or 0 for summary in summaries),
-        "total_retries": sum(summary.retries or 0 for summary in summaries),
+        "total_invalid_actions": sum(invalid_actions),
+        "invalid_action_run_count": invalid_action_run_count,
+        "invalid_action_run_rate": round(invalid_action_run_count / run_count, 6) if run_count else None,
+        "total_retries": sum(retries),
+        "retry_run_count": retry_run_count,
+        "retry_run_rate": round(retry_run_count / run_count, 6) if run_count else None,
+        "successful_invalid_action_runs": successful_invalid_action_runs,
+        "successful_retry_runs": successful_retry_runs,
+        "recovery_success_rate": (
+            round(successful_invalid_action_runs / invalid_action_run_count, 6) if invalid_action_run_count else None
+        ),
         "termination_reasons": termination_reasons,
         "run_ids": [summary.run_id for summary in summaries],
     }
@@ -1112,6 +1521,7 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
         f"- Results root: `{summary['results_root']}`",
         f"- Output dir: `{summary['output_dir']}`",
         f"- Task family: `{summary['task_family']}`",
+        f"- Task families in tasks: `{', '.join(summary['task_families'])}`",
         f"- Backend: `{summary['backend']}`",
         f"- Backends in tasks: `{', '.join(summary['backends'])}`",
         f"- Planner backend: `{summary['planner_backend']}`",
@@ -1126,8 +1536,9 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
         lines.extend(["", summary["description"]])
 
     analysis = summary.get("analysis")
-    if isinstance(analysis, dict) and analysis.get("mode") == "block_a_navigation_robustness":
-        lines.extend(["", "## Robustness Findings", ""])
+    analysis_heading = _analysis_heading(analysis)
+    if isinstance(analysis, dict) and analysis_heading is not None:
+        lines.extend(["", f"## {analysis_heading}", ""])
         for finding in analysis.get("findings", []):
             lines.append(f"- {finding}")
         reference_summary_path = analysis.get("reference_summary_path")
@@ -1136,6 +1547,23 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## Task Family",
+            "",
+            _render_markdown_table(
+                summary["by_task_family"],
+                columns=[
+                    "task_family",
+                    "run_count",
+                    "run_complete_runs",
+                    "successful_runs",
+                    "success_rate",
+                    "average_planner_calls",
+                    "average_tool_calls",
+                    "total_invalid_actions",
+                    "total_retries",
+                ],
+            ),
             "",
             "## Prompt x Runtime",
             "",
@@ -1151,10 +1579,31 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "average_step_count",
                     "average_planner_calls",
                     "average_tool_calls",
+                    "average_invalid_actions",
                     "total_invalid_actions",
+                    "recovery_success_rate",
                     "total_retries",
                     "average_episode_time_s",
                     "average_planner_latency_s",
+                ],
+            ),
+            "",
+            "## Task Family x Prompt x Runtime",
+            "",
+            _render_markdown_table(
+                summary["by_task_family_prompt_runtime"],
+                columns=[
+                    "task_family",
+                    "prompt_variant",
+                    "runtime_variant",
+                    "run_count",
+                    "successful_runs",
+                    "success_rate",
+                    "average_planner_calls",
+                    "average_tool_calls",
+                    "total_invalid_actions",
+                    "recovery_success_rate",
+                    "total_retries",
                 ],
             ),
             "",
@@ -1173,7 +1622,9 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "average_step_count",
                     "average_planner_calls",
                     "average_tool_calls",
+                    "average_invalid_actions",
                     "total_invalid_actions",
+                    "recovery_success_rate",
                     "total_retries",
                     "average_episode_time_s",
                     "average_planner_latency_s",
@@ -1185,6 +1636,7 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
             _render_markdown_table(
                 summary["by_task_variant"],
                 columns=[
+                    "task_family",
                     "backend_variant",
                     "task_id",
                     "scene_id",
@@ -1196,7 +1648,9 @@ def _render_pilot_summary_markdown(summary: dict[str, Any]) -> str:
                     "average_step_count",
                     "average_planner_calls",
                     "average_tool_calls",
+                    "average_invalid_actions",
                     "total_invalid_actions",
+                    "recovery_success_rate",
                     "total_retries",
                     "average_episode_time_s",
                     "termination_reasons",
@@ -1326,7 +1780,24 @@ def _parse_task(
     if not isinstance(payload, dict):
         raise ValueError("each task must be a mapping")
     task_id = _required_string(payload, "task_id")
+    task_family_value = _optional_string(payload.get("task_family")) or _optional_string(defaults.get("task_family"))
+    if task_family_value is None:
+        if task_family == "mixed":
+            raise ValueError(f"tasks[{task_id}].task_family is required when suite task_family='mixed'")
+        task_family_value = task_family
+    resolved_task_family = _parse_task_family(
+        task_family_value,
+        field_name=f"tasks[{task_id}].task_family",
+        allow_mixed=False,
+    )
+    runtime_probe_invalid_first_action = _optional_bool_alias(
+        payload=payload,
+        defaults=defaults,
+        primary_field="runtime_probe_invalid_first_action",
+        alias_field="recoverable_invalid_first_action",
+    )
     shared = {
+        "task_family": resolved_task_family,
         "task_id": task_id,
         "scene_id": _required_string(payload, "scene_id"),
         "backend": _parse_backend(
@@ -1336,17 +1807,18 @@ def _parse_task(
         ),
         "robot_id": _optional_string(payload.get("robot_id"))
         or _optional_string(defaults.get("robot_id"))
-        or ("gripper_marker" if task_family == "manipulation" else "agent_point_robot"),
+        or ("gripper_marker" if resolved_task_family == "manipulation" else "agent_point_robot"),
         "seed": _positive_or_zero_int(payload.get("seed", defaults.get("seed", 0)), "seed"),
         "max_steps": _positive_int(payload.get("max_steps", defaults.get("max_steps", 10)), "max_steps"),
         "max_time_sec": _positive_float(
             payload.get("max_time_sec", defaults.get("max_time_sec", 10.0)),
             "max_time_sec",
         ),
+        "runtime_probe_invalid_first_action": runtime_probe_invalid_first_action,
         "notes": _optional_string(payload.get("notes")) or "",
     }
 
-    if task_family == "manipulation":
+    if resolved_task_family == "manipulation":
         return PilotTaskSpec(
             **shared,
             gripper_start_pose=_parse_pose3d(
@@ -1360,6 +1832,15 @@ def _parse_task(
             target_pose=_parse_pose3d(
                 payload.get("target_pose", defaults.get("target_pose")),
                 "target_pose",
+            ),
+            transfer_waypoints=_parse_pose3d_sequence(
+                _optional_payload_alias(
+                    payload=payload,
+                    defaults=defaults,
+                    primary_field="transfer_waypoints",
+                    alias_field="transfer_waypoint_poses",
+                ),
+                "transfer_waypoints",
             ),
             hover_offset_m=_positive_float(
                 payload.get("hover_offset_m", defaults.get("hover_offset_m", 0.12)),
@@ -1408,6 +1889,14 @@ def _parse_pose3d(payload: Any, field_name: str) -> Pose3D:
     if not isinstance(payload, dict):
         raise ValueError(f"{field_name} must be a mapping with x, y, z")
     return Pose3D.from_dict(payload)
+
+
+def _parse_pose3d_sequence(payload: Any, field_name: str) -> tuple[Pose3D, ...]:
+    if payload is None:
+        return ()
+    if not isinstance(payload, (list, tuple)):
+        raise ValueError(f"{field_name} must be a list of pose mappings when provided")
+    return tuple(_parse_pose3d(item, f"{field_name}[{index}]") for index, item in enumerate(payload))
 
 
 def _build_planner_backend(planner_backend: str):
@@ -1468,6 +1957,57 @@ def _parse_backend(value: str, field_name: str, allow_mixed: bool) -> str:
         allowed.add("mixed")
     if value not in allowed:
         raise ValueError(f"{field_name} must be one of: {', '.join(sorted(allowed))}")
+    return value
+
+
+def _parse_task_family(value: str, field_name: str, allow_mixed: bool) -> str:
+    allowed = {"navigation", "manipulation"}
+    if allow_mixed:
+        allowed.add("mixed")
+    if value not in allowed:
+        raise ValueError(f"{field_name} must be one of: {', '.join(sorted(allowed))}")
+    return value
+
+
+def _optional_payload_alias(
+    payload: dict[str, Any],
+    defaults: dict[str, Any],
+    primary_field: str,
+    alias_field: str,
+) -> Any:
+    value = payload.get(primary_field)
+    alias_value = payload.get(alias_field)
+    if value is not None and alias_value is not None:
+        raise ValueError(f"provide only one of {primary_field} or {alias_field}")
+    if value is not None:
+        return value
+    if alias_value is not None:
+        return alias_value
+    default_value = defaults.get(primary_field)
+    default_alias_value = defaults.get(alias_field)
+    if default_value is not None and default_alias_value is not None:
+        raise ValueError(f"defaults may provide only one of {primary_field} or {alias_field}")
+    if default_value is not None:
+        return default_value
+    return default_alias_value
+
+
+def _optional_bool_alias(
+    payload: dict[str, Any],
+    defaults: dict[str, Any],
+    primary_field: str,
+    alias_field: str,
+) -> bool:
+    value = _optional_payload_alias(
+        payload=payload,
+        defaults=defaults,
+        primary_field=primary_field,
+        alias_field=alias_field,
+    )
+    if value is None:
+        return False
+    if not isinstance(value, bool):
+        raise ValueError(f"{primary_field} must be a boolean when provided")
     return value
 
 

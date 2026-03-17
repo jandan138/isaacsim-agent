@@ -359,6 +359,20 @@ def _runtime_policy_name(config: TaskConfig) -> str:
     return "agent_runtime_v0"
 
 
+def _runtime_probe_invalid_first_action(config: TaskConfig) -> bool:
+    extra_options = config.runtime_options.extra_options
+    value = extra_options.get("runtime_probe_invalid_first_action")
+    if isinstance(value, bool):
+        return value
+
+    pilot_suite = config.metadata.get("pilot_suite")
+    if isinstance(pilot_suite, dict):
+        metadata_value = pilot_suite.get("runtime_probe_invalid_first_action")
+        if isinstance(metadata_value, bool):
+            return metadata_value
+    return False
+
+
 def _suite_experiment_name(config: TaskConfig) -> str | None:
     extra_options = config.runtime_options.extra_options
     value = extra_options.get("suite_experiment")
@@ -616,6 +630,7 @@ class AgentRuntime:
                 "success_radius_m": prepared_config.navigation.success_radius_m,
                 "prompt_variant": prompt_variant,
                 "runtime_variant": runtime_variant,
+                "runtime_probe_invalid_first_action": _runtime_probe_invalid_first_action(prepared_config),
                 "validation_enabled": validation_enabled,
                 "max_validation_retries": max_validation_retries,
             }
@@ -706,11 +721,16 @@ class AgentRuntime:
                         step_index=step_index,
                         available_tools=available_tools,
                         state={
+                            "task_id": prepared_config.task_id,
+                            "scene_id": prepared_config.scene_id,
                             "robot_pose": observation.pose.to_dict(),
                             "goal_pose": prepared_config.navigation.goal_pose,
                             "distance_to_goal_m": round(observation.distance_to_goal_m, 6),
                             "success_radius_m": round(prepared_config.navigation.success_radius_m, 6),
                             "sim_time_sec": round(observation.sim_time_sec, 6),
+                            "runtime_probe_invalid_first_action": _runtime_probe_invalid_first_action(
+                                prepared_config
+                            ),
                         },
                         last_tool_result=last_tool_result,
                         tool_history=list(tool_history),
@@ -1160,6 +1180,7 @@ class AgentRuntime:
                 "target_pose": config.pick_place.target_pose if config.pick_place is not None else None,
                 "prompt_variant": prompt_variant,
                 "runtime_variant": runtime_variant,
+                "runtime_probe_invalid_first_action": _runtime_probe_invalid_first_action(config),
                 "validation_enabled": validation_enabled,
                 "max_validation_retries": max_validation_retries,
             }
@@ -1252,6 +1273,8 @@ class AgentRuntime:
                         step_index=step_index,
                         available_tools=available_tools,
                         state={
+                            "task_id": config.task_id,
+                            "scene_id": config.scene_id,
                             "gripper_pose": observation.gripper_pose.to_dict(),
                             "object_pose": observation.object_pose.to_dict(),
                             "target_pose": config.pick_place.target_pose if config.pick_place is not None else None,
@@ -1262,6 +1285,7 @@ class AgentRuntime:
                             "gripper_open": observation.gripper_open,
                             "object_attached": observation.object_attached,
                             "sim_time_sec": round(observation.sim_time_sec, 6),
+                            "runtime_probe_invalid_first_action": _runtime_probe_invalid_first_action(config),
                         },
                         last_tool_result=last_tool_result,
                         tool_history=list(tool_history),

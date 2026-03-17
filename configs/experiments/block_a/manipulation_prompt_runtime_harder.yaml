@@ -1,0 +1,171 @@
+{
+  "experiment_name": "block_a_manipulation_harder",
+  "description": "Slightly harder manipulation-only Block A slice that reuses the existing prompt x runtime matrix while increasing scripted sequence length via fixed transfer waypoints.",
+  "task_family": "manipulation",
+  "execution_mode": "sequential",
+  "backend": "toy",
+  "planner_backend": "mock_block_a",
+  "summary_basename": "block_a_manipulation_harder_summary",
+  "summary_title": "Block A Manipulation Harder Summary",
+  "results_root": "results/block_a_manipulation_harder",
+  "output_dir": "results/processed/block_a_manipulation_harder",
+  "analysis_mode": "block_a_manipulation_harder",
+  "reference_summary_path": "results/processed/block_a_manipulation_prompt_runtime_pilot/block_a_summary.json",
+  "defaults": {
+    "backend": "toy",
+    "robot_id": "gripper_marker",
+    "seed": 0,
+    "hover_offset_m": 0.12,
+    "grasp_tolerance_m": 0.01,
+    "place_tolerance_m": 0.02,
+    "control_dt_sec": 0.5
+  },
+  "prompt_variants": [
+    {
+      "id": "P0",
+      "label": "direct_next_action",
+      "response_mode": "direct_action_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous direct action. Return one valid JSON action only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P0. Task: manipulation harder. Object start: ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}). Target pose: ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Transfer waypoints: {transfer_waypoint_count}. Output the next action directly as one JSON object and keep it minimal.",
+      "notes": "Direct next-action prompt with the smallest allowed structured form."
+    },
+    {
+      "id": "P1",
+      "label": "structured_tool_json",
+      "response_mode": "tool_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous tool call. Return one valid JSON object with tool_name and arguments only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P1. Task: manipulation harder. Gripper start: ({gripper_start_x:.2f}, {gripper_start_y:.2f}, {gripper_start_z:.2f}). Object start: ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}). Target pose: ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Transfer waypoints: {transfer_waypoint_count}. Choose one tool from the provided tools and emit typed JSON with tool_name and arguments.",
+      "notes": "Explicit tool-oriented prompting with typed JSON arguments."
+    },
+    {
+      "id": "P2",
+      "label": "structured_tool_json_with_self_check",
+      "response_mode": "tool_json_with_self_check",
+      "self_check_required": true,
+      "repair_instruction_template": "Repair the previous tool call. Return one JSON object with tool_name, arguments, and a brief self_check. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P2. Task: manipulation harder. Gripper start: ({gripper_start_x:.2f}, {gripper_start_y:.2f}, {gripper_start_z:.2f}). Object start: ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}). Target pose: ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Transfer waypoints: {transfer_waypoint_count}. Choose one tool from the provided tools, emit typed JSON arguments, and include one brief self_check field before execution.",
+      "notes": "Structured tool prompt plus a short explicit self-check field."
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "R0",
+      "label": "bare_no_validation_no_retry",
+      "runtime_policy": "block_a_r0_bare",
+      "validate_actions": false,
+      "max_retries_per_step": 0,
+      "max_invalid_actions": 1,
+      "notes": "Bare runtime path with no validation and no retry."
+    },
+    {
+      "id": "R1",
+      "label": "validate_single_retry",
+      "runtime_policy": "block_a_r1_validate_retry",
+      "validate_actions": true,
+      "max_retries_per_step": 1,
+      "max_invalid_actions": 2,
+      "notes": "Single validation pass plus one planner retry on invalid action."
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "pick_place_harder_midpoint_forward",
+      "scene_id": "tabletop_harder_stage_a",
+      "gripper_start_pose": {
+        "x": -0.22,
+        "y": -0.28,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": -0.02,
+        "y": 0.01,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.28,
+        "y": 0.02,
+        "z": 0.03
+      },
+      "transfer_waypoints": [
+        {
+          "x": 0.12,
+          "y": -0.10,
+          "z": 0.18
+        }
+      ],
+      "max_steps": 16,
+      "max_time_sec": 16.0,
+      "notes": "Adds one mid-transfer hover waypoint to increase sequence length over the easy forward manipulation task."
+    },
+    {
+      "task_id": "pick_place_harder_lateral_detour",
+      "scene_id": "tabletop_harder_stage_b",
+      "gripper_start_pose": {
+        "x": -0.22,
+        "y": -0.28,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": 0.02,
+        "y": -0.04,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": -0.02,
+        "y": 0.26,
+        "z": 0.03
+      },
+      "transfer_waypoints": [
+        {
+          "x": 0.12,
+          "y": -0.02,
+          "z": 0.19
+        },
+        {
+          "x": 0.05,
+          "y": 0.16,
+          "z": 0.19
+        }
+      ],
+      "max_steps": 18,
+      "max_time_sec": 18.0,
+      "notes": "Lateral placement with a two-waypoint detour to raise planner and tool-call workload."
+    },
+    {
+      "task_id": "pick_place_harder_cross_table",
+      "scene_id": "tabletop_harder_stage_c",
+      "gripper_start_pose": {
+        "x": -0.24,
+        "y": -0.30,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": -0.06,
+        "y": 0.05,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.30,
+        "y": 0.20,
+        "z": 0.03
+      },
+      "transfer_waypoints": [
+        {
+          "x": 0.02,
+          "y": 0.14,
+          "z": 0.19
+        },
+        {
+          "x": 0.20,
+          "y": 0.24,
+          "z": 0.19
+        }
+      ],
+      "max_steps": 18,
+      "max_time_sec": 18.0,
+      "notes": "Longest cross-table manipulation route in the slice with two fixed transfer waypoints."
+    }
+  ]
+}

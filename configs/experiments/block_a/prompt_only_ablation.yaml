@@ -1,0 +1,155 @@
+{
+  "experiment_name": "block_a_prompt_only_ablation",
+  "description": "Prompt-only Block A ablation with runtime fixed at R0 across two easy navigation tasks and two easy manipulation tasks.",
+  "task_family": "mixed",
+  "execution_mode": "sequential",
+  "backend": "toy",
+  "planner_backend": "mock_block_a",
+  "summary_basename": "block_a_prompt_only_summary",
+  "summary_title": "Block A Prompt-Only Summary",
+  "results_root": "results/block_a_prompt_only_ablation",
+  "output_dir": "results/processed/block_a_prompt_only_ablation",
+  "analysis_mode": "block_a_prompt_only_ablation",
+  "defaults": {
+    "backend": "toy",
+    "seed": 0
+  },
+  "prompt_variants": [
+    {
+      "id": "P0",
+      "label": "direct_next_action",
+      "response_mode": "direct_action_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous direct action. Return one valid JSON action only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P0. Task family: {task_family}. Navigation goal pose: ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Manipulation target pose: ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Output the next action directly as one JSON object and keep it minimal.",
+      "notes": "Direct next-action prompt with the smallest allowed structured form."
+    },
+    {
+      "id": "P1",
+      "label": "structured_tool_json",
+      "response_mode": "tool_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous tool call. Return one valid JSON object with tool_name and arguments only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P1. Task family: {task_family}. Navigation start/goal: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}) -> ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Manipulation gripper/object/target: ({gripper_start_x:.2f}, {gripper_start_y:.2f}, {gripper_start_z:.2f}) / ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}) / ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Choose one tool from the provided tools and emit typed JSON with tool_name and arguments.",
+      "notes": "Explicit tool-oriented prompting with typed JSON arguments."
+    },
+    {
+      "id": "P2",
+      "label": "structured_tool_json_with_self_check",
+      "response_mode": "tool_json_with_self_check",
+      "self_check_required": true,
+      "repair_instruction_template": "Repair the previous tool call. Return one JSON object with tool_name, arguments, and a brief self_check. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P2. Task family: {task_family}. Navigation start/goal: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}) -> ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Manipulation gripper/object/target: ({gripper_start_x:.2f}, {gripper_start_y:.2f}, {gripper_start_z:.2f}) / ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}) / ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Choose one tool from the provided tools, emit typed JSON arguments, and include one brief self_check field before execution.",
+      "notes": "Structured tool prompt plus a short explicit self-check field."
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "R0",
+      "label": "bare_no_validation_no_retry",
+      "runtime_policy": "block_a_r0_bare",
+      "validate_actions": false,
+      "max_retries_per_step": 0,
+      "max_invalid_actions": 1,
+      "notes": "Bare runtime path with no validation and no retry."
+    }
+  ],
+  "tasks": [
+    {
+      "task_family": "navigation",
+      "task_id": "prompt_nav_short_forward",
+      "scene_id": "easy_empty_stage_a",
+      "robot_id": "agent_point_robot",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "success_radius_m": 0.2,
+      "step_size_m": 0.5,
+      "control_dt_sec": 0.5,
+      "max_steps": 6,
+      "max_time_sec": 6.0
+    },
+    {
+      "task_family": "navigation",
+      "task_id": "prompt_nav_offset_start",
+      "scene_id": "easy_empty_stage_f",
+      "robot_id": "agent_point_robot",
+      "start_pose": {
+        "x": -0.5,
+        "y": -0.5,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.5,
+        "yaw": 0.0
+      },
+      "success_radius_m": 0.2,
+      "step_size_m": 0.5,
+      "control_dt_sec": 0.5,
+      "max_steps": 10,
+      "max_time_sec": 10.0
+    },
+    {
+      "task_family": "manipulation",
+      "task_id": "prompt_pick_place_short_forward",
+      "scene_id": "tabletop_stage_a",
+      "robot_id": "gripper_marker",
+      "gripper_start_pose": {
+        "x": -0.2,
+        "y": -0.25,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.25,
+        "y": 0.0,
+        "z": 0.03
+      },
+      "hover_offset_m": 0.12,
+      "grasp_tolerance_m": 0.01,
+      "place_tolerance_m": 0.02,
+      "control_dt_sec": 0.5,
+      "max_steps": 12,
+      "max_time_sec": 12.0
+    },
+    {
+      "task_family": "manipulation",
+      "task_id": "prompt_pick_place_lateral_left",
+      "scene_id": "tabletop_stage_b",
+      "robot_id": "gripper_marker",
+      "gripper_start_pose": {
+        "x": -0.2,
+        "y": -0.25,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": 0.02,
+        "y": -0.02,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.0,
+        "y": 0.22,
+        "z": 0.03
+      },
+      "hover_offset_m": 0.12,
+      "grasp_tolerance_m": 0.01,
+      "place_tolerance_m": 0.02,
+      "control_dt_sec": 0.5,
+      "max_steps": 12,
+      "max_time_sec": 12.0
+    }
+  ]
+}

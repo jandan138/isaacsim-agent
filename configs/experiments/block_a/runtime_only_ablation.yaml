@@ -1,0 +1,152 @@
+{
+  "experiment_name": "block_a_runtime_only_ablation",
+  "description": "Runtime-only Block A ablation with fixed P1 prompting across two easy navigation tasks and two easy manipulation tasks. The slice uses one recoverable invalid-first-action probe per family so R0 vs R1 can be isolated without changing the broader Block A definition.",
+  "task_family": "mixed",
+  "execution_mode": "sequential",
+  "backend": "toy",
+  "planner_backend": "mock_block_a",
+  "summary_basename": "block_a_runtime_only_summary",
+  "summary_title": "Block A Runtime-Only Summary",
+  "results_root": "results/block_a_runtime_only_ablation",
+  "output_dir": "results/processed/block_a_runtime_only_ablation",
+  "analysis_mode": "block_a_runtime_only_ablation",
+  "defaults": {
+    "backend": "toy",
+    "seed": 0
+  },
+  "prompt_variants": [
+    {
+      "id": "P1",
+      "label": "structured_tool_json",
+      "response_mode": "tool_json",
+      "self_check_required": false,
+      "repair_instruction_template": "Repair the previous tool call. Return one valid JSON object with tool_name and arguments only. Validation error: {validation_error}",
+      "instruction_template": "Prompt variant: P1. Task family: {task_family}. Navigation start/goal: ({start_x:.2f}, {start_y:.2f}, yaw={start_yaw:.2f}) -> ({goal_x:.2f}, {goal_y:.2f}, yaw={goal_yaw:.2f}). Manipulation gripper/object/target: ({gripper_start_x:.2f}, {gripper_start_y:.2f}, {gripper_start_z:.2f}) / ({object_x:.2f}, {object_y:.2f}, {object_z:.2f}) / ({target_x:.2f}, {target_y:.2f}, {target_z:.2f}). Choose one tool from the provided tools and emit typed JSON with tool_name and arguments.",
+      "notes": "Fixed structured-tool prompt used to isolate runtime validation plus single retry."
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "R0",
+      "label": "bare_no_validation_no_retry",
+      "runtime_policy": "block_a_r0_bare",
+      "validate_actions": false,
+      "max_retries_per_step": 0,
+      "max_invalid_actions": 1,
+      "notes": "Bare runtime path with no validation and no retry."
+    },
+    {
+      "id": "R1",
+      "label": "validate_single_retry",
+      "runtime_policy": "block_a_r1_validate_retry",
+      "validate_actions": true,
+      "max_retries_per_step": 1,
+      "max_invalid_actions": 2,
+      "notes": "Single validation pass plus one retry on invalid action."
+    }
+  ],
+  "tasks": [
+    {
+      "task_family": "navigation",
+      "task_id": "runtime_nav_short_forward",
+      "scene_id": "easy_empty_stage_a",
+      "robot_id": "agent_point_robot",
+      "start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.0,
+        "yaw": 0.0
+      },
+      "success_radius_m": 0.2,
+      "step_size_m": 0.5,
+      "control_dt_sec": 0.5,
+      "max_steps": 6,
+      "max_time_sec": 6.0,
+      "notes": "Stable easy navigation reference with no runtime probe."
+    },
+    {
+      "task_family": "navigation",
+      "task_id": "runtime_nav_offset_probe",
+      "scene_id": "easy_empty_stage_f",
+      "robot_id": "agent_point_robot",
+      "start_pose": {
+        "x": -0.5,
+        "y": -0.5,
+        "yaw": 0.0
+      },
+      "goal_pose": {
+        "x": 1.0,
+        "y": 0.5,
+        "yaw": 0.0
+      },
+      "success_radius_m": 0.2,
+      "step_size_m": 0.5,
+      "control_dt_sec": 0.5,
+      "max_steps": 10,
+      "max_time_sec": 10.0,
+      "runtime_probe_invalid_first_action": true,
+      "notes": "Easy navigation geometry with a recoverable invalid-first-action runtime probe."
+    },
+    {
+      "task_family": "manipulation",
+      "task_id": "runtime_pick_place_short_forward",
+      "scene_id": "tabletop_stage_a",
+      "robot_id": "gripper_marker",
+      "gripper_start_pose": {
+        "x": -0.2,
+        "y": -0.25,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.25,
+        "y": 0.0,
+        "z": 0.03
+      },
+      "hover_offset_m": 0.12,
+      "grasp_tolerance_m": 0.01,
+      "place_tolerance_m": 0.02,
+      "control_dt_sec": 0.5,
+      "max_steps": 12,
+      "max_time_sec": 12.0,
+      "notes": "Stable easy manipulation reference with no runtime probe."
+    },
+    {
+      "task_family": "manipulation",
+      "task_id": "runtime_pick_place_lateral_probe",
+      "scene_id": "tabletop_stage_b",
+      "robot_id": "gripper_marker",
+      "gripper_start_pose": {
+        "x": -0.2,
+        "y": -0.25,
+        "z": 0.18
+      },
+      "object_start_pose": {
+        "x": 0.02,
+        "y": -0.02,
+        "z": 0.03
+      },
+      "target_pose": {
+        "x": 0.0,
+        "y": 0.22,
+        "z": 0.03
+      },
+      "hover_offset_m": 0.12,
+      "grasp_tolerance_m": 0.01,
+      "place_tolerance_m": 0.02,
+      "control_dt_sec": 0.5,
+      "max_steps": 12,
+      "max_time_sec": 12.0,
+      "runtime_probe_invalid_first_action": true,
+      "notes": "Easy manipulation geometry with a recoverable invalid-first-action runtime probe."
+    }
+  ]
+}
