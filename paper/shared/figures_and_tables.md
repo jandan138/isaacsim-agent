@@ -8,9 +8,11 @@ yet.
 
 - Treat `results/processed/` as immutable evidence.
 - Treat `paper/assets/` as future derived outputs only.
-- Use `results/processed/block_a_final_closure/` as the canonical freeze for final numbers.
+- Use `results/processed/block_a_final_closure/` as the canonical freeze for final
+  numbers.
 - Use the packaged outputs under `results/processed/block_a_master_summary/paper_figures/`
-  and `results/processed/block_a_master_summary/paper_tables/` only as layout/style templates because they predate final closure.
+  and `results/processed/block_a_master_summary/paper_tables/` only as layout/style
+  templates because they predate final closure.
 
 ## Source hierarchy
 
@@ -31,9 +33,10 @@ yet.
 ### Figure A: Main condition ordering
 
 - Purpose:
-  show the stable qualitative ordering across the six prompt/runtime conditions
+  show the stable qualitative ordering across the six contract/runtime conditions
 - Main claim served:
-  `P0/R0` is worst, `P0/R1` recovers, `P1/P2` are strong, and `P2` is not worse than `P1`
+  `P0/R0` is worst, `P0/R1` recovers, `P1/P2` are strong, and `P2` is not worse than
+  `P1`
 - Canonical data source:
   `results/processed/block_a_final_closure/block_a_final_closure_summary.md`
 - Supporting sources:
@@ -49,9 +52,10 @@ yet.
 ### Figure B: Invalid actions and recovery
 
 - Purpose:
-  explain why structured prompts help and why runtime validation matters
+  explain why explicit contracts help and why runtime validation matters
 - Main claim served:
-  structured prompts reduce invalid actions; `R1` converts recoverable invalid-action runs into successful runs
+  typed contracts reduce invalid actions; `R1` converts recoverable invalid-action
+  runs into successful runs
 - Canonical data sources:
   `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.md`
   `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.md`
@@ -69,7 +73,8 @@ yet.
 - Purpose:
   show that `P2` reduces planner/tool workload relative to `P1` in the tested setup
 - Main claim served:
-  brief self-check can improve efficiency without harming the success profile in current slices
+  a brief self-check can improve efficiency without harming the success profile in
+  current slices
 - Canonical data sources:
   `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.md`
   `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.md`
@@ -89,7 +94,8 @@ yet.
 ### Table A: Experimental design summary
 
 - Purpose:
-  define task families, slices, variants, and run counts without over-explaining the roadmap
+  define task families, slices, variants, and run counts without over-explaining the
+  roadmap
 - Main claim served:
   the paper is a controlled study with a finite and explicit matrix
 - Data sources:
@@ -105,7 +111,8 @@ yet.
 ### Table B: Final closure result summary
 
 - Purpose:
-  present the compact per-family/per-slice outcome summary with success, invalid actions, retries, planner calls, and tool calls
+  present the compact per-family/per-slice outcome summary with success, invalid
+  actions, retries, planner calls, and tool calls
 - Main claim served:
   the ordering remains stable across families and current harder slices
 - Data sources:
@@ -124,9 +131,9 @@ yet.
 ### Table C: Focused ablation summary
 
 - Purpose:
-  summarize the independent prompt-only and runtime-only tests in one compact place
+  summarize the independent contract-only and runtime-only tests in one compact place
 - Main claim served:
-  prompt structure and runtime validation each have independent value
+  contract design and runtime validation each have independent value
 - Data sources:
   `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json`
   `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json`
@@ -139,15 +146,16 @@ yet.
 
 ## Non-results figure note
 
-`docs/ral_writing_playbook.md` recommends a system diagram for the eventual manuscript.
-That schematic is not a current result asset and is intentionally out of scope for
-this mapping pass. If it is added later, it should be authored from the method
-description rather than inferred from `results/processed/`.
+`docs/ral_writing_playbook.md` recommends a system diagram for the eventual
+manuscript. That schematic is not a current result asset and is intentionally out of
+scope for this mapping pass. If it is added later, it should be authored from the
+method description rather than inferred from `results/processed/`.
 
 ## Regeneration rule
 
 Before any manuscript figure or table is committed under `paper/assets/`, record:
 
 - the exact source files used
-- whether the asset is regenerated from final closure or only a legacy layout reference
+- whether the asset is regenerated from final closure or only a legacy layout
+  reference
 - any mismatch between a legacy packaged asset and the final-closure freeze
