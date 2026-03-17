@@ -1,0 +1,38 @@
+\newif\ifieeefallback
+\IfFileExists{IEEEtran.cls}{
+  \ieeefallbackfalse
+  \documentclass[letterpaper,10pt,journal]{IEEEtran}
+}{
+  \ieeefallbacktrue
+  \documentclass[10pt,twocolumn]{article}
+}
+
+\usepackage{graphicx}
+\usepackage{url}
+
+\ifieeefallback
+\setlength{\textwidth}{7.0in}
+\setlength{\textheight}{9.25in}
+\setlength{\oddsidemargin}{-0.25in}
+\setlength{\evensidemargin}{-0.25in}
+\setlength{\topmargin}{-0.60in}
+\setlength{\columnsep}{0.24in}
+\fi
+
+\title{A Controlled Study of Planner-to-Executor Contract Design and Runtime Validation for Embodied-Agent Execution in Isaac Sim}
+\author{Anonymous Authors}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/related_work}
+\input{sections/setup}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{refs/references_note}
+
+\end{document}

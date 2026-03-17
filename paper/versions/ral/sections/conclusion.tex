@@ -1,0 +1,16 @@
+\section{Conclusion}
+
+This paper presents a controlled systems study of planner-to-executor contract
+design and runtime validation for embodied-agent execution in Isaac Sim. Across
+navigation and tabletop manipulation tasks, the same qualitative ordering
+remains stable: P0/R0 is weakest, R1 recovers fragile invalid-first-action
+cases, and the explicit-contract conditions P1 and P2 remain strong across
+the covered slices.
+
+The failure analysis shows why. The dominant errors are contract violations
+rather than generic task collapse. Explicit contracts prevent those failures at
+the source, runtime validation repairs some of the ones that remain, and a
+brief self-check can reduce planner/tool overhead within an already strong
+contract. For embodied-agent execution stacks, the main lesson is
+straightforward: contract design and lightweight runtime safeguards belong in
+the architecture, not as afterthoughts.

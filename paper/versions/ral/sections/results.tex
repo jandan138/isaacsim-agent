@@ -1,0 +1,86 @@
+\section{Results}
+
+Across the aggregated evaluation slices, the same contract x runtime ordering
+recurs: P0/R0 is the weakest condition, P0/R1 recovers, and the explicit-contract
+conditions remain strong.
+
+\subsection{Main Contract x Runtime Effect}
+
+The main effect is a stable qualitative ordering across navigation easy,
+tabletop manipulation easy, harder navigation, and harder manipulation. In each
+slice, P0/R0 is the weakest cell. Pairing the same under-specified contract
+with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
+P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. This repeated pattern
+holds across both task families and persists as tasks become harder.
+
+\input{figures/main_condition_ordering.tex}
+
+The same comparison separates the roles of contract design and runtime
+validation. Invalid-action failures are concentrated in the P0 cells, showing
+that loose task-level verbs are brittle at the planner/executor boundary. Once
+the planner is forced into a typed tool namespace, the dominant failure mode
+disappears in the covered fixed-R0 slice. Within the successful structured
+conditions, P2 matches P1 on success while showing lower planner/tool
+overhead on the shared easy slice and the harder manipulation slice. We
+interpret that pattern as an efficiency association within already-strong
+contracts, not as evidence of a new success regime.
+
+\input{figures/planner_tool_overhead.tex}
+
+The direction is also consistent across families. Navigation and tabletop
+manipulation both place the weakest behavior in P0/R0, both recover under
+P0/R1, and both preserve the lower-overhead P2 pattern where P1 and
+P2 are directly compared.
+
+\subsection{Action-Interface and Runtime-Only Ablations}
+
+The targeted ablations use different easy-task subsets: the runtime-only slice
+deliberately includes recoverable invalid-first-action probes under fixed P1,
+whereas the action-interface slice compares clean easy tasks under fixed R0.
+Together they isolate the two design axes without changing the overall
+execution-design framing.
+
+With the contract fixed at P1, moving from R0 to R1 raises success from
+2/4 to 4/4 across two navigation tasks and two tabletop manipulation tasks.
+The mechanism is recovery, not suppression: invalid-action runs remain 2
+under both runtimes, but successful invalid-action recoveries rise from 0 to
+2 once validation and one retry are enabled. The same direction appears in
+each family separately, with navigation and manipulation each moving from
+0.5 to 1.0 success in this slice.
+
+\input{figures/invalid_actions_recovery.tex}
+\input{tables/focused_ablation_summary.tex}
+
+With runtime fixed at R0, P0/R0 fails on all 4/4 evaluated tasks and
+accumulates four total invalid actions, whereas P1/R0 and P2/R0 succeed on
+all 4/4 tasks and reduce invalid actions to zero. This establishes an
+independent contract effect: once the planner must emit dispatchable tool
+calls, the invalid-action failures that dominate the under-specified interface
+disappear in this slice. The same comparison also shows the narrower P2
+effect: P1/R0 and P2/R0 have the same success profile, but average planner
+and tool calls each fall from roughly 7.5 to 6.0.
+
+The failure traces explain what goes wrong under P0. In navigation, failing
+P0 runs repeatedly emit the unsupported tool name
+\texttt{move\_to\_goal}; in tabletop manipulation, they emit
+\texttt{move\_object}. Both are semantically plausible task verbs, but the
+executor accepts \texttt{navigate\_to} and
+\texttt{scripted\_pick\_place\_step} instead. R1 helps because the runtime
+catches the unknown tool before dispatch, returns a validation error, and
+allows a corrected retry. The runtime does not erase the contract violation; it
+turns a terminating handoff failure into a recoverable one.
+
+\subsection{Harder-Task Robustness}
+
+The harder-task slices increase planner/tool overhead without changing the
+condition ordering. In harder navigation, the same ranking as the easy slice is
+preserved, while successful cells require roughly three additional planner or
+tool calls per run. In harder tabletop manipulation, P0/R0 fails on all
+3/3 tasks, P0/R1 recovers all 3/3 with one retry per task, and P1/P2
+remain fully successful under both runtimes.
+
+The P1 versus P2 efficiency relation also survives the harder manipulation
+setting. P2 remains about two planner calls and two tool calls per run below
+P1 under both runtimes while maintaining the same success profile. The harder
+slices therefore look like cost amplification rather than rank reversal: tasks
+become busier, but the contract and runtime ordering stays intact.

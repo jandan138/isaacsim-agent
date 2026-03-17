@@ -1,0 +1,7 @@
+comparison_block,task_family,slice,varying_axes,runs_per_cell,total_runs,task_count,paper_role
+main factorial,navigation,easy,P0/P1/P2 x R0/R1,11,66,11,main contract x runtime ordering
+main factorial,manipulation,easy,P0/P1/P2 x R0/R1,3,18,3,main contract x runtime ordering
+main factorial,navigation,harder,P0/P1/P2 x R0/R1,4,24,4,harder-task robustness
+main factorial,manipulation,harder,P0/P1/P2 x R0/R1,3,18,3,harder-task robustness
+action-interface ablation,navigation + manipulation,easy shared subset,P0/P1/P2 at fixed R0,4,12,4,invalid actions and P2 overhead
+runtime-only ablation,navigation + manipulation,recoverable easy probes,R0/R1 at fixed P1,4,8,4,recovery and retry value

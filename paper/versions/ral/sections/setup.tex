@@ -1,0 +1,69 @@
+\section{Study Design and Experimental Setup}
+
+\subsection{Controlled Isaac Sim Setting}
+
+The study uses a common Isaac Sim execution architecture across navigation and
+tabletop manipulation. The navigation family contains language-driven
+mobile-goal tasks in indoor scenes. The manipulation family contains tabletop
+manipulation tasks that require object identification, grasping, transfer, and
+placement. The main comparison uses a shared easy slice across both
+families, with additional harder navigation and harder manipulation slices to
+test whether increased task burden changes the qualitative ordering or mainly
+amplifies planner/tool overhead.
+
+All conditions share the same high-level handoff:
+
+\begin{enumerate}
+\item The planner receives the current task state and the exposed tool set.
+\item The planner emits an action request.
+\item Under R0, the request is dispatched as issued; under R1, the runtime
+validates it against the active contract and allows one repair attempt on
+failure.
+\item The executor runs only requests that satisfy the active dispatch interface.
+\end{enumerate}
+
+The dispatch vocabulary is family-specific but explicit. Navigation exposes
+\texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and \texttt{navigate\_to}.
+Tabletop manipulation exposes \texttt{get\_gripper\_state},
+\texttt{get\_object\_state}, \texttt{get\_target\_state}, and
+\texttt{scripted\_pick\_place\_step}. This distinction matters because the
+study is not asking whether the planner can describe the task in natural
+language. It is asking whether the planner can hand the executor a dispatchable
+request under a specified interface.
+
+\subsection{Contract and Runtime Variants}
+
+The controlled matrix is summarized in Table~\ref{tab:experimental-design-summary}.
+P0 uses an under-specified direct-action contract, allowing the planner to
+emit a task-level next action without binding it to the executor's tool
+namespace. P1 uses a typed tool-call contract, requiring the planner to
+choose one exposed tool and provide dispatchable arguments. P2 keeps the same
+typed tool-call contract and adds a brief planner-side self-check before
+emission.
+
+R0 is a bare-dispatch runtime: it does not perform pre-dispatch validation or
+offer a repair path. R1 is a validate-and-retry runtime: it checks the
+emitted request against the active contract and, on failure, returns the
+validation error to the planner and allows one retry. Contract and runtime
+therefore play distinct roles. Contract design can prevent invalid actions at
+the source, while runtime validation can recover some contract violations that
+still slip through.
+
+\input{tables/experimental_design_summary.tex}
+
+\subsection{Metrics and Evaluation Protocol}
+
+Success rate is the primary task outcome. An invalid action is an emitted
+action or tool call that violates the active contract and therefore cannot be
+dispatched as issued. A recovery is a run that contains an invalid action but
+still ends successfully after runtime handling. Retries capture the extra
+repair work used in R1. Planner calls and tool calls together define
+planner/tool overhead, which is the paper's efficiency proxy.
+
+The paper draws its quantitative comparisons from the main factorial results
+plus targeted runtime-only, action-interface-only, and harder-task summaries.
+The final closure summary provides the canonical aggregate view, while the
+slice-specific summaries support the ablations and the failure-case
+interpretation.
+
+\input{tables/final_closure_result_summary.tex}

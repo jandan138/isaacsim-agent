@@ -1,0 +1,11 @@
+panel_label,panel_note,bar_label,value
+NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P0,1
+NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P1,0
+NAVIGATION INVALID ACTIONS,Fixed R0 action-interface ablation,P2,0
+MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P0,1
+MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P1,0
+MANIPULATION INVALID ACTIONS,Fixed R0 action-interface ablation,P2,0
+NAVIGATION RETRIES,Fixed P1 runtime-only ablation,R0,0
+NAVIGATION RETRIES,Fixed P1 runtime-only ablation,R1,0.5
+MANIPULATION RETRIES,Fixed P1 runtime-only ablation,R0,0
+MANIPULATION RETRIES,Fixed P1 runtime-only ablation,R1,0.5

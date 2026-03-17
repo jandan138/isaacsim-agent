@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Experimental design summary. The main factorial comparison covers a shared easy slice plus one harder slice per task family. Two compact ablations isolate action-interface and runtime-validation effects without adding new experiment axes.}
+\label{tab:experimental-design-summary}
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llllrrl}
+\hline
+Block & Family & Slice & Varying axes & Runs/cell & Runs & Role \\
+\hline
+Main Factorial & Navigation & Easy & P0/P1/P2 x R0/R1 & 11 & 66 & Main Contract X Runtime Ordering \\
+Main Factorial & Manipulation & Easy & P0/P1/P2 x R0/R1 & 3 & 18 & Main Contract X Runtime Ordering \\
+Main Factorial & Navigation & Harder & P0/P1/P2 x R0/R1 & 4 & 24 & Harder-Task Robustness \\
+Main Factorial & Manipulation & Harder & P0/P1/P2 x R0/R1 & 3 & 18 & Harder-Task Robustness \\
+Action-Interface Ablation & Mixed & Easy Shared Subset & P0/P1/P2 at fixed R0 & 4 & 12 & Invalid Actions And P2 Overhead \\
+Runtime-Only Ablation & Mixed & Recoverable Easy Probes & R0/R1 at fixed P1 & 4 & 8 & Recovery And Retry Value \\
+\hline
+\end{tabular}%
+}
+\end{table}

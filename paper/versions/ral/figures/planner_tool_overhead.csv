@@ -1,0 +1,17 @@
+panel_label,panel_note,bar_label,value
+NAVIGATION EASY,Fixed R0 action-interface ablation,P1-P,5
+NAVIGATION EASY,Fixed R0 action-interface ablation,P1-T,5
+NAVIGATION EASY,Fixed R0 action-interface ablation,P2-P,4
+NAVIGATION EASY,Fixed R0 action-interface ablation,P2-T,4
+MANIPULATION EASY,Fixed R0 action-interface ablation,P1-P,10
+MANIPULATION EASY,Fixed R0 action-interface ablation,P1-T,10
+MANIPULATION EASY,Fixed R0 action-interface ablation,P2-P,8
+MANIPULATION EASY,Fixed R0 action-interface ablation,P2-T,8
+MANIPULATION HARDER R0,Harder manipulation summary,P1-P,11.666667
+MANIPULATION HARDER R0,Harder manipulation summary,P1-T,11.666667
+MANIPULATION HARDER R0,Harder manipulation summary,P2-P,9.666667
+MANIPULATION HARDER R0,Harder manipulation summary,P2-T,9.666667
+MANIPULATION HARDER R1,Harder manipulation summary,P1-P,11.666667
+MANIPULATION HARDER R1,Harder manipulation summary,P1-T,11.666667
+MANIPULATION HARDER R1,Harder manipulation summary,P2-P,9.666667
+MANIPULATION HARDER R1,Harder manipulation summary,P2-T,9.666667

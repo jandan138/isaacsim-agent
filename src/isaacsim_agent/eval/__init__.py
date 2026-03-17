@@ -3,7 +3,9 @@
 from .block_a_final_closure import BlockAFinalClosureProcessedSource
 from .block_a_final_closure import BlockAFinalClosureReferenceSummary
 from .block_a_final_closure import BlockAFinalClosureSummaryResult
+from .block_a_ral_assets import BlockARalAssetPackagingResult
 from .block_a_final_closure import build_block_a_final_closure_summary
+from .block_a_ral_assets import package_block_a_ral_assets
 from .block_a_final_closure import summarize_block_a_final_closure_processed_dirs
 from .block_a_master import BlockAMasterProcessedSource
 from .block_a_master import BlockAMasterReferenceSummary
@@ -37,6 +39,7 @@ __all__ = [
     "BlockAFinalClosureProcessedSource",
     "BlockAFinalClosureReferenceSummary",
     "BlockAFinalClosureSummaryResult",
+    "BlockARalAssetPackagingResult",
     "BlockAMasterProcessedSource",
     "BlockAMasterReferenceSummary",
     "BlockAMasterSummaryResult",
@@ -54,6 +57,7 @@ __all__ = [
     "build_block_a_final_closure_summary",
     "build_block_a_master_summary",
     "build_cross_family_summary",
+    "package_block_a_ral_assets",
     "package_block_a_master_summary",
     "package_block_a_master_for_paper",
     "load_run_record",

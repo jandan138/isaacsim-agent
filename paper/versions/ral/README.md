@@ -13,7 +13,10 @@ Current branch state:
   figure/table planning markers
 - branch support files now record citation grounding, editing decisions,
   bibliography candidates, and figure/table binding
-- no figure/table regeneration or LaTeX manuscript conversion has been done yet
+- formal RA-L figure PNGs, figure wrappers, table CSVs, and table wrappers now
+  live under `paper/versions/ral/figures/` and `paper/versions/ral/tables/`
+- a first LaTeX scaffold now lives under `paper/versions/ral/main.tex`,
+  `sections/`, and `refs/`
 
 ## Branch policy
 
@@ -74,33 +77,21 @@ Practical rule:
 - if a title, abstract, or discussion sentence cannot be supported by the
   frozen summaries and `full_draft_v1.md`, revise or remove it
 
-## Placeholder policy for figures and tables
-
-The allowed placeholders in this branch remain:
-
-- `[Fig: main condition ordering]`
-- `[Fig: invalid actions and recovery]`
-- `[Fig: planner/tool overhead]`
-- `[Table: experimental design summary]`
-- `[Table: final closure result summary]`
-- `[Table: focused ablation summary]`
-
-These are planning markers only. They do not imply that final manuscript assets
-already exist.
-
 ## What remains after citation grounding and light polish
 
-- regenerate figures and tables from the final-closure and ablation freezes
+- tighten the first compiled draft against the real RA-L page budget
 - decide whether `[Table: focused ablation summary]` survives the final page
   budget
+- convert the current author-year prose citations to BibTeX-backed
+  `\cite{}` commands
 - author the optional system diagram if the methods section keeps it
-- convert the polished manuscript to anonymous RA-L LaTeX later, after prose and
-  asset freeze
+- tighten float placement and line breaking after author review of the compiled
+  PDF
 
 ## Next recommended action
 
-- refresh figure/table assets and caption text from the frozen summaries, then
-  prepare the anonymous RA-L LaTeX assembly pass
+- tighten the compiled scaffold into a page-budgeted RA-L letter while keeping
+  the current contract/runtime framing and asset bindings intact
 
 ## Anonymity and scope reminders
 
@@ -110,3 +101,10 @@ already exist.
   randomization
 - do not turn the paper back into a prompt-engineering study or a benchmark
   package
+
+## Compile note
+
+- `main.tex` is now in first-compiled-draft state.
+- `paper/versions/ral/IEEEtran.cls` is bundled locally so the current scaffold
+  compiles against an IEEE-style journal class even when the host TeX
+  distribution does not ship `IEEEtran.cls`.

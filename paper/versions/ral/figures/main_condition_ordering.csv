@@ -1,0 +1,25 @@
+panel_label,panel_note,bar_label,value
+NAVIGATION EASY,11 runs per cell,P0/R0,0
+NAVIGATION EASY,11 runs per cell,P0/R1,1
+NAVIGATION EASY,11 runs per cell,P1/R0,1
+NAVIGATION EASY,11 runs per cell,P1/R1,1
+NAVIGATION EASY,11 runs per cell,P2/R0,1
+NAVIGATION EASY,11 runs per cell,P2/R1,1
+MANIPULATION EASY,3 runs per cell,P0/R0,0
+MANIPULATION EASY,3 runs per cell,P0/R1,1
+MANIPULATION EASY,3 runs per cell,P1/R0,1
+MANIPULATION EASY,3 runs per cell,P1/R1,1
+MANIPULATION EASY,3 runs per cell,P2/R0,1
+MANIPULATION EASY,3 runs per cell,P2/R1,1
+NAVIGATION HARDER,4 runs per cell,P0/R0,0
+NAVIGATION HARDER,4 runs per cell,P0/R1,1
+NAVIGATION HARDER,4 runs per cell,P1/R0,1
+NAVIGATION HARDER,4 runs per cell,P1/R1,1
+NAVIGATION HARDER,4 runs per cell,P2/R0,1
+NAVIGATION HARDER,4 runs per cell,P2/R1,1
+MANIPULATION HARDER,3 runs per cell,P0/R0,0
+MANIPULATION HARDER,3 runs per cell,P0/R1,1
+MANIPULATION HARDER,3 runs per cell,P1/R0,1
+MANIPULATION HARDER,3 runs per cell,P1/R1,1
+MANIPULATION HARDER,3 runs per cell,P2/R0,1
+MANIPULATION HARDER,3 runs per cell,P2/R1,1

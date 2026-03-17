@@ -1,0 +1,53 @@
+\section{Introduction}
+
+Embodied-agent systems often fail at the boundary between planning and
+execution. A planner can identify the right task-level intention and still emit
+an action name or argument structure that the executor cannot dispatch. When
+that happens, the failure is not only a high-level planning error. It is also
+an architectural failure of the planner-to-executor contract, of the action
+interface that mediates the handoff, and of the runtime policy that decides
+whether a bad first emission should terminate the run or be repaired.
+
+This execution boundary is easy to overlook in current embodied-agent
+literature, where broader benchmarks, richer capability taxonomies, and
+stronger models often dominate the narrative. Those directions matter, but they
+also make it hard to isolate execution-stack design from model quality or task
+coverage. We therefore ask a narrower robotics-systems question: when the
+simulator setting and task families are held fixed, how much do
+planner-to-executor contract design and lightweight runtime validation affect
+invalid actions, recovery, success, and planner/tool overhead?
+
+We study two task families in Isaac Sim: language-conditioned navigation and
+tabletop manipulation. The matrix compares three contract variants: an
+under-specified direct-action contract (P0), a typed tool-call contract
+(P1), and the same typed contract with a brief self-check (P2). It also
+compares two runtime variants: bare dispatch (R0) and validation with a
+single retry (R1). These variants are implemented through different planner
+instructions, but the manipulated system variables are the executable interface
+presented to the executor and the runtime policy applied before dispatch.
+
+The findings are stable across the covered slices. P0/R0 is consistently the
+weakest condition; adding runtime validation to that weak contract recovers
+fragile invalid-first-action failures; explicit contracts P1 and P2
+eliminate the invalid-action failure mode in the fixed-R0 slice; and P2 is
+associated with lower planner/tool overhead than P1 in the covered
+comparisons. Harder tasks increase planner and tool activity without reversing
+that ordering. The paper is limited to this controlled simulator study and
+argues for bounded execution-design lessons rather than a new model or benchmark
+claim.
+
+This paper makes three contributions:
+
+\begin{enumerate}
+\item It presents a controlled Isaac Sim study that isolates two execution-design
+axes, planner-to-executor contract design and lightweight runtime
+validation, across navigation and tabletop manipulation tasks.
+\item It provides evidence that typed tool-call contracts reduce invalid actions
+relative to an under-specified direct-action contract, while runtime
+validation with a single retry converts recoverable invalid first actions
+into successful executions in both covered task families.
+\item It extracts a compact architectural lesson from the tested setup: contract
+design, runtime validation, and a brief planner-side self-check are separate
+systems levers that shape reliability and planner/tool overhead without
+changing the underlying task matrix.
+\end{enumerate}
