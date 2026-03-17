@@ -1,48 +1,56 @@
 # Related Work Draft
 
-Placeholder citation note: citation markers such as `[RW1]` and `[RW2]` are
-intentional placeholders only. They must be replaced with verified references in a
-later literature-check pass and should not be treated as already confirmed
-bibliography entries.
+This source fragment has completed its citation-grounding pass. The references
+below are verified against arXiv pages, official documentation, or official
+publication pages and are chosen to support the current robotics-systems
+framing rather than a prompt-first framing.
 
-## Embodied-agent execution context
+## Embodied and LLM-based robot planning
 
-Recent work on language-conditioned and embodied-agent systems studies how agents
-plan and act in simulated or robotic environments, often with increasing emphasis on
-broader task suites, richer capability taxonomies, or larger benchmark packages
-`[RW1]`, `[RW2]`, `[RW3]`, `[RW4]`. Related benchmark-oriented efforts similarly
-highlight persistent brittleness in embodied execution, especially when planning must
-be translated into executable actions under environment and tool constraints
-`[RW5]`, `[RW6]`, `[RW7]`. That literature motivates the present paper, but it is
-not the target shape of our contribution. We do not introduce a new model or a broad
-benchmark. Instead, we hold the Isaac Sim setting fixed and ask a narrower systems
-question: how much do prompt/interface structure and runtime validation change
-invalid actions, recovery, success, and planner/tool overhead in a controlled task
-matrix?
+Recent embodied and language-conditioned robot-planning work studies how
+high-level language intent is translated into executable robot behavior in
+simulation or on robots, including closed-loop language feedback, embodied
+multimodal models, vision-language-action policies, model-based language
+grounding, and systems-first integration pipelines such as Inner Monologue
+(Huang et al., 2022), PaLM-E (Driess et al., 2023), RT-2 (Brohan et al.,
+2023), VoxPoser (Huang et al., 2023), and OK-Robot (Liu et al., 2024). This
+includes language-conditioned skill selection, code-generating control, and
+program-like robot planning directions exemplified by SayCan (Ahn et al.,
+2022), Code as Policies (Liang et al., 2022), and ProgPrompt (Singh et al.,
+2022). That literature makes planner quality visible, but it often leaves less
+room to isolate what happens at the boundary between planner output and
+dispatch. Our paper is narrower: it holds the Isaac Sim setting fixed and
+studies how planner-to-executor contract design changes invalid actions,
+recovery, success, and planner/tool overhead.
 
-## Runtime checking, validation, and execution reliability
+## Execution contracts, runtime validation, and robotics middleware
 
-A second relevant line of work studies execution reliability, action validation, and
-safety-adjacent runtime checks for embodied or robotic systems `[RW8]`, `[RW9]`,
-`[RW10]`, `[RW11]`. The shared intuition is that planner outputs should not be
-treated as executable by default; some contract is needed between generation and
-dispatch. Our paper is closest to that execution-boundary view. However, the runtime
-layer studied here is intentionally lightweight. `R1` performs runtime validation
-against the active action or tool-call contract and allows a single retry after a
-validation failure. The contribution is therefore evidence about a compact recovery
-mechanism in a controlled simulator setting, not a claim of a full safety framework,
-policy shield, or deployment-ready runtime stack.
+A second line of work addresses execution architectures rather than only
+planning quality. Relevant threads include ROS 2 middleware and action
+semantics (Macenski et al., 2022; Biggs et al., 2019/2020), planning
+frameworks such as PlanSys2 (Martin et al., 2021), behavior-tree execution
+stacks and libraries such as BehaviorTree.CPP (Colledanchise and Ogren, 2018;
+BehaviorTree.CPP documentation), and task-and-motion planning interfaces such
+as PDDLStream and the broader TAMP literature (Garrett et al., 2020; Garrett
+et al., 2021). The shared intuition is that planner outputs should not
+be treated as executable by default; they need an explicit interface to the
+execution stack. The present study is closest to that execution-boundary view.
+Its runtime layer is intentionally lightweight: `R1` validates an emitted
+action or tool call against the active contract and allows one repair attempt.
+The contribution is therefore evidence about a small validation-and-retry
+mechanism in a controlled simulator setting, not a claim of a complete
+middleware stack, full TAMP framework, or end-to-end safety case.
 
-## Controlled empirical design studies
+## Controlled design studies and broader evaluations
 
-This paper is also aligned with empirical systems studies that isolate a small number
-of design axes instead of maximizing coverage breadth `[RW12]`, `[RW13]`, `[RW14]`.
-That methodological choice matters for the present evidence base. By fixing the task
-families and comparing only prompt/interface structure and runtime validation, the
-study can directly attribute differences in invalid actions, recovery, success, and
-planner/tool overhead to those execution-design choices within the covered slices.
-This narrower scope complements larger embodied-agent evaluations rather than trying
-to replace them. In that sense, the paper should be read as a controlled empirical
-study of embodied-agent execution design in Isaac Sim: it uses a simulator-bounded
-setting to extract specific system-design lessons, rather than to claim a generally
-best agent or a universal benchmark ordering.
+Methodologically, the paper favors a small controlled matrix over benchmark
+breadth. Broader embodied-agent evaluations such as EmbodiedBench, IS-Bench,
+and the Isaac Sim-based Mind and Motion Aligned benchmark are valuable because
+they expose long-horizon execution difficulty, safety failures, or integrated
+planning-and-control behavior across larger task sets or evaluation matrices
+(Yang et al., 2025; Lu et al., 2025; Kachaev et al., 2025). By varying only
+the action interface and runtime validation policy within a fixed Isaac Sim
+setting, we instead use a narrower study design to attribute differences in
+invalid actions, recovery, success, and planner/tool overhead to explicit
+execution-design choices. This complements broader embodied-agent evaluations
+rather than competing with them.
