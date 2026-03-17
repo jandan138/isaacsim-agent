@@ -102,10 +102,9 @@ def package_block_a_ral_assets(
         _figure_wrapper(
             image_filename="main_condition_ordering.png",
             caption=(
-                "Success rate for the retained contract and runtime conditions across both task families and both "
-                "difficulty slices. The under-specified direct-action contract \\texttt{P0/R0} is the weakest cell, "
-                "\\texttt{P0/R1} recovers, and the typed tool-call contracts remain successful in the covered easy and "
-                "harder slices."
+                "Success rate across navigation and manipulation, each with easy and harder slices, for the retained "
+                "contract/runtime cells. \\texttt{P0/R0} is consistently weakest, \\texttt{P0/R1} recovers, and the "
+                "typed tool-call contracts remain successful in the covered slices."
             ),
             label="fig:main-condition-ordering",
         ),
@@ -133,10 +132,10 @@ def package_block_a_ral_assets(
         _figure_wrapper(
             image_filename="invalid_actions_recovery.png",
             caption=(
-                "Top: under fixed bare dispatch \\texttt{R0}, typed tool-call contracts drive invalid actions to zero "
-                "in both families. Bottom: under fixed \\texttt{P1}, validate-and-retry \\texttt{R1} adds retries only "
-                "for the recoverable invalid-first-action probes and is accompanied by a 0.5 to 1.0 success change in "
-                "both families."
+                "Invalid actions under the fixed-\\texttt{R0} action-interface ablation (top) and retries under the "
+                "fixed-\\texttt{P1} runtime-only ablation (bottom). Typed tool-call contracts remove invalid actions "
+                "in both families, and validate-and-retry \\texttt{R1} adds retries only on recoverable invalid-first-"
+                "action probes while raising success from 0.5 to 1.0."
             ),
             label="fig:invalid-actions-recovery",
         ),
@@ -164,10 +163,10 @@ def package_block_a_ral_assets(
         _figure_wrapper(
             image_filename="planner_tool_overhead.png",
             caption=(
-                "Planner and tool calls in the retained \\texttt{P1} versus \\texttt{P2} comparisons. In the easy "
-                "fixed-\\texttt{R0} action-interface ablation and in the harder manipulation slice under both runtimes, "
-                "\\texttt{P2} keeps the same success profile as \\texttt{P1} while using fewer planner/tool calls. The "
-                "figure is descriptive rather than a broader statistical claim."
+                "Planner and tool calls in the retained \\texttt{P1} versus \\texttt{P2} comparisons across the "
+                "fixed-\\texttt{R0} action-interface ablation and the harder manipulation slice. Under the covered "
+                "conditions, \\texttt{P2} matches \\texttt{P1} on success while using fewer planner/tool calls. This "
+                "is a descriptive slice-level comparison, not a broader statistical claim."
             ),
             label="fig:planner-tool-overhead",
         ),
@@ -702,9 +701,9 @@ def _experimental_design_table_tex(rows: list[dict[str, Any]]) -> str:
     ]
     return "\n".join(
         [
-            r"\begin{table}[t]",
+            r"\begin{table}[!t]",
             r"\centering",
-            r"\caption{Experimental design summary. The main factorial comparison covers a shared easy slice plus one harder slice per task family. Two compact ablations isolate action-interface and runtime-validation effects without adding new experiment axes.}",
+            r"\caption{Experimental design summary. The main factorial comparison covers a shared easy slice plus one harder slice per task family. Two compact ablations isolate action-interface and runtime-validation effects.}",
             r"\label{tab:experimental-design-summary}",
             r"\footnotesize",
             r"\resizebox{\columnwidth}{!}{%",
@@ -738,9 +737,9 @@ def _final_closure_table_tex(rows: list[dict[str, Any]]) -> str:
     ]
     return "\n".join(
         [
-            r"\begin{table*}[t]",
+            r"\begin{table*}[!t]",
             r"\centering",
-            r"\caption{Final closure result summary across the four retained cohorts. Each cell reports success, invalid actions per run, retries per run, and planner/tool calls per run.}",
+            r"\caption{Per-cell summary across the four retained cohorts. Each cell reports success, invalid actions/run, retries/run, and planner/tool calls/run.}",
             r"\label{tab:final-closure-result-summary}",
             r"\footnotesize",
             r"\resizebox{\textwidth}{!}{%",
@@ -777,9 +776,9 @@ def _focused_ablation_table_tex(rows: list[dict[str, Any]]) -> str:
     ]
     return "\n".join(
         [
-            r"\begin{table}[t]",
+            r"\begin{table}[!t]",
             r"\centering",
-            r"\caption{Focused ablation summary. This compact table remains the first manuscript table to drop if page pressure requires it.}",
+            r"\caption{Support-only summary of the fixed-\texttt{R0} action-interface ablation and the fixed-\texttt{P1} runtime-only ablation.}",
             r"\label{tab:focused-ablation-summary}",
             r"\footnotesize",
             r"\resizebox{\columnwidth}{!}{%",
@@ -816,9 +815,9 @@ def _harder_task_table_tex(rows: list[dict[str, Any]]) -> str:
     ]
     return "\n".join(
         [
-            r"\begin{table}[t]",
+            r"\begin{table}[!t]",
             r"\centering",
-            r"\caption{Optional harder-task support table. It is not bound to a dedicated placeholder in the current draft, but it records the retained easy-to-harder comparison that supports the cost-amplification interpretation.}",
+            r"\caption{Support-only easy-to-harder comparison for the retained navigation and manipulation slices. It records the cost-amplification pattern referenced in the main text.}",
             r"\label{tab:harder-task-summary}",
             r"\footnotesize",
             r"\resizebox{\columnwidth}{!}{%",
@@ -853,7 +852,7 @@ def _display_slice(value: str) -> str:
 def _figure_wrapper(*, image_filename: str, caption: str, label: str) -> str:
     return "\n".join(
         [
-            "\\begin{figure*}[t]",
+            "\\begin{figure*}[!t]",
             "  \\centering",
             f"  \\includegraphics[width=\\textwidth]{{figures/{image_filename}}}",
             f"  \\caption{{{caption}}}",

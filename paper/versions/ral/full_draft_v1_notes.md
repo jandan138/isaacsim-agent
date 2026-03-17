@@ -21,7 +21,7 @@
 - Kept the concrete `move_to_goal` / `move_object` failure example only in the
   ablation subsection; discussion and conclusion now keep the architectural
   lesson without repeating the log-level example.
-- Added one explicit sentence that the runtime-only and action-interface-only
+- Added one explicit sentence that the runtime-only and action-interface
   ablations use different easy-task subsets, resolving the apparent tension
   between `P1` invalid actions in the runtime-only slice and zero invalid
   actions for `P1/R0` in the fixed-`R0` slice.
@@ -121,3 +121,27 @@
 - Removed the focused ablation table from the current main-text float stack and
   left it as the first support/overflow asset to restore only if authors later
   decide the page budget allows it.
+
+## Submission-Polish Pass
+
+- Tightened the active LaTeX draft at the sentence level without changing the
+  paper's findings, framing, or result ordering.
+- Normalized the last local wording drift toward the shared terminology:
+  `runtime validation policy` and `action-interface ablation` now replace the
+  remaining older labels in the active `.tex` files.
+- Upgraded the bibliography from a merely working BibTeX file to a more
+  submission-facing one:
+  - fuller author metadata for the cited embodied-planning references
+  - verified venue / DOI / page fields where safely confirmed
+  - title-case protection for terms that IEEEtran would otherwise downcase
+  - an official Isaac Sim documentation citation
+- Kept the current main-text asset set unchanged:
+  `main_condition_ordering`, `invalid_actions_recovery`,
+  `planner_tool_overhead`, `experimental_design_summary`, and
+  `final_closure_result_summary`.
+- Kept `focused_ablation_summary` and `harder_task_summary` support-only rather
+  than reintroducing them into the letter.
+- Audited the optional system diagram and recorded a `defer` recommendation:
+  the present manuscript is self-contained, and adding another full-width
+  figure would likely displace a more important result asset or worsen float
+  delay.

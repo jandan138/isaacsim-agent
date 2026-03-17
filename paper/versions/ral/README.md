@@ -7,20 +7,19 @@ paper in Isaac Sim. The evidence base remains fixed to the scope defined in
 Current branch state:
 
 - `full_draft_v1.md` remains the citation-grounded mother draft, while
-  `main.tex` and the split section files now carry the author-ready cleanup
-  assembly
-- the draft keeps the contract/runtime framing, replaces the former
-  placeholder citations with verified literature, and preserves the existing
-  figure/table planning markers
+  `main.tex` and the split section files now carry the submission-polish draft
+- the draft keeps the contract/runtime framing, stays within the existing
+  compiled-draft asset set, and applies sentence-level compression plus local
+  terminology cleanup rather than a broad prose rewrite
 - branch support files now record citation grounding, editing decisions,
   bibliography candidates, and figure/table binding
 - formal RA-L figure PNGs, figure wrappers, table CSVs, and table wrappers now
   live under `paper/versions/ral/figures/` and `paper/versions/ral/tables/`
 - the LaTeX scaffold now lives under `paper/versions/ral/main.tex`,
   `sections/`, and `refs/`
-- the cleanup pass has now switched the scaffold to a real BibTeX-backed
-  bibliography flow and reduced main-text float pressure by moving the focused
-  ablation table out of the current compiled draft
+- the submission-polish pass keeps the main-text float set unchanged, retains
+  the focused ablation and harder-task tables as support-only assets, and
+  leaves the current compiled PDF at 7 pages with bibliography included
 
 ## Branch policy
 
@@ -81,21 +80,36 @@ Practical rule:
 - if a title, abstract, or discussion sentence cannot be supported by the
   frozen summaries and `full_draft_v1.md`, revise or remove it
 
-## What remains after the compiled-draft cleanup pass
+## Main-text asset boundary
 
-- review the 7-page compiled draft for author-side line edits and local float
-  polishing
-- decide whether `[Table: focused ablation summary]` should return to the main
-  letter or remain support-only
-- author the optional system diagram if the methods section keeps it
-- tighten float placement and line breaking after author review of the compiled
-  PDF
-- do a final metadata pass on `refs/references.bib` before submission
+- Main-text figures:
+  - `figures/main_condition_ordering.{png,csv,tex}`
+  - `figures/invalid_actions_recovery.{png,csv,tex}`
+  - `figures/planner_tool_overhead.{png,csv,tex}`
+- Main-text tables:
+  - `tables/experimental_design_summary.{csv,tex}`
+  - `tables/final_closure_result_summary.{csv,tex}`
+- Support-only / overflow assets:
+  - `tables/focused_ablation_summary.{csv,tex}`
+  - `tables/harder_task_summary.{csv,tex}`
+- Current recommendation:
+  keep the support-only tables out of the main letter unless authors explicitly
+  trade away another float to make room.
+
+## What remains after the submission-polish pass
+
+- do the author-side sentence-by-sentence line edit and anonymity check
+- review the current float locality in the compiled PDF, especially the late
+  placement of the ablation figure on page 6
+- decide whether to keep the present asset boundary or swap in one support-only
+  table by removing another float
+- do a final human spot-check of whether any arXiv items should be replaced by
+  later archival versions before submission
 
 ## Next recommended action
 
-- run a final page-budget and bibliography-polish pass while keeping the
-  current contract/runtime framing and asset bindings intact
+- do an author-side hand edit pass on the current 7-page PDF, keeping the
+  contract/runtime framing and the present asset boundary intact
 
 ## Anonymity and scope reminders
 
@@ -108,17 +122,18 @@ Practical rule:
 
 ## Compile note
 
-- `main.tex` is now in author-ready cleanup-draft state.
+- `main.tex` is now in submission-polish-draft state.
 - `paper/versions/ral/IEEEtran.cls` is bundled locally so the current scaffold
   compiles against an IEEE-style journal class even when the host TeX
   distribution does not ship `IEEEtran.cls`.
 - `paper/versions/ral/IEEEtran.bst` is bundled locally for the same reason.
-- Current compile sequence:
+- Current regenerate-and-compile sequence:
+  - `python scripts/package_block_a_ral_assets.py`
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `bibtex main`
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-- The current cleanup draft compiles to `paper/versions/ral/main.pdf` and is
+- The current polished draft compiles to `paper/versions/ral/main.pdf` and is
   7 pages with bibliography included.
 
 ## Asset provenance
@@ -132,9 +147,20 @@ Practical rule:
 
 ## Citation status
 
-- `refs/references.bib` now contains conservative BibTeX entries for the
-  grounded literature used in Related Work and Discussion.
+- `refs/references.bib` now contains fuller author metadata and verified
+  venue/DOI/page fields where those were safely confirmed.
 - The compiled scaffold now uses `\cite{}`-based bibliography handling instead
   of the former references note placeholder.
-- Remaining citation work is polish, not bootstrap: tighten entry metadata,
-  normalize any future inline author-year additions, and do a final style pass.
+- No inline author-year references remain in the active RA-L `.tex` sources.
+- Remaining citation work is now optional author spot-checking: decide whether
+  any arXiv-only entries should be swapped to later archival versions and do a
+  final bibliography-style glance before submission.
+
+## System diagram decision
+
+- Recommendation: `defer`.
+- Rationale:
+  the manuscript is currently self-contained without a system diagram, and the
+  present full-width float queue already pushes the ablation figure late in the
+  PDF. Add a system diagram only as a swap against an existing full-width
+  figure, not as a fourth main-text figure.

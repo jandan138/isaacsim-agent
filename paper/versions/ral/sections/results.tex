@@ -7,11 +7,11 @@ conditions remain strong.
 \subsection{Main Contract x Runtime Effect}
 
 The main effect is a stable qualitative ordering across navigation easy,
-tabletop manipulation easy, harder navigation, and harder manipulation. In each
-slice, P0/R0 is the weakest cell. Pairing the same under-specified contract
-with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
-P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. This repeated pattern
-holds across both task families and persists as tasks become harder.
+tabletop manipulation easy, harder navigation, and harder manipulation. In
+each slice, P0/R0 is the weakest cell. Pairing the same under-specified
+contract with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
+P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. The same ordering holds
+across both task families and persists as tasks become harder.
 
 \input{figures/main_condition_ordering.tex}
 
@@ -22,23 +22,18 @@ the planner is forced into a typed tool namespace, the dominant failure mode
 disappears in the covered fixed-R0 slice. Within the successful structured
 conditions, P2 matches P1 on success while showing lower planner/tool
 overhead on the shared easy slice and the harder manipulation slice. We
-interpret that pattern as an efficiency association within already-strong
+interpret that pattern as a workload association within already-strong
 contracts, not as evidence of a new success regime.
 
 \input{figures/planner_tool_overhead.tex}
-
-The direction is also consistent across families. Navigation and tabletop
-manipulation both place the weakest behavior in P0/R0, both recover under
-P0/R1, and both preserve the lower-overhead P2 pattern where P1 and
-P2 are directly compared.
 
 \subsection{Action-Interface and Runtime-Only Ablations}
 
 The targeted ablations use different easy-task subsets: the runtime-only slice
 deliberately includes recoverable invalid-first-action probes under fixed P1,
-whereas the action-interface slice compares clean easy tasks under fixed R0.
-Together they isolate the two design axes without changing the overall
-execution-design framing.
+whereas the action-interface ablation uses clean easy tasks under fixed R0.
+Together they isolate the two design axes within the same execution-design
+framing.
 
 With the contract fixed at P1, moving from R0 to R1 raises success from
 2/4 to 4/4 across two navigation tasks and two tabletop manipulation tasks.
@@ -72,14 +67,13 @@ turns a terminating handoff failure into a recoverable one.
 \subsection{Harder-Task Robustness}
 
 The harder-task slices increase planner/tool overhead without changing the
-condition ordering. In harder navigation, the same ranking as the easy slice is
-preserved, while successful cells require roughly three additional planner or
-tool calls per run. In harder tabletop manipulation, P0/R0 fails on all
-3/3 tasks, P0/R1 recovers all 3/3 with one retry per task, and P1/P2
-remain fully successful under both runtimes.
+condition ordering. In harder navigation, the easy-slice ranking is preserved,
+while successful cells require roughly three additional planner or tool calls
+per run. In harder tabletop manipulation, P0/R0 fails on all 3/3 tasks,
+P0/R1 recovers all 3/3 with one retry per task, and P1/P2 remain fully
+successful under both runtimes.
 
-The P1 versus P2 efficiency relation also survives the harder manipulation
+The P1 versus P2 workload relation also survives the harder manipulation
 setting. P2 remains about two planner calls and two tool calls per run below
 P1 under both runtimes while maintaining the same success profile. The harder
-slices therefore look like cost amplification rather than rank reversal: tasks
-become busier, but the contract and runtime ordering stays intact.
+slices therefore look like cost amplification rather than rank reversal.

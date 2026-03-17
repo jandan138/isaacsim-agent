@@ -13,7 +13,25 @@ the immutable evidence remains under `results/processed/`.
 | `[Fig: planner/tool overhead]` | `paper/versions/ral/figures/planner_tool_overhead.{png,csv,tex}` | `paper/versions/ral/sections/results.tex` in Section 4.1, with the same figure serving the narrower `P2` references in Sections 4.2 and 4.3 | main-text asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.{json,md}` | Caption and prose keep the effect descriptive: lower planner/tool overhead in the covered slices, not a broader statistical efficiency claim. |
 | `[Table: experimental design summary]` | `paper/versions/ral/tables/experimental_design_summary.{tex,csv}` | `paper/versions/ral/sections/setup.tex` in Section 3.2 via `\input{tables/experimental_design_summary.tex}` | main-text asset | Final-closure umbrella plus the retained ablation and harder-manipulation summaries, with run-count context from `results/processed/block_a_master_summary/block_a_master_summary.json` | Keeps the variant inventory table-driven for page control. No legacy table template is reused as evidence. |
 | `[Table: final closure result summary]` | `paper/versions/ral/tables/final_closure_result_summary.{tex,csv}` | `paper/versions/ral/sections/setup.tex` at the end of Section 3.3 via `\input{tables/final_closure_result_summary.tex}` | main-text asset | Final-closure umbrella, with retained cohort-level support from `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | The table is generated and hooked once in the compiled draft, then referenced by the Results prose. |
-| `[Table: focused ablation summary]` | `paper/versions/ral/tables/focused_ablation_summary.{tex,csv}` | not currently inserted in `main.tex` | support / overflow asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.{json,md}` | Deliberately removed from the current main-text float stack in this cleanup pass to keep page pressure lower. It remains the first asset to restore or cut depending on final author-page decisions. |
+| `[Table: focused ablation summary]` | `paper/versions/ral/tables/focused_ablation_summary.{tex,csv}` | not currently inserted in `main.tex` | support / overflow asset | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.{json,md}` | Kept support-only in the submission-polish draft. Restore it only if authors explicitly trade away another main-text float. |
+
+## Final asset-boundary decision for the current draft
+
+- Main-text assets retained:
+  - `main_condition_ordering`
+  - `invalid_actions_recovery`
+  - `planner_tool_overhead`
+  - `experimental_design_summary`
+  - `final_closure_result_summary`
+- Support-only / overflow assets:
+  - `focused_ablation_summary`
+  - `harder_task_summary`
+- Other main-text assets:
+  - none beyond the five assets listed above
+- Float-locality note:
+  the current three-figure stack already places the ablation figure late in the
+  compiled PDF, so the draft should not add another full-width main-text float
+  unless one existing float is removed.
 
 ## Support-only asset
 
@@ -50,5 +68,11 @@ the immutable evidence remains under `results/processed/`.
 ## System diagram status
 
 - `full_draft_v1.md` still has no dedicated system-diagram placeholder.
+- Decision for the current submission-polish draft:
+  `defer`
+- Rationale:
+  the current manuscript is self-consistent without a system diagram, and a
+  new full-width figure would likely worsen float delay unless it replaces an
+  existing result asset.
 - If a schematic is added later, it should remain author-drawn method artwork,
   not a derived result asset.

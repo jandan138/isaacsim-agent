@@ -1,6 +1,6 @@
-\begin{figure*}[t]
+\begin{figure*}[!t]
   \centering
   \includegraphics[width=\textwidth]{figures/invalid_actions_recovery.png}
-  \caption{Top: under fixed \texttt{R0}, typed tool-call contracts remove invalid actions in both families. Bottom: under fixed \texttt{P1}, validate-and-retry \texttt{R1} adds retries only on recoverable invalid-first-action probes and raises success from 0.5 to 1.0 in both families.}
+  \caption{Invalid actions under the fixed-\texttt{R0} action-interface ablation (top) and retries under the fixed-\texttt{P1} runtime-only ablation (bottom). Typed tool-call contracts remove invalid actions in both families, and validate-and-retry \texttt{R1} adds retries only on recoverable invalid-first-action probes while raising success from 0.5 to 1.0.}
   \label{fig:invalid-actions-recovery}
 \end{figure*}

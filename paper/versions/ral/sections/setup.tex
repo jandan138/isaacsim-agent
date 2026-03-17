@@ -3,13 +3,12 @@
 \subsection{Controlled Isaac Sim Setting}
 
 The study uses a common Isaac Sim execution architecture across navigation and
-tabletop manipulation. The navigation family contains language-driven
-mobile-goal tasks in indoor scenes. The manipulation family contains tabletop
-manipulation tasks that require object identification, grasping, transfer, and
-placement. The main comparison uses a shared easy slice across both
-families, with additional harder navigation and harder manipulation slices to
-test whether increased task burden changes the qualitative ordering or mainly
-amplifies planner/tool overhead.
+tabletop manipulation \cite{nvidiaIsaacSimDocs}. The navigation family
+contains language-conditioned mobile-goal tasks in indoor scenes. The
+manipulation family contains tabletop tasks that require object identification,
+grasping, transfer, and placement. The main comparison uses a shared easy
+slice plus one harder slice per family to test whether added task burden
+changes the qualitative ordering or mainly amplifies planner/tool overhead.
 
 All conditions share the same high-level handoff:
 
@@ -22,14 +21,11 @@ failure.
 \item The executor runs only requests that satisfy the active dispatch interface.
 \end{enumerate}
 
-The dispatch vocabulary is family-specific but explicit. Navigation exposes
-\texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and \texttt{navigate\_to}.
-Tabletop manipulation exposes \texttt{get\_gripper\_state},
-\texttt{get\_object\_state}, \texttt{get\_target\_state}, and
-\texttt{scripted\_pick\_place\_step}. This distinction matters because the
-study is not asking whether the planner can describe the task in natural
-language. It is asking whether the planner can hand the executor a dispatchable
-request under a specified interface.
+The dispatch vocabulary is family-specific and explicit. Navigation exposes
+state getters and \texttt{navigate\_to}; manipulation exposes state getters
+and \texttt{scripted\_pick\_place\_step}. The study therefore asks whether the
+planner can hand the executor a dispatchable request under a specified
+interface, not whether it can describe the task in natural language.
 
 \subsection{Contract and Runtime Variants}
 
@@ -61,7 +57,8 @@ repair work used in R1. Planner calls and tool calls together define
 planner/tool overhead, which is the paper's efficiency proxy.
 
 The paper draws its quantitative comparisons from the main factorial results
-plus targeted runtime-only, action-interface-only, and harder-task summaries.
+plus targeted runtime-only, action-interface ablation, and harder-task
+summaries.
 The final closure summary provides the canonical aggregate view, while the
 slice-specific summaries support the ablations and the failure-case
 interpretation.
