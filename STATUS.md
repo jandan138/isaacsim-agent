@@ -2,88 +2,111 @@
 
 ## Current status
 
-- Date: 2026-03-16
+- Date: 2026-03-17
 - Plan source of truth: `plan.md`
 - Active milestone: `M6. Prompting and runtime ablations`
-- Milestone state: completed for the scoped `M6 Block A final closure` requested in this run
+- Milestone state:
+  - Block A experimental closure remains completed from the previous run
+  - this run created the paper-writing scaffold for the frozen Block A package
 - Completion level:
-  - the existing Block A checkpoint remains available under `results/processed/block_a_master_summary/`
-  - the new Block A final-closure experiment slices now exist under:
+  - the frozen Block A evidence base remains under:
+    - `results/processed/block_a_final_closure/`
+    - `results/processed/block_a_master_summary/`
     - `results/processed/block_a_runtime_only_ablation/`
     - `results/processed/block_a_prompt_only_ablation/`
     - `results/processed/block_a_manipulation_harder/`
-  - the unified closure package now exists under:
-    - `results/processed/block_a_final_closure/`
+    - `results/processed/block_a_cross_family_summary/`
+  - the new paper workspace now exists under:
+    - `paper/shared/`
+    - `paper/outlines/`
+    - `paper/versions/`
+    - `paper/assets/`
+    - `paper/notes/`
 
 ## Run context
 
 - This run stayed within the requested boundaries:
-  - Block A final closure only
-  - no paper drafting
-  - no `M7` memory/context work
-  - no tool abstraction work
+  - no new experiments
+  - no code main-function changes
+  - no `M7+` implementation work
+  - no tool-abstraction work
   - no randomization work
-  - no `R2`
-  - no new research axes
-  - no heavy Isaac Sim / ROS workflow launch beyond the existing toy-backed and already-scoped M6 harness
-- Existing artifacts reused in this run:
-  - `results/processed/block_a_master_summary/block_a_master_summary.json`
-  - `results/processed/block_a_navigation_prompt_runtime_expanded/block_a_summary.json`
-  - `results/processed/block_a_manipulation_prompt_runtime_pilot/block_a_summary.json`
+  - no venue switch in repo metadata
+  - no heavy Isaac Sim / ROS workflow launch
+- Existing artifacts consumed in this run:
+  - `results/processed/block_a_final_closure/block_a_final_closure_summary.{json,csv,md}`
+  - `results/processed/block_a_master_summary/block_a_master_summary.{json,md}`
+  - `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.{json,md}`
+  - `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.{json,md}`
+  - `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.{json,md}`
+  - `results/processed/block_a_cross_family_summary/cross_family_summary.json`
+  - legacy packaging templates under:
+    - `results/processed/block_a_master_summary/paper_figures/`
+    - `results/processed/block_a_master_summary/paper_tables/`
+    - `results/processed/block_a_master_summary/analysis/block_a_analysis.md`
 - Agent teaming:
-  - spawned two explorer sub-agents to inspect the minimal mixed-family runner change and the reusable summary/closure pattern
-  - both explorers eventually returned guidance without requiring interruption
-  - spawned two worker sub-agents in parallel:
-    - one for `pilot.py` / manipulation-baseline compatibility work
-    - one for the final-closure summary layer
-  - one wait window for the final-closure worker timed out with no result, but no interruption was sent; the worker later returned successfully
+  - spawned two explorer sub-agents in parallel
+  - one explored claim boundaries and evidence-safe findings for the Block A paper scaffold
+  - one explored current paper-facing assets and stale-packaging risks
+  - one wait window timed out with no completed result, but no interruption was sent
+  - both explorers later returned successfully
   - no sub-agent stall intervention or reassignment was needed
 
 ## Milestone summary
 
 - Completed in this run:
-  - extended `src/isaacsim_agent/experiments/pilot.py` so one suite config can span both task families via `task_family: mixed`
-  - added task-level `runtime_probe_invalid_first_action` plumbing so runtime-only ablations can isolate `R0` vs `R1` under fixed `P1`
-  - added optional manipulation `transfer_waypoints` support in `src/isaacsim_agent/tasks/manipulation/baseline.py` so harder manipulation can increase scripted sequence length and planner/tool workload without changing the M1.5 contract
-  - updated `src/isaacsim_agent/runtime/session.py` and `src/isaacsim_agent/planner/mock.py` so the runtime-only probes are consumed only by the new ablation tasks
-  - added the new Block A final-closure configs:
-    - `configs/experiments/block_a/runtime_only_ablation.yaml`
-    - `configs/experiments/block_a/prompt_only_ablation.yaml`
-    - `configs/experiments/block_a/manipulation_prompt_runtime_harder.yaml`
-  - added focused smoke coverage:
-    - `tests/test_block_a_runtime_only_ablation_smoke.py`
-    - `tests/test_block_a_prompt_only_ablation_smoke.py`
-    - `tests/test_block_a_manipulation_harder_smoke.py`
-  - added the unified final-closure summary layer:
-    - `src/isaacsim_agent/eval/block_a_final_closure.py`
-    - `scripts/summarize_block_a_final_closure.py`
-    - `tests/test_block_a_final_closure_summary.py`
-  - exported the final-closure entrypoints from `src/isaacsim_agent/eval/__init__.py`
-  - documented the new configs and script in:
-    - `configs/README.md`
-    - `scripts/README.md`
-  - ran all three requested new experiment slices and wrote their processed outputs
-  - built the unified `block_a_final_closure_summary.{json,csv,md}`
+  - replaced the placeholder `paper/README.md` with a multi-version workspace guide
+  - created the reusable claim and evidence layer:
+    - `paper/shared/core_claim.md`
+    - `paper/shared/contributions.md`
+    - `paper/shared/findings.md`
+    - `paper/shared/limitations.md`
+    - `paper/shared/terminology.md`
+    - `paper/shared/figures_and_tables.md`
+  - created the outline layer:
+    - `paper/outlines/ral_outline.md`
+    - `paper/outlines/neutral_outline.md`
+    - `paper/outlines/corl_outline.md`
+    - `paper/outlines/autonomous_robots_outline.md`
+  - created venue-specific branch notes:
+    - `paper/versions/ral/README.md`
+    - `paper/versions/neutral/README.md`
+    - `paper/versions/corl/README.md`
+    - `paper/versions/autonomous_robots/README.md`
+  - created asset-mapping notes without copying result binaries:
+    - `paper/assets/README.md`
+    - `paper/assets/figures/README.md`
+    - `paper/assets/tables/README.md`
+  - created writing-strategy and handoff notes:
+    - `paper/notes/submission_strategy.md`
+    - `paper/notes/review_risks.md`
+    - `paper/notes/version_deltas.md`
+    - `paper/notes/open_questions.md`
+  - validated markdown links, referenced paths, and wording against the frozen Block A scope
 - Not completed in this run:
-  - no paper writing
-  - no `M7` implementation work
-  - no tool-abstraction work
-  - no randomization work
-  - no `R2`
+  - no manuscript section prose yet
+  - no final paper figures/tables regenerated from final closure
+  - no system diagram drafting
+  - no related-work refresh
+  - no new experiments or analysis reruns
 
-## Checkpoint results
+## Frozen evidence snapshot
 
+- Unified final closure:
+  - output dir: `results/processed/block_a_final_closure/`
+  - merged runs: `146`
+  - successful runs: `119`
+  - success rate: `0.815068`
+  - all six closure questions remain `yes`
+  - verdict remains: `freeze_block_a_and_write_paper`
 - Runtime-only ablation:
   - output dir: `results/processed/block_a_runtime_only_ablation/`
-  - total runs: `8`
-  - successful runs: `6`
-  - `P1/R0` success rate: `0.5`
-  - `P1/R1` success rate: `1.0`
-  - invalid-action runs remained `2` under both runtimes, but successful invalid-action recoveries improved from `0` to `2` with retries `0 -> 2`
+  - fixed condition: `P1`
+  - success: `2/4 -> 4/4` from `R0` to `R1`
+  - invalid-action runs remain `2` vs `2`; successful recoveries rise `0 -> 2`
 - Prompt-only ablation:
   - output dir: `results/processed/block_a_prompt_only_ablation/`
-  - total runs: `12`
-  - successful runs: `8`
+  - fixed condition: `R0`
   - `P0/R0` success rate: `0.0`
   - `P1/R0` success rate: `1.0`
   - `P2/R0` success rate: `1.0`
@@ -91,225 +114,87 @@
   - `P1/R0` average planner/tool calls: `7.5 / 7.5`
 - Manipulation harder slice:
   - output dir: `results/processed/block_a_manipulation_harder/`
-  - total runs: `18`
-  - successful runs: `15`
   - `P0/R0` fails on all `3` harder tasks
   - `P0/R1` recovers on all `3` harder tasks
   - `P1/P2` remain fully successful
-  - `P2` average planner/tool calls stay below `P1`:
-    - `R0`: `9.666667 / 9.666667` vs `11.666667 / 11.666667`
-    - `R1`: `9.666667 / 9.666667` vs `11.666667 / 11.666667`
-- Unified final closure:
-  - output dir: `results/processed/block_a_final_closure/`
-  - merged runs: `146`
-  - successful runs: `119`
-  - success rate: `0.815068`
-  - all six closure questions are marked `yes` in `block_a_final_closure_summary.md`
-  - final closure verdict: `freeze_block_a_and_write_paper`
+  - `P2` planner/tool calls remain below `P1`
 
 ## Files changed
 
 - `STATUS.md`
-- `configs/README.md`
-- `configs/experiments/block_a/manipulation_prompt_runtime_harder.yaml`
-- `configs/experiments/block_a/prompt_only_ablation.yaml`
-- `configs/experiments/block_a/runtime_only_ablation.yaml`
-- `scripts/README.md`
-- `scripts/summarize_block_a_final_closure.py`
-- `src/isaacsim_agent/eval/__init__.py`
-- `src/isaacsim_agent/eval/block_a_final_closure.py`
-- `src/isaacsim_agent/experiments/pilot.py`
-- `src/isaacsim_agent/planner/mock.py`
-- `src/isaacsim_agent/runtime/session.py`
-- `src/isaacsim_agent/tasks/manipulation/baseline.py`
-- `tests/test_block_a_final_closure_summary.py`
-- `tests/test_block_a_manipulation_harder_smoke.py`
-- `tests/test_block_a_prompt_only_ablation_smoke.py`
-- `tests/test_block_a_runtime_only_ablation_smoke.py`
-
-## Generated outputs
-
-- `results/processed/block_a_runtime_only_ablation/run_plan.json`
-- `results/processed/block_a_runtime_only_ablation/run_summary.jsonl`
-- `results/processed/block_a_runtime_only_ablation/run_summary.csv`
-- `results/processed/block_a_runtime_only_ablation/aggregate.json`
-- `results/processed/block_a_runtime_only_ablation/validation.json`
-- `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json`
-- `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.md`
-- `results/processed/block_a_prompt_only_ablation/run_plan.json`
-- `results/processed/block_a_prompt_only_ablation/run_summary.jsonl`
-- `results/processed/block_a_prompt_only_ablation/run_summary.csv`
-- `results/processed/block_a_prompt_only_ablation/aggregate.json`
-- `results/processed/block_a_prompt_only_ablation/validation.json`
-- `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json`
-- `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.md`
-- `results/processed/block_a_manipulation_harder/run_plan.json`
-- `results/processed/block_a_manipulation_harder/run_summary.jsonl`
-- `results/processed/block_a_manipulation_harder/run_summary.csv`
-- `results/processed/block_a_manipulation_harder/aggregate.json`
-- `results/processed/block_a_manipulation_harder/validation.json`
-- `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json`
-- `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.md`
-- `results/processed/block_a_final_closure/run_summary.jsonl`
-- `results/processed/block_a_final_closure/run_summary.csv`
-- `results/processed/block_a_final_closure/aggregate.json`
-- `results/processed/block_a_final_closure/validation.json`
-- `results/processed/block_a_final_closure/block_a_final_closure_summary.json`
-- `results/processed/block_a_final_closure/block_a_final_closure_summary.csv`
-- `results/processed/block_a_final_closure/block_a_final_closure_summary.md`
+- `paper/README.md`
+- `paper/assets/README.md`
+- `paper/assets/figures/README.md`
+- `paper/assets/tables/README.md`
+- `paper/notes/open_questions.md`
+- `paper/notes/review_risks.md`
+- `paper/notes/submission_strategy.md`
+- `paper/notes/version_deltas.md`
+- `paper/outlines/autonomous_robots_outline.md`
+- `paper/outlines/corl_outline.md`
+- `paper/outlines/neutral_outline.md`
+- `paper/outlines/ral_outline.md`
+- `paper/shared/contributions.md`
+- `paper/shared/core_claim.md`
+- `paper/shared/figures_and_tables.md`
+- `paper/shared/findings.md`
+- `paper/shared/limitations.md`
+- `paper/shared/terminology.md`
+- `paper/versions/autonomous_robots/README.md`
+- `paper/versions/corl/README.md`
+- `paper/versions/neutral/README.md`
+- `paper/versions/ral/README.md`
 
 ## Commands run
 
 - Source-of-truth reads:
   - `sed -n '1,220p' plan.md`
-  - `sed -n '1,240p' AGENTS.md`
+  - `sed -n '1,260p' AGENTS.md`
   - `sed -n '1,260p' STATUS.md`
-  - `rg --files`
+  - `sed -n '1,260p' docs/ral_writing_playbook.md`
+  - `sed -n '260,520p' docs/ral_writing_playbook.md`
+  - `rg -n '^##|^###' docs/ral_writing_playbook.md`
 - Context inspection:
-  - `rg -n "M6|Block A|runtime-only|prompt-only|manipulation harder|final closure|master summary|cross-family" plan.md STATUS.md src scripts tests configs -S`
-  - `sed -n '1,260p' src/isaacsim_agent/eval/block_a_master.py`
-  - `sed -n '1,260p' src/isaacsim_agent/eval/cross_family.py`
-  - `sed -n '1,260p' src/isaacsim_agent/eval/summarize.py`
-  - `sed -n '1,260p' scripts/run_suite.py`
-  - `find results/processed -maxdepth 2 -type f | sort | rg 'block_a|summary|aggregate|validation|run_summary'`
-  - `sed -n '1,320p' src/isaacsim_agent/experiments/pilot.py`
-  - `sed -n '1,320p' src/isaacsim_agent/experiments/manifest.py`
-  - `sed -n '1,260p' configs/experiments/block_a/manipulation_prompt_runtime_pilot.yaml`
-  - `sed -n '1,260p' configs/experiments/block_a/navigation_prompt_runtime_expanded.yaml`
-  - `sed -n '1,260p' configs/experiments/block_a/navigation_prompt_runtime_robustness.yaml`
-  - `sed -n '1,260p' tests/test_block_a_manipulation_pilot_smoke.py`
-  - `sed -n '320,760p' src/isaacsim_agent/experiments/pilot.py`
-  - `sed -n '1,220p' src/isaacsim_agent/eval/__init__.py`
-  - `sed -n '1,260p' tests/test_block_a_master_summary.py`
-  - `sed -n '520,700p' plan.md`
-  - `sed -n '300,380p' plan.md`
-  - `git status --short`
-  - `sed -n '1,320p' src/isaacsim_agent/planner/mock.py`
-  - `sed -n '1,320p' src/isaacsim_agent/tasks/manipulation/baseline.py`
-  - `sed -n '1,320p' src/isaacsim_agent/tasks/navigation/baseline.py`
-  - `sed -n '1,360p' tests/test_block_a_robustness_smoke.py`
-  - `sed -n '1,220p' scripts/summarize_block_a_master.py`
-  - `sed -n '760,1320p' src/isaacsim_agent/experiments/pilot.py`
-  - `sed -n '1,260p' tests/test_block_a_expanded_smoke.py`
-  - `sed -n '1,220p' scripts/README.md`
-  - `sed -n '1,200p' configs/README.md`
-  - `rg -n "def _parse_task|def _build_run_id|task_family == \\\"manipulation\\\"|pilot runner currently supports only task_family|task_family" src/isaacsim_agent/experiments/pilot.py -S`
-  - `sed -n '1320,1565p' src/isaacsim_agent/experiments/pilot.py`
-  - `sed -n '1,260p' src/isaacsim_agent/runtime/session.py`
-  - `sed -n '1,220p' src/isaacsim_agent/runtime/__init__.py`
-  - `rg -n "def build_minimal_pickplace_task_config|scripted_sequence|PickPlaceSpec|manipulation_baseline|build_minimal_pickplace" src/isaacsim_agent/tasks/manipulation -S`
-  - `sed -n '320,760p' src/isaacsim_agent/tasks/manipulation/baseline.py`
-  - `sed -n '1,260p' src/isaacsim_agent/tools/manipulation.py`
-  - `sed -n '1560,1725p' src/isaacsim_agent/runtime/session.py`
-  - `rg -n "block_a_navigation_robustness|Robustness Findings|analysis\\[\\\"mode\\\"\\]|analysis_mode" tests src -S`
-  - `sed -n '1,260p' src/isaacsim_agent/planner/base.py`
-  - `rg -n "PlannerRequest\\(" src/isaacsim_agent/runtime/session.py -n -S`
-  - `sed -n '740,930p' src/isaacsim_agent/runtime/session.py`
-  - `sed -n '1290,1475p' src/isaacsim_agent/runtime/session.py`
-  - `sed -n '1,220p' src/isaacsim_agent/experiments/__init__.py`
-  - `sed -n '1,220p' src/isaacsim_agent/tasks/manipulation/__init__.py`
-  - `find results -maxdepth 2 -type d | sort | rg 'block_a_runtime_only_ablation|block_a_prompt_only_ablation|block_a_manipulation_harder'`
+  - `find paper -maxdepth 3 -print 2>/dev/null | sort`
+  - `find results/processed -maxdepth 2 -type d | sort | rg 'block_a|packag|figure|table|analysis'`
+  - `sed -n '1,220p' paper/README.md`
+  - `sed -n '1,260p' results/processed/block_a_final_closure/block_a_final_closure_summary.md`
+  - `sed -n '1,260p' results/processed/block_a_final_closure/block_a_final_closure_summary.json`
+  - `sed -n '1,220p' results/processed/block_a_final_closure/block_a_final_closure_summary.csv`
+  - `sed -n '1,240p' results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json`
   - `sed -n '1,220p' results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json`
-  - `sed -n '1,220p' results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json`
   - `sed -n '1,260p' results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json`
   - `sed -n '1,260p' results/processed/block_a_master_summary/block_a_master_summary.json`
-  - `rg -n '\"question\"|\"answer\"|block A 的主效应|跨 navigation|runtime|prompt|harder navigation|harder manipulation|questions' results/processed/block_a_master_summary/block_a_master_summary.json results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json -S`
-  - `sed -n '1,220p' src/isaacsim_agent/eval/validate.py`
-  - `sed -n '1,200p' src/isaacsim_agent/eval/__init__.py`
-  - `sed -n '1,220p' results/processed/block_a_final_closure/block_a_final_closure_summary.md`
-  - `sed -n '1,120p' results/processed/block_a_final_closure/block_a_final_closure_summary.csv`
-  - `find results/processed/block_a_runtime_only_ablation results/processed/block_a_prompt_only_ablation results/processed/block_a_manipulation_harder results/processed/block_a_final_closure -maxdepth 2 -type f | sort`
-  - `sed -n '1,200p' scripts/README.md`
-  - `sed -n '1,200p' configs/README.md`
-- Lightweight validation and focused tests:
-  - `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/experiments/pilot.py src/isaacsim_agent/tasks/manipulation/baseline.py src/isaacsim_agent/runtime/session.py src/isaacsim_agent/planner/mock.py tests/test_block_a_runtime_only_ablation_smoke.py tests/test_block_a_prompt_only_ablation_smoke.py tests/test_block_a_manipulation_harder_smoke.py`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_runtime_only_ablation_smoke`
-  - `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/runtime_only_ablation.yaml`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_prompt_only_ablation_smoke`
-  - `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/prompt_only_ablation.yaml`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_manipulation_harder_smoke`
-  - `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/manipulation_prompt_runtime_harder.yaml`
-  - `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/eval/block_a_final_closure.py src/isaacsim_agent/eval/__init__.py scripts/summarize_block_a_final_closure.py tests/test_block_a_final_closure_summary.py`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_final_closure_summary`
-  - `PYTHONPATH=src uv run python scripts/summarize_block_a_final_closure.py`
-- Regression coverage:
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_pilot_smoke`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_expanded_smoke`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_manipulation_pilot_smoke`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_robustness_smoke`
-  - `PYTHONPATH=src uv run python -m unittest tests.test_block_a_master_summary`
-- Focused debug probes:
-  - `PYTHONPATH=src uv run python - <<'PY' ... stage temp inputs and print final-closure question answers ... PY`
-  - `PYTHONPATH=src uv run python - <<'PY' ... inspect staged master-summary keys ... PY`
-  - `PYTHONPATH=src uv run python - <<'PY' ... inspect staged master answers ... PY`
+  - `sed -n '1,260p' results/processed/block_a_cross_family_summary/cross_family_summary.json`
+  - `find results/processed/block_a_master_summary -maxdepth 2 -type f | sort`
+  - `find results/processed/block_a_master_summary/paper_tables -maxdepth 2 -type f | sort`
+  - `find results/processed/block_a_master_summary/paper_figures -maxdepth 2 -type f | sort`
+  - `find results/processed/block_a_master_summary/analysis -maxdepth 2 -type f | sort`
+  - `sed -n '1,200p' results/processed/block_a_master_summary/analysis/block_a_analysis.md`
+- Workspace setup:
+  - `mkdir -p paper/shared paper/versions/ral paper/versions/corl paper/versions/autonomous_robots paper/versions/neutral paper/assets/figures paper/assets/tables paper/notes paper/outlines`
+- Validation:
+  - `python - <<'PY' ... verify markdown links and referenced result paths under paper/ ... PY`
+  - `rg -n "state of the art|strongest embodied agent|general embodied intelligence|sim-to-real|real-world safety|accepted|submitted|dual submission|first Isaac Sim embodied-agent benchmark|memory/context/tool abstraction are solved|new model" paper -S`
+  - `find paper -maxdepth 4 -print | sort`
 
 ## Validation results
 
-- Python compilation for the new Block A closure files succeeded:
-  - command: `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/eval/block_a_final_closure.py src/isaacsim_agent/eval/__init__.py scripts/summarize_block_a_final_closure.py tests/test_block_a_final_closure_summary.py`
-  - result: success with no output
-- Python compilation for the shared runner/runtime changes succeeded:
-  - command: `PYTHONPATH=src uv run python -m py_compile src/isaacsim_agent/experiments/pilot.py src/isaacsim_agent/tasks/manipulation/baseline.py src/isaacsim_agent/runtime/session.py src/isaacsim_agent/planner/mock.py tests/test_block_a_runtime_only_ablation_smoke.py tests/test_block_a_prompt_only_ablation_smoke.py tests/test_block_a_manipulation_harder_smoke.py`
-  - result: success with no output
-- Runtime-only ablation smoke coverage succeeded:
-  - command: `PYTHONPATH=src uv run python -m unittest tests.test_block_a_runtime_only_ablation_smoke`
-  - result:
-    - `Ran 2 tests in 0.239s`
-    - `OK`
-- Runtime-only real-data e2e succeeded:
-  - command: `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/runtime_only_ablation.yaml`
-  - result:
-    - `Planned runs: 8`
-    - `Runs scanned: 8`
-    - `Run-complete runs: 8`
-    - `Successful runs: 6`
-- Prompt-only ablation smoke coverage succeeded:
-  - command: `PYTHONPATH=src uv run python -m unittest tests.test_block_a_prompt_only_ablation_smoke`
-  - result:
-    - `Ran 2 tests in 0.222s`
-    - `OK`
-- Prompt-only real-data e2e succeeded:
-  - command: `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/prompt_only_ablation.yaml`
-  - result:
-    - `Planned runs: 12`
-    - `Runs scanned: 12`
-    - `Run-complete runs: 12`
-    - `Successful runs: 8`
-- Manipulation harder smoke coverage succeeded:
-  - command: `PYTHONPATH=src uv run python -m unittest tests.test_block_a_manipulation_harder_smoke`
-  - result:
-    - `Ran 2 tests in 0.311s`
-    - `OK`
-- Manipulation harder real-data e2e succeeded:
-  - command: `PYTHONPATH=src uv run python scripts/run_suite.py --config configs/experiments/block_a/manipulation_prompt_runtime_harder.yaml`
-  - result:
-    - `Planned runs: 18`
-    - `Runs scanned: 18`
-    - `Run-complete runs: 18`
-    - `Successful runs: 15`
-- Final closure summary focused coverage succeeded:
-  - command: `PYTHONPATH=src uv run python -m unittest tests.test_block_a_final_closure_summary`
-  - result:
-    - `Ran 2 tests in 0.156s`
-    - `OK`
-- Final closure real-data e2e succeeded:
-  - command: `PYTHONPATH=src uv run python scripts/summarize_block_a_final_closure.py`
-  - result:
-    - `Merged runs: 146`
-    - `Successful runs: 119`
-    - all three final closure artifacts were written
-- Shared Block A regression coverage also succeeded:
-  - `tests.test_block_a_pilot_smoke`: `Ran 2 tests ... OK`
-  - `tests.test_block_a_expanded_smoke`: `Ran 2 tests ... OK`
-  - `tests.test_block_a_manipulation_pilot_smoke`: `Ran 2 tests ... OK`
-  - `tests.test_block_a_robustness_smoke`: `Ran 2 tests ... OK`
-  - `tests.test_block_a_master_summary`: `Ran 2 tests ... OK`
+- Markdown links and referenced paths under `paper/` all resolved successfully.
+  - command: `python - <<'PY' ... verify markdown links and referenced result paths under paper/ ... PY`
+  - result: `OK`
+- Keyword scan only found explicit negative guardrails and caution text; no conflicting positive claim about SOTA, submission state, or general embodied intelligence was introduced.
+  - command: `rg -n "state of the art|strongest embodied agent|general embodied intelligence|sim-to-real|real-world safety|accepted|submitted|dual submission|first Isaac Sim embodied-agent benchmark|memory/context/tool abstraction are solved|new model" paper -S`
+  - result: matches were all negative guardrails or branch-policy cautions
+- The expected paper workspace structure now exists.
+  - command: `find paper -maxdepth 4 -print | sort`
+  - result: all requested top-level subdirectories and required markdown files are present
 
-## Blockers
+## Next recommended sub-milestone
 
-- None.
-
-## Next recommended step
-
-- Treat Block A as experimentally closed for the scoped prompting × runtime paper axis and freeze these outputs for manuscript integration.
-- Do not start `M7` memory/context unless a later run explicitly asks for it.
+- Draft the RA-L main-text core from this scaffold in results-first order:
+  - `Results`
+  - `Study Design`
+  - `Experimental Setup`
+  - `Discussion and Limitations`
+- When that work starts, use `paper/shared/findings.md`, `paper/shared/figures_and_tables.md`, and `paper/outlines/ral_outline.md` as the immediate source documents.
