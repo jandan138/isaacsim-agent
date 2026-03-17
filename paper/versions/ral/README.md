@@ -1,19 +1,25 @@
-# RA-L Version Policy
+# RA-L Working Draft Stack
 
-This directory is for the primary submission-target version.
+This directory holds the active RA-L branch for the current Block A paper. The
+evidence base remains fixed to the controlled-study scope defined in
+`paper/shared/` and `docs/ral_writing_playbook.md`.
 
-## Why RA-L first
+Current branch state:
 
-The current evidence is strongest as a compact controlled systems study with clean,
-results-first takeaways. `docs/ral_writing_playbook.md` already defines the most
-concrete writing constraints in the repo, so RA-L is the best first target for the
-current Block A closure.
+- first-pass core prose is complete for introduction, setup/study design, and results
+- second-pass prose is now complete for related work, discussion/limitations, and
+  conclusion
+- the branch now covers all main body sections in draft prose, but it has not yet
+  been assembled into a final page-budgeted manuscript
 
-## What belongs in this version
+## Branch policy
+
+RA-L remains the best first target because the current evidence fits a compact,
+results-first controlled systems study. This branch should continue to optimize for:
 
 - the tightest framing of the controlled-study story
 - the highest-value figures and tables only
-- the most compressed introduction and related work
+- compressed introduction and related work
 - explicit limitations with no scope creep
 
 Use these inputs first:
@@ -24,46 +30,90 @@ Use these inputs first:
 - `paper/shared/figures_and_tables.md`
 - `paper/outlines/ral_outline.md`
 
-## Section triage under page pressure
+## Current draft files
 
-Keep at full strength:
+| File | Stage | Role |
+| --- | --- | --- |
+| `title_candidates.md` | prose | Candidate RA-L titles grouped by framing strength and reviewer risk. |
+| `abstract_candidates.md` | prose | Three abstract variants that share the same Block A claim boundary. |
+| `intro_draft.md` | prose | First-pass introduction that states the problem, gap, scope, findings preview, and contributions. |
+| `setup_and_study_design_draft.md` | prose | Combined setup and study-design text defining task families, slices, contracts, variants, and metrics. |
+| `results_draft.md` | prose | Results-first manuscript core anchored to the frozen Block A summaries. |
+| `related_work_draft.md` | prose | Short RA-L related-work draft using explicit placeholder citations that still require literature verification. |
+| `discussion_and_limitations_draft.md` | prose | Discussion of robotics relevance, design implications, and explicit study boundaries. |
+| `conclusion_draft.md` | prose | Short conclusion that closes on bounded system-design findings. |
+| `page_pressure_plan.md` | planning | Concrete trimming plan for assembling the draft within the RA-L 6-8 page budget. |
+| `README.md` | prose | Branch policy, file relationships, and remaining work status for this RA-L version. |
 
-- results
-- study design
-- experimental setup
-- limitations
+## How these drafts relate
 
-Compress aggressively:
+The documents are meant to be read in the same claim order as the eventual letter:
 
-- introduction
-- related work
-- conclusion
+1. `title_candidates.md` and `abstract_candidates.md` define the outer framing.
+2. `intro_draft.md` turns that framing into the paper's problem statement, scope, and
+   contribution set.
+3. `setup_and_study_design_draft.md` defines the controlled matrix that makes the
+   claims interpretable.
+4. `results_draft.md` is the anchor document for all scientific claims and should be
+   treated as the main guardrail against drift in later prose passes.
+5. `related_work_draft.md` positions the paper without widening the scope beyond the
+   controlled-study framing.
+6. `discussion_and_limitations_draft.md` and `conclusion_draft.md` close the argument
+   while keeping the claims aligned to the frozen evidence.
+7. `page_pressure_plan.md` defines what should be cut, compressed, or moved when the
+   branch is assembled into a letter.
 
-Exclude unless a later task explicitly adds them:
+Practical rule:
 
-- roadmap dimensions outside Block A
-- long implementation detail
-- expanded discussion that does not change interpretation
+- if a title, abstract, or introduction sentence cannot be supported by
+  `results_draft.md` plus the frozen summaries, it should be revised or removed
 
-## Anonymity rules
+## Placeholder policy for figures and tables
 
-- maintain double-anonymous wording in manuscript text
-- avoid self-identifying repo history, names, affiliations, or prior ownership language
-- do not state or imply that the paper is already submitted, accepted, or transferred
+This prose pass intentionally uses placeholder markers instead of final numbering. The
+allowed placeholders in this branch are:
 
-## Shared vs venue-specific text
+- `[Fig: main condition ordering]`
+- `[Fig: invalid actions and recovery]`
+- `[Fig: planner/tool overhead]`
+- `[Table: experimental design summary]`
+- `[Table: final closure result summary]`
+- `[Table: focused ablation summary]`
 
-Likely shared:
+These labels are aligned with `paper/shared/figures_and_tables.md`. They are planning
+markers only and do not imply that final manuscript assets already exist.
 
-- results paragraphs
-- variant definitions
-- metric definitions
-- most of the limitations wording
+## Current prose coverage
 
-Must be RA-L-specific:
+The RA-L branch now has prose drafts for all major manuscript sections:
 
 - title
 - abstract
-- introduction pacing
-- related-work compression
-- figure/table budget decisions
+- introduction
+- related work
+- experimental setup / study design
+- results
+- discussion / limitations
+- conclusion
+
+## What remains before full draft assembly
+
+The branch is not yet at full draft assembly. The main remaining steps are:
+
+- replace the `[RW*]` placeholder citations in `related_work_draft.md` with verified
+  literature
+- assemble the section drafts into one manuscript-order body with consistent
+  transitions and no duplicated wording
+- execute the trimming actions in `page_pressure_plan.md`, especially for
+  `intro_draft.md`, `setup_and_study_design_draft.md`, and `results_draft.md`
+- regenerate final figures and tables from the `block_a_final_closure` freeze and
+  decide whether the focused ablation table fits the RA-L page budget
+- draft appendix / supplementary notes, anonymous artifact wording, and submission
+  metadata as separate assembly-stage assets
+
+## Anonymity and scope reminders
+
+- maintain double-anonymous wording throughout
+- keep the paper on Block A only
+- do not widen the branch to memory, context management, tool abstraction, or randomization
+- do not present the paper as a new-model paper or as a broad deployment claim
