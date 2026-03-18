@@ -1,7 +1,7 @@
 block,family,slice,axes,tasks,runs_per_cell,total_runs,role
-Main factorial,Navigation,Easy,P0/P1/P2 x R0/R1,11,11,66,Main contract/runtime ordering
-Main factorial,Manipulation,Easy,P0/P1/P2 x R0/R1,3,3,18,Main contract/runtime ordering
-Main factorial,Navigation,Harder,P0/P1/P2 x R0/R1,4,4,24,Harder-task robustness
-Main factorial,Manipulation,Harder,P0/P1/P2 x R0/R1,3,3,18,Harder-task robustness
-Action-interface ablation,Mixed,Easy shared subset,P0/P1/P2 at fixed R0,4,4,12,Invalid-action mechanism check
-Runtime-only ablation,Mixed,Recoverable probes,R0/R1 at fixed P1,4,4,8,Validation/retry mechanism check
+Main factorial,Navigation,Easy,P0/P1/P2 x R0/R1,11,11,66,Main ordering
+Main factorial,Manipulation,Easy,P0/P1/P2 x R0/R1,3,3,18,Main ordering
+Main factorial,Navigation,Harder,P0/P1/P2 x R0/R1,4,4,24,Harder robustness
+Main factorial,Manipulation,Harder,P0/P1/P2 x R0/R1,3,3,18,Harder robustness
+Action-interface ablation,Mixed,Easy shared subset,P0/P1/P2 at fixed R0,4,4,12,Contract mechanism
+Runtime-only ablation,Mixed,Recoverable probes,R0/R1 at fixed P1,4,4,8,Runtime recovery

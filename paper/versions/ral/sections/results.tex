@@ -19,6 +19,10 @@ across both task families and persists as tasks become harder.
 Table~\ref{tab:main-outcome-summary} records the same retained cohorts
 in a reviewer-facing layout that keeps success, invalid-action exposure, and
 retries readable without forcing planner/tool counts into every cell.
+Figure~\ref{fig:main-condition-ordering} makes the same distinction visually:
+the recovered \texttt{P0/R1} cells are separated from the clean
+\texttt{P1}/\texttt{P2} cells, so the repeated 1.0 success values remain
+interpretable at manuscript scale.
 
 The same comparison separates the roles of contract design and runtime
 validation. Invalid-action failures are concentrated in the P0 cells, showing
@@ -26,12 +30,14 @@ that loose task-level verbs are brittle at the planner/executor boundary. Once
 the planner is forced into a typed tool namespace, the dominant failure mode
 disappears in the covered fixed-R0 slice. Within the successful structured
 conditions, P2 matches P1 on success while showing lower planner/tool
-overhead on the shared easy slice and the harder manipulation slice.
+overhead across the retained \texttt{P1} versus \texttt{P2} comparisons.
 Table~\ref{tab:planner-tool-overhead-summary} isolates that workload
 comparison so the manuscript can report it without overloading the outcome
-table. We
-interpret that pattern as a workload association within already-strong
-contracts, not as evidence of a new success regime.
+table. Figure~\ref{fig:planner-tool-overhead} compresses those retained
+comparisons into one workload mark per row because planner and tool counts are
+equal within the plotted \texttt{P1}/\texttt{P2} pairs. We interpret that
+pattern as a workload association within already-strong contracts, not as
+evidence of a new success regime.
 
 \input{figures/planner_tool_overhead.tex}
 
@@ -53,8 +59,6 @@ under both runtimes, but successful invalid-action recoveries rise from 0 to
 each family separately, with navigation and manipulation each moving from
 0.5 to 1.0 success in this slice.
 
-\input{figures/invalid_actions_recovery.tex}
-
 With runtime fixed at R0, P0/R0 fails on all 4/4 evaluated tasks and
 accumulates four total invalid actions, whereas P1/R0 and P2/R0 succeed on
 all 4/4 tasks and reduce invalid actions to zero. This establishes an
@@ -63,6 +67,14 @@ calls, the invalid-action failures that dominate the under-specified interface
 disappear in this slice. The same comparison also shows the narrower P2
 effect: P1/R0 and P2/R0 have the same success profile, but average planner
 and tool calls each fall from roughly 7.5 to 6.0.
+
+\input{figures/invalid_actions_recovery.tex}
+
+Figure~\ref{fig:invalid-actions-recovery} makes both mechanisms visible in one
+place: the fixed-R0 panel shows typed contracts eliminating invalid actions,
+while the fixed-P1 runtime panel shows R1 converting the invalid half of the
+runtime-only slice from failure into recovery, with retries rising from 0.0 to
+0.5 per run.
 
 The failure traces explain what goes wrong under P0. In navigation, failing
 P0 runs repeatedly emit the unsupported tool name

@@ -1,10 +1,11 @@
 Grounded BibTeX entries now live in \texttt{references.bib}, and the active
 LaTeX draft now uses \texttt{\textbackslash cite\{\}} consistently throughout
-the compiled manuscript. The submission-polish pass added fuller author
-metadata plus verified venue / DOI / page fields where those were safely
-confirmed, while leaving documentation and arXiv-only items conservative where
-no safer archival metadata was introduced. The current \texttt{.tex} sources
-contain no inline author-year references. Remaining reference work is optional
-author spot-checking: decide whether any arXiv-only items should be swapped to
-later archival versions and do one final bibliography-style glance before
-submission.
+the compiled manuscript. This pass kept the bibliography changes conservative:
+\texttt{RT-2} was aligned to the official PMLR proceedings metadata, and the
+BehaviorTree.CPP documentation entries now record checked version / access
+notes. ArXiv-only items were left conservative where the safer archival
+alternative would have changed the cited title or paper type. The current
+\texttt{.tex} sources contain no inline author-year references. Remaining
+reference work is optional author spot-checking: decide whether any arXiv-only
+items should be swapped to later archival versions and do one final
+bibliography-style glance before submission.

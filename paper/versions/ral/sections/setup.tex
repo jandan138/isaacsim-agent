@@ -7,8 +7,9 @@ tabletop manipulation \cite{nvidiaIsaacSimDocs}. The navigation family
 contains language-conditioned mobile-goal tasks in indoor scenes. The
 manipulation family contains tabletop tasks that require object identification,
 grasping, transfer, and placement. The main comparison uses a shared easy
-slice plus one harder slice per family to test whether added task burden
-changes the qualitative ordering or mainly amplifies planner/tool overhead.
+slice plus one harder slice per family, letting us test whether additional task
+burden changes the qualitative ordering or mainly amplifies planner/tool
+overhead.
 
 All conditions share the same high-level handoff:
 
@@ -51,23 +52,25 @@ still slip through.
 
 The frozen Block A evidence uses the repo-local \texttt{mock\_block\_a}
 planner backend rather than a hosted foundation-model API. In the archived run
-summaries, \texttt{planner\_backend=mock\_block\_a} and
-\texttt{model\_variant=null}; the access path is the local implementation in
+summaries, this appears as \texttt{planner\_backend=mock\_block\_a} with
+\texttt{model\_variant=null}; the implementation is the local file
 \texttt{src/isaacsim\_agent/planner/mock.py}. The planner emits one
 deterministic JSON action per call, so there are no temperature, top-$p$, or
-stochastic decoding settings to tune in this frozen study. P0 realizes a
-direct-action JSON contract, P1 realizes typed tool JSON, and P2 keeps the
-same typed tool JSON while adding a planner-side \texttt{self\_check} field.
-R0 performs bare dispatch, while R1 validates tool name and arguments against
-the active task-specific namespace and allows one repair attempt before
-termination. Navigation exposes \texttt{get\_robot\_state},
-\texttt{get\_goal\_state}, and \texttt{navigate\_to}. Manipulation exposes
-\texttt{get\_gripper\_state}, \texttt{get\_object\_state},
-\texttt{get\_target\_state}, and \texttt{scripted\_pick\_place\_step}.
-Representative task configs and trajectories also record the backend
-realization directly, including archived \texttt{backend\_variant} values and
-the stored Isaac-backed navigation runtime metadata
-(\texttt{kit\_version}=106.5.0).
+stochastic decoding settings to tune in this frozen study.
+
+P0 realizes a direct-action JSON contract, P1 realizes typed tool JSON, and
+P2 keeps the same typed tool JSON while adding a planner-side
+\texttt{self\_check} field. R0 performs bare dispatch, while R1 validates tool
+name and arguments against the active task-specific namespace and allows one
+repair attempt before termination. Navigation exposes
+\texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and
+\texttt{navigate\_to}. Manipulation exposes \texttt{get\_gripper\_state},
+\texttt{get\_object\_state}, \texttt{get\_target\_state}, and
+\texttt{scripted\_pick\_place\_step}. The archived task configs, trajectories,
+and processed summaries record the selected backend realization, contract and
+runtime variants, termination reason, and Isaac runtime metadata such as
+\texttt{backend\_variant} and \texttt{kit\_version}=106.5.0, so the reported
+slices remain traceable to fixed local artifacts.
 
 \subsection{Metrics and Evaluation Protocol}
 
@@ -78,8 +81,8 @@ still ends successfully after runtime handling. Retries capture the extra
 repair work used in R1. Planner calls and tool calls together define
 planner/tool overhead, which is the paper's efficiency proxy.
 
-The paper draws its quantitative comparisons from the main factorial results
-plus targeted runtime-only, action-interface ablation, and harder-task
+The paper draws its quantitative comparisons from the frozen main factorial
+results plus targeted runtime-only, action-interface ablation, and harder-task
 summaries.
 The final closure summary provides the canonical aggregate view, while the
 slice-specific summaries support the ablations and the failure-case

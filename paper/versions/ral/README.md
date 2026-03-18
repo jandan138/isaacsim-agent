@@ -84,6 +84,19 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   revert to prompt-first wording.
 - Figure 1 is now a frozen manually selected asset and is out of scope for any
   further redesign in this branch.
+- The latest manuscript pass focused on Fig. 2 / 3 / 4 readability, table
+  readability, setup/reproducibility clarity, and conservative bibliography
+  polish.
+- The current result-figure designs are:
+  - Fig. 2:
+    full-width outcome matrix with explicit `fail` / `recovered` / `clean`
+    cells
+  - Fig. 3:
+    retained `P1` versus `P2` workload comparison with `planner/tool` pair
+    labels
+  - Fig. 4:
+    compact mechanism figure combining invalid-action exposure with runtime
+    recovery
 - The setup section now includes a compact implementation snapshot covering the
   local planner backend, deterministic JSON decoding, contract realizations,
   runtime realizations, and executor namespaces.

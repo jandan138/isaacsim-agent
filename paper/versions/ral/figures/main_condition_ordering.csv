@@ -1,25 +1,25 @@
-panel,note,bar_label,value,color
-Navigation Easy,11 runs/cell,P0/R0,0.0,ralP0R0
-Navigation Easy,11 runs/cell,P0/R1,1.0,ralP0R1
-Navigation Easy,11 runs/cell,P1/R0,1.0,ralP1R0
-Navigation Easy,11 runs/cell,P1/R1,1.0,ralP1R1
-Navigation Easy,11 runs/cell,P2/R0,1.0,ralP2R0
-Navigation Easy,11 runs/cell,P2/R1,1.0,ralP2R1
-Manipulation Easy,3 runs/cell,P0/R0,0.0,ralP0R0
-Manipulation Easy,3 runs/cell,P0/R1,1.0,ralP0R1
-Manipulation Easy,3 runs/cell,P1/R0,1.0,ralP1R0
-Manipulation Easy,3 runs/cell,P1/R1,1.0,ralP1R1
-Manipulation Easy,3 runs/cell,P2/R0,1.0,ralP2R0
-Manipulation Easy,3 runs/cell,P2/R1,1.0,ralP2R1
-Navigation Harder,4 runs/cell,P0/R0,0.0,ralP0R0
-Navigation Harder,4 runs/cell,P0/R1,1.0,ralP0R1
-Navigation Harder,4 runs/cell,P1/R0,1.0,ralP1R0
-Navigation Harder,4 runs/cell,P1/R1,1.0,ralP1R1
-Navigation Harder,4 runs/cell,P2/R0,1.0,ralP2R0
-Navigation Harder,4 runs/cell,P2/R1,1.0,ralP2R1
-Manipulation Harder,3 runs/cell,P0/R0,0.0,ralP0R0
-Manipulation Harder,3 runs/cell,P0/R1,1.0,ralP0R1
-Manipulation Harder,3 runs/cell,P1/R0,1.0,ralP1R0
-Manipulation Harder,3 runs/cell,P1/R1,1.0,ralP1R1
-Manipulation Harder,3 runs/cell,P2/R0,1.0,ralP2R0
-Manipulation Harder,3 runs/cell,P2/R1,1.0,ralP2R1
+cohort_label,cohort_key,task_family,task_difficulty,runs_per_cell,prompt_variant,runtime_variant,cell,successful_runs,run_count,success_rate,average_invalid_actions,average_retries
+Navigation Easy,navigation_easy,navigation,easy,11,P0,R0,P0/R0,0,11,0.0,1.0,0.0
+Navigation Easy,navigation_easy,navigation,easy,11,P0,R1,P0/R1,11,11,1.0,1.0,1.0
+Navigation Easy,navigation_easy,navigation,easy,11,P1,R0,P1/R0,11,11,1.0,0.0,0.0
+Navigation Easy,navigation_easy,navigation,easy,11,P1,R1,P1/R1,11,11,1.0,0.0,0.0
+Navigation Easy,navigation_easy,navigation,easy,11,P2,R0,P2/R0,11,11,1.0,0.0,0.0
+Navigation Easy,navigation_easy,navigation,easy,11,P2,R1,P2/R1,11,11,1.0,0.0,0.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P0,R0,P0/R0,0,3,0.0,1.0,0.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P0,R1,P0/R1,3,3,1.0,1.0,1.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P1,R0,P1/R0,3,3,1.0,0.0,0.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P1,R1,P1/R1,3,3,1.0,0.0,0.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P2,R0,P2/R0,3,3,1.0,0.0,0.0
+Manipulation Easy,manipulation_easy,manipulation,easy,3,P2,R1,P2/R1,3,3,1.0,0.0,0.0
+Navigation Harder,navigation_harder,navigation,harder,4,P0,R0,P0/R0,0,4,0.0,1.0,0.0
+Navigation Harder,navigation_harder,navigation,harder,4,P0,R1,P0/R1,4,4,1.0,1.0,1.0
+Navigation Harder,navigation_harder,navigation,harder,4,P1,R0,P1/R0,4,4,1.0,0.0,0.0
+Navigation Harder,navigation_harder,navigation,harder,4,P1,R1,P1/R1,4,4,1.0,0.0,0.0
+Navigation Harder,navigation_harder,navigation,harder,4,P2,R0,P2/R0,4,4,1.0,0.0,0.0
+Navigation Harder,navigation_harder,navigation,harder,4,P2,R1,P2/R1,4,4,1.0,0.0,0.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P0,R0,P0/R0,0,3,0.0,1.0,0.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P0,R1,P0/R1,3,3,1.0,1.0,1.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P1,R0,P1/R0,3,3,1.0,0.0,0.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P1,R1,P1/R1,3,3,1.0,0.0,0.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P2,R0,P2/R0,3,3,1.0,0.0,0.0
+Manipulation Harder,manipulation_harder,manipulation,harder,3,P2,R1,P2/R1,3,3,1.0,0.0,0.0

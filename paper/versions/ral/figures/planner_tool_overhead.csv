@@ -1,17 +1,21 @@
-panel,note,bar_label,value,color
-Navigation Easy,Fixed R0 contract ablation,P1-P,5.0,ralP1R0
-Navigation Easy,Fixed R0 contract ablation,P1-T,5.0,ralP1R0
-Navigation Easy,Fixed R0 contract ablation,P2-P,4.0,ralP2R0
-Navigation Easy,Fixed R0 contract ablation,P2-T,4.0,ralP2R0
-Manipulation Easy,Fixed R0 contract ablation,P1-P,10.0,ralP1R0
-Manipulation Easy,Fixed R0 contract ablation,P1-T,10.0,ralP1R0
-Manipulation Easy,Fixed R0 contract ablation,P2-P,8.0,ralP2R0
-Manipulation Easy,Fixed R0 contract ablation,P2-T,8.0,ralP2R0
-Manipulation Harder R0,Harder manipulation slice,P1-P,11.67,ralP1R0
-Manipulation Harder R0,Harder manipulation slice,P1-T,11.67,ralP1R0
-Manipulation Harder R0,Harder manipulation slice,P2-P,9.67,ralP2R0
-Manipulation Harder R0,Harder manipulation slice,P2-T,9.67,ralP2R0
-Manipulation Harder R1,Harder manipulation slice,P1-P,11.67,ralP1R1
-Manipulation Harder R1,Harder manipulation slice,P1-T,11.67,ralP1R1
-Manipulation Harder R1,Harder manipulation slice,P2-P,9.67,ralP2R1
-Manipulation Harder R1,Harder manipulation slice,P2-T,9.67,ralP2R1
+context_label,family,difficulty,runtime_variant,metric,prompt_variant,value
+Nav. easy,navigation,easy,R0,planner_calls,P1,4.82
+Nav. easy,navigation,easy,R0,planner_calls,P2,3.82
+Nav. easy,navigation,easy,R0,tool_calls,P1,4.82
+Nav. easy,navigation,easy,R0,tool_calls,P2,3.82
+Nav. harder,navigation,harder,R0,planner_calls,P1,7.75
+Nav. harder,navigation,harder,R0,planner_calls,P2,6.75
+Nav. harder,navigation,harder,R0,tool_calls,P1,7.75
+Nav. harder,navigation,harder,R0,tool_calls,P2,6.75
+Manip. easy,manipulation,easy,R0,planner_calls,P1,10.0
+Manip. easy,manipulation,easy,R0,planner_calls,P2,8.0
+Manip. easy,manipulation,easy,R0,tool_calls,P1,10.0
+Manip. easy,manipulation,easy,R0,tool_calls,P2,8.0
+Manip. harder R0,manipulation,harder,R0,planner_calls,P1,11.67
+Manip. harder R0,manipulation,harder,R0,planner_calls,P2,9.67
+Manip. harder R0,manipulation,harder,R0,tool_calls,P1,11.67
+Manip. harder R0,manipulation,harder,R0,tool_calls,P2,9.67
+Manip. harder R1,manipulation,harder,R1,planner_calls,P1,11.67
+Manip. harder R1,manipulation,harder,R1,planner_calls,P2,9.67
+Manip. harder R1,manipulation,harder,R1,tool_calls,P1,11.67
+Manip. harder R1,manipulation,harder,R1,tool_calls,P2,9.67

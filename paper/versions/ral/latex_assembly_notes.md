@@ -6,6 +6,7 @@
 - Keep the existing anonymous reviewer-facing submission entry under
   `paper/versions/ral/reviewer_submission/`.
 - Keep the contract / runtime-validation framing intact.
+- Keep Figure 1 frozen and out of scope.
 - Do not add experiments, invent numbers, or widen the evidence base.
 
 ## Variant split
@@ -41,20 +42,23 @@
 - The shared manuscript now reaches that frozen asset through
   `figures/fig1_system_overview_frozen.tex`.
 - This pass does not redesign, regenerate, or iterate on Figure 1.
-- Replaced the manuscript-facing raster wrappers with vector-first TikZ/PGF
-  assets for:
+- Replaced the old shared grouped-bar template with figure-specific
+  manuscript-facing assets:
   - `main_condition_ordering`
-  - `invalid_actions_recovery`
+    - now a full-width outcome matrix with explicit `fail`, `recovered`, and
+      `clean` states
   - `planner_tool_overhead`
-- Removed the old debug-style visual treatment from the active manuscript
-  figures: no packaging annotations, no beige debug canvas, and no raster-first
-  dependence in the active reviewer-facing build.
+    - now a consolidated retained `P1` / `P2` workload comparison with
+      `planner/tool` labels instead of duplicated planner/tool panels
+  - `invalid_actions_recovery`
+    - now a two-part mechanism figure showing invalid-action elimination and
+      runtime recovery rather than retry-only micro-panels
 
 ## Table assembly changes
 
-- Reformatted `experimental_design_summary.tex` into a full-width reviewer-
-  facing matrix table.
-- Replaced the former dense combined result table in the main text with:
+- Kept the three main-text tables but refreshed their captions/labels so their
+  roles are clearer beside the redesigned figures:
+  - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
   - `tables/planner_tool_overhead_summary.tex`
 - Kept `tables/final_closure_result_summary.tex`,
@@ -72,11 +76,13 @@
 
 ## Citation and prose cleanup
 
-- Tightened the introduction wording without rewriting the manuscript around a
-  new thesis.
-- Kept the safer formal-venue replacements already present in
-  `refs/references.bib`; remaining arXiv-only items stay only where no safer
-  archival replacement was applied in this pass.
+- Tightened the introduction, setup, discussion, and conclusion wording without
+  rewriting the manuscript around a new thesis.
+- Updated `refs/references.bib` conservatively:
+  - aligned `RT-2` to official PMLR proceedings metadata
+  - added version/access notes to the BehaviorTree.CPP documentation entries
+  - left `OK-Robot` and the two 2025 benchmark citations conservative where no
+    same-title archival replacement was safely introduced in this pass
 
 ## Build verification
 
@@ -99,6 +105,8 @@
 
 - Underfull-box warnings remain from narrow-column line breaking and float-page
   composition.
+- Small overfull-box warnings remain in the compact Fig. 2 / Fig. 4
+  table-figure hybrids, but the rendered reviewer PDF is legible.
 - The reviewer-facing system-overview insets are schematic renderings grounded
   in frozen layouts and traces; authors may still swap in literal simulator
   screenshots later if desired.

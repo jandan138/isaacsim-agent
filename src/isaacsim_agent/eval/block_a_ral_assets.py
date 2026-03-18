@@ -36,6 +36,12 @@ _MAIN_COHORTS = [
     ("manipulation", "harder", "Manipulation Harder"),
 ]
 
+_PROMPT_BASE_COLOR_NAMES = {
+    "P0": "ralP0R0",
+    "P1": "ralP1R0",
+    "P2": "ralP2R0",
+}
+
 
 @dataclass(frozen=True)
 class BlockARalAssetPackagingResult:
@@ -81,77 +87,37 @@ def package_block_a_ral_assets(
 
     written_outputs: dict[str, Path] = {}
 
-    main_panels = _build_main_condition_panels(main_rows)
+    main_figure_rows = _build_main_condition_figure_rows(main_rows)
     main_figure_csv = figures_dir / "main_condition_ordering.csv"
-    _write_csv(main_figure_csv, _panel_csv_rows(main_panels))
+    _write_csv(main_figure_csv, main_figure_rows)
     written_outputs["main_condition_ordering_csv"] = main_figure_csv
     main_figure_tex = figures_dir / "main_condition_ordering.tex"
     _write_text(
         main_figure_tex,
-        _bar_group_figure_tex(
-            panels=main_panels,
-            y_max=1.0,
-            y_label="Success rate",
-            float_env="figure*",
-            axis_width=r"0.43\textwidth",
-            axis_height=r"0.25\textwidth",
-            label="fig:main-condition-ordering",
-            caption=(
-                "Success rate across the retained navigation and manipulation cohorts for all six "
-                "contract/runtime cells. \\texttt{P0/R0} is consistently weakest, \\texttt{P0/R1} recovers, "
-                "and the typed contracts remain successful in the covered slices."
-            ),
-        ),
+        _main_condition_ordering_figure_tex(main_figure_rows),
     )
     written_outputs["main_condition_ordering_tex"] = main_figure_tex
 
-    invalid_recovery_panels = _build_invalid_recovery_panels(prompt_rows, runtime_rows)
+    invalid_rows = _build_invalid_action_rows(prompt_rows)
+    recovery_rows = _build_runtime_recovery_rows(runtime_rows)
     invalid_recovery_csv = figures_dir / "invalid_actions_recovery.csv"
-    _write_csv(invalid_recovery_csv, _panel_csv_rows(invalid_recovery_panels))
+    _write_csv(invalid_recovery_csv, _invalid_actions_recovery_csv_rows(invalid_rows, recovery_rows))
     written_outputs["invalid_actions_recovery_csv"] = invalid_recovery_csv
     invalid_recovery_tex = figures_dir / "invalid_actions_recovery.tex"
     _write_text(
         invalid_recovery_tex,
-        _bar_group_figure_tex(
-            panels=invalid_recovery_panels,
-            y_max=1.0,
-            y_label="Average per run",
-            float_env="figure",
-            axis_width=r"0.39\columnwidth",
-            axis_height=r"0.32\columnwidth",
-            label="fig:invalid-actions-recovery",
-            caption=(
-                "Invalid actions in the fixed-\\texttt{R0} contract comparison (top row) and retries in the "
-                "fixed-\\texttt{P1} runtime comparison (bottom row). Typed contracts eliminate the invalid-action "
-                "mode in the shared ablation slice, while \\texttt{R1} adds retry work only on recoverable "
-                "invalid-first-action probes."
-            ),
-        ),
+        _invalid_actions_recovery_figure_tex(invalid_rows, recovery_rows),
     )
     written_outputs["invalid_actions_recovery_tex"] = invalid_recovery_tex
 
-    overhead_panels = _build_overhead_panels(prompt_rows, manipulation_harder_rows)
+    overhead_rows = _build_overhead_figure_rows(main_rows)
     overhead_csv = figures_dir / "planner_tool_overhead.csv"
-    _write_csv(overhead_csv, _panel_csv_rows(overhead_panels))
+    _write_csv(overhead_csv, _planner_tool_overhead_csv_rows(overhead_rows))
     written_outputs["planner_tool_overhead_csv"] = overhead_csv
     overhead_tex = figures_dir / "planner_tool_overhead.tex"
     _write_text(
         overhead_tex,
-        _bar_group_figure_tex(
-            panels=overhead_panels,
-            y_max=12.0,
-            y_label="Calls per run",
-            float_env="figure",
-            axis_width=r"0.39\columnwidth",
-            axis_height=r"0.32\columnwidth",
-            label="fig:planner-tool-overhead",
-            caption=(
-                "Planner and tool calls in the retained \\texttt{P1} versus \\texttt{P2} comparisons across the "
-                "fixed-\\texttt{R0} contract ablation and the harder manipulation slice. The figure is descriptive: "
-                "in the covered slices, \\texttt{P2} matches the success profile of \\texttt{P1} while using fewer "
-                "planner/tool calls."
-            ),
-        ),
+        _planner_tool_overhead_figure_tex(overhead_rows),
     )
     written_outputs["planner_tool_overhead_tex"] = overhead_tex
 
@@ -246,7 +212,11 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         path.write_text("", encoding="utf-8")
         return
-    fieldnames = list(rows[0].keys())
+    fieldnames: list[str] = []
+    for row in rows:
+        for key in row.keys():
+            if key not in fieldnames:
+                fieldnames.append(key)
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -320,114 +290,330 @@ def _load_family_prompt_runtime_rows(summary: dict[str, Any]) -> dict[tuple[str,
     return rows
 
 
-def _build_main_condition_panels(
+def _build_main_condition_figure_rows(
     main_rows: dict[tuple[str, str, str, str], dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    panels: list[dict[str, Any]] = []
-    for task_family, difficulty, label in _MAIN_COHORTS:
-        bars = []
+    rows: list[dict[str, Any]] = []
+    for task_family, difficulty, cohort_label in _MAIN_COHORTS:
         run_count = None
         for prompt_variant, runtime_variant in _CELL_ORDER:
             row = main_rows[(task_family, difficulty, prompt_variant, runtime_variant)]
             if run_count is None:
                 run_count = int(row["run_count"])
-            bars.append(
-                {
-                    "label": f"{prompt_variant}/{runtime_variant}",
-                    "value": float(row["success_rate"]),
-                    "color": _CELL_COLOR_NAMES[(prompt_variant, runtime_variant)],
-                }
-            )
-        panels.append({"label": label, "note": f"{run_count} runs/cell", "bars": bars})
-    return panels
-
-
-def _build_invalid_recovery_panels(
-    prompt_rows: dict[tuple[str, str, str], dict[str, Any]],
-    runtime_rows: dict[tuple[str, str, str], dict[str, Any]],
-) -> list[dict[str, Any]]:
-    panels: list[dict[str, Any]] = []
-    for family, label in [("navigation", "Navigation Invalid"), ("manipulation", "Manipulation Invalid")]:
-        bars = []
-        for prompt_variant in ("P0", "P1", "P2"):
-            row = prompt_rows[(family, prompt_variant, "R0")]
-            bars.append(
-                {
-                    "label": prompt_variant,
-                    "value": float(row["average_invalid_actions"]),
-                    "color": _CELL_COLOR_NAMES[(prompt_variant, "R0")],
-                }
-            )
-        panels.append({"label": label, "note": "Fixed R0 contract ablation", "bars": bars})
-
-    for family, label in [("navigation", "Navigation Retries"), ("manipulation", "Manipulation Retries")]:
-        bars = []
-        for runtime_variant in ("R0", "R1"):
-            row = runtime_rows[(family, "P1", runtime_variant)]
-            bars.append(
-                {
-                    "label": runtime_variant,
-                    "value": float(row["average_retries"]),
-                    "color": _CELL_COLOR_NAMES[("P1", runtime_variant)],
-                }
-            )
-        panels.append({"label": label, "note": "Fixed P1 runtime ablation", "bars": bars})
-    return panels
-
-
-def _build_overhead_panels(
-    prompt_rows: dict[tuple[str, str, str], dict[str, Any]],
-    manipulation_harder_rows: dict[tuple[str, str, str, str], dict[str, Any]],
-) -> list[dict[str, Any]]:
-    panels: list[dict[str, Any]] = []
-    for family, label in [("navigation", "Navigation Easy"), ("manipulation", "Manipulation Easy")]:
-        p1 = prompt_rows[(family, "P1", "R0")]
-        p2 = prompt_rows[(family, "P2", "R0")]
-        panels.append(
-            {
-                "label": label,
-                "note": "Fixed R0 contract ablation",
-                "bars": [
-                    {"label": "P1-P", "value": float(p1["average_planner_calls"]), "color": _CELL_COLOR_NAMES[("P1", "R0")]},
-                    {"label": "P1-T", "value": float(p1["average_tool_calls"]), "color": _CELL_COLOR_NAMES[("P1", "R0")]},
-                    {"label": "P2-P", "value": float(p2["average_planner_calls"]), "color": _CELL_COLOR_NAMES[("P2", "R0")]},
-                    {"label": "P2-T", "value": float(p2["average_tool_calls"]), "color": _CELL_COLOR_NAMES[("P2", "R0")]},
-                ],
-            }
-        )
-
-    for runtime_variant in ("R0", "R1"):
-        p1 = manipulation_harder_rows[("manipulation", "harder", "P1", runtime_variant)]
-        p2 = manipulation_harder_rows[("manipulation", "harder", "P2", runtime_variant)]
-        panels.append(
-            {
-                "label": f"Manipulation Harder {runtime_variant}",
-                "note": "Harder manipulation slice",
-                "bars": [
-                    {"label": "P1-P", "value": float(p1["average_planner_calls"]), "color": _CELL_COLOR_NAMES[("P1", runtime_variant)]},
-                    {"label": "P1-T", "value": float(p1["average_tool_calls"]), "color": _CELL_COLOR_NAMES[("P1", runtime_variant)]},
-                    {"label": "P2-P", "value": float(p2["average_planner_calls"]), "color": _CELL_COLOR_NAMES[("P2", runtime_variant)]},
-                    {"label": "P2-T", "value": float(p2["average_tool_calls"]), "color": _CELL_COLOR_NAMES[("P2", runtime_variant)]},
-                ],
-            }
-        )
-    return panels
-
-
-def _panel_csv_rows(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for panel in panels:
-        for bar in panel["bars"]:
             rows.append(
                 {
-                    "panel": panel["label"],
-                    "note": panel["note"],
-                    "bar_label": bar["label"],
-                    "value": _fmt(bar["value"]),
-                    "color": bar["color"],
+                    "cohort_label": cohort_label,
+                    "cohort_key": _cohort_key(cohort_label),
+                    "task_family": task_family,
+                    "task_difficulty": difficulty,
+                    "runs_per_cell": run_count,
+                    "prompt_variant": prompt_variant,
+                    "runtime_variant": runtime_variant,
+                    "cell": f"{prompt_variant}/{runtime_variant}",
+                    "successful_runs": int(row["successful_runs"]),
+                    "run_count": int(row["run_count"]),
+                    "success_rate": _fmt(row["success_rate"]),
+                    "average_invalid_actions": _fmt(row["average_invalid_actions"]),
+                    "average_retries": _fmt(row["average_retries"]),
                 }
             )
     return rows
+
+
+def _main_condition_ordering_figure_tex(rows: list[dict[str, Any]]) -> str:
+    row_lookup = {(row["cohort_label"], row["cell"]): row for row in rows}
+    body: list[str] = []
+    for cohort_label in [label for _, _, label in _MAIN_COHORTS]:
+        sample = row_lookup[(cohort_label, "P0/R0")]
+        cohort_cell = _makecell(rf"{cohort_label}\\\scriptsize {sample['runs_per_cell']} runs/cell")
+        cell_entries = [cohort_cell]
+        for prompt_variant, runtime_variant in _CELL_ORDER:
+            row = row_lookup[(cohort_label, f"{prompt_variant}/{runtime_variant}")]
+            tint = "22" if row["successful_runs"] == 0 else "16"
+            color = f"{_CELL_COLOR_NAMES[(prompt_variant, runtime_variant)]}!{tint}"
+            value = _escape_latex(f"{row['successful_runs']}/{row['run_count']}")
+            status = "clean"
+            if row["successful_runs"] == 0:
+                status = "fail"
+            elif float(row["average_invalid_actions"]) > 0 or float(row["average_retries"]) > 0:
+                status = "recovered"
+            cell_entries.append(
+                rf"\cellcolor{{{color}}}\makecell[c]{{\textbf{{{value}}}\\\scriptsize {status}}}"
+            )
+        body.append("    " + " & ".join(cell_entries) + r" \\")
+
+    lines = [
+        r"\begin{figure*}[!t]",
+        r"  \centering",
+        r"  \setlength{\tabcolsep}{5pt}",
+        r"  \renewcommand{\arraystretch}{1.18}",
+        r"  \begin{tabular}{L{2.85cm} *{6}{>{\centering\arraybackslash}p{1.35cm}}}",
+        r"    \toprule",
+        r"    & \multicolumn{2}{c}{\textcolor{ralP0R0}{\textbf{P0}}} & \multicolumn{2}{c}{\textcolor{ralP1R0}{\textbf{P1}}} & \multicolumn{2}{c}{\textcolor{ralP2R0}{\textbf{P2}}} \\",
+        r"    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}",
+        r"    Cohort & R0 & R1 & R0 & R1 & R0 & R1 \\",
+        r"    \midrule",
+        *body,
+        r"    \bottomrule",
+        r"  \end{tabular}",
+        r"  \\[2pt]",
+        r"  {\raggedright\scriptsize Cell text shows successful runs / runs. The harder rows preserve the same ordering as the easy rows; workload growth is summarized separately in Fig.~\ref{fig:planner-tool-overhead} and Table~\ref{tab:planner-tool-overhead-summary}.\par}",
+        r"  \caption{Main outcome ordering across the retained navigation and manipulation cohorts. The under-specified direct-action cell \texttt{P0/R0} is consistently weakest, \texttt{P0/R1} recovers, and the typed-contract cells remain successful in the covered slices.}",
+        r"  \label{fig:main-condition-ordering}",
+        r"\end{figure*}",
+    ]
+    return "\n".join(lines)
+
+
+def _build_invalid_action_rows(
+    prompt_rows: dict[tuple[str, str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for family in ("navigation", "manipulation"):
+        for prompt_variant in ("P0", "P1", "P2"):
+            row = prompt_rows[(family, prompt_variant, "R0")]
+            rows.append(
+                {
+                    "section": "invalid_actions",
+                    "family": family,
+                    "family_label": "Navigation" if family == "navigation" else "Manipulation",
+                    "prompt_variant": prompt_variant,
+                    "runtime_variant": "R0",
+                    "run_count": int(row["run_count"]),
+                    "average_invalid_actions": _fmt(row["average_invalid_actions"]),
+                }
+            )
+    return rows
+
+
+def _build_runtime_recovery_rows(
+    runtime_rows: dict[tuple[str, str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for family in ("navigation", "manipulation"):
+        for runtime_variant in ("R0", "R1"):
+            row = runtime_rows[(family, "P1", runtime_variant)]
+            run_count = int(row["run_count"])
+            recovered_successes = int(row["successful_invalid_action_runs"])
+            clean_successes = int(row["successful_runs"]) - recovered_successes
+            invalid_failures = int(row["invalid_action_run_count"]) - recovered_successes
+            rows.append(
+                {
+                    "section": "runtime_recovery",
+                    "family": family,
+                    "family_label": "Navigation" if family == "navigation" else "Manipulation",
+                    "runtime_variant": runtime_variant,
+                    "run_count": run_count,
+                    "clean_successes": clean_successes,
+                    "recovered_successes": recovered_successes,
+                    "invalid_failures": invalid_failures,
+                    "clean_success_rate": _fmt(clean_successes / run_count),
+                    "recovered_success_rate": _fmt(recovered_successes / run_count),
+                    "invalid_failure_rate": _fmt(invalid_failures / run_count),
+                    "average_retries": _fmt(row["average_retries"]),
+                    "average_invalid_actions": _fmt(row["average_invalid_actions"]),
+                }
+            )
+    return rows
+
+
+def _invalid_actions_recovery_csv_rows(
+    invalid_rows: list[dict[str, Any]],
+    recovery_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    rows.extend(invalid_rows)
+    rows.extend(recovery_rows)
+    return rows
+
+
+def _invalid_actions_recovery_figure_tex(
+    invalid_rows: list[dict[str, Any]],
+    recovery_rows: list[dict[str, Any]],
+) -> str:
+    invalid_lookup = {(row["family"], row["prompt_variant"]): row for row in invalid_rows}
+    recovery_lookup = {(row["family"], row["runtime_variant"]): row for row in recovery_rows}
+    invalid_body: list[str] = []
+    for family in ("navigation", "manipulation"):
+        family_label = "Navigation" if family == "navigation" else "Manipulation"
+        row_entries = [_makecell(rf"{family_label}\\\scriptsize fixed R0")]
+        for prompt_variant in ("P0", "P1", "P2"):
+            row = invalid_lookup[(family, prompt_variant)]
+            tint = "22" if prompt_variant == "P0" else "16"
+            color = f"{_PROMPT_BASE_COLOR_NAMES[prompt_variant]}!{tint}"
+            row_entries.append(
+                rf"\cellcolor{{{color}}}\makecell[c]{{\textbf{{{row['average_invalid_actions']}}}}}"
+            )
+        invalid_body.append("      " + " & ".join(row_entries) + r" \\")
+
+    lines = [
+        r"\begin{figure}[!t]",
+        r"  \centering",
+        r"  \setlength{\tabcolsep}{4pt}",
+        r"  \renewcommand{\arraystretch}{1.15}",
+        r"  {\footnotesize\textbf{A. Fixed-\texttt{R0} invalid actions per run}}\par",
+        r"  \vspace{2pt}",
+        r"  \begin{tabular}{L{1.60cm} *{3}{>{\centering\arraybackslash}p{0.90cm}}}",
+        r"    \toprule",
+        r"    Family & \textcolor{ralP0R0}{\textbf{P0}} & \textcolor{ralP1R0}{\textbf{P1}} & \textcolor{ralP2R0}{\textbf{P2}} \\",
+        r"    \midrule",
+        *invalid_body,
+        r"    \bottomrule",
+        r"  \end{tabular}",
+        r"  \\[4pt]",
+        r"  {\raggedright\scriptsize Typed contracts remove the invalid-action mode in the fixed-\texttt{R0} action-interface slice.\par}",
+        r"  \vspace{6pt}",
+        r"  \begin{tikzpicture}[x=1cm,y=1cm]",
+        r"    \node[anchor=west, font=\footnotesize\bfseries, text=ralSlate] at (0.0,4.2) {B. Fixed-\texttt{P1} runtime outcomes};",
+        r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.0,3.82) {Family-specific runtime-only slices; right labels show retries/run.};",
+    ]
+
+    bar_y = 3.15
+    bar_x = 2.0
+    bar_width = 4.45
+    bar_height = 0.44
+    family_offsets = [("navigation", "Navigation"), ("manipulation", "Manipulation")]
+    for family, family_label in family_offsets:
+        lines.append(rf"    \node[anchor=east, font=\scriptsize\bfseries, text=ralSlate] at ({bar_x - 0.15:.2f},{bar_y + 0.22:.2f}) {{{family_label}}};")
+        for runtime_index, runtime_variant in enumerate(("R0", "R1")):
+            row = recovery_lookup[(family, runtime_variant)]
+            y = bar_y - runtime_index * 0.62
+            clean_width = bar_width * (row["clean_successes"] / row["run_count"])
+            recovered_width = bar_width * (row["recovered_successes"] / row["run_count"])
+            invalid_width = bar_width * (row["invalid_failures"] / row["run_count"])
+            lines.append(rf"    \node[anchor=east, font=\scriptsize, text=ralMuted] at ({bar_x - 0.15:.2f},{y:.2f}) {{{runtime_variant}}};")
+            lines.append(rf"    \draw[draw=ralBorder] ({bar_x:.2f},{y - bar_height / 2:.2f}) rectangle ({bar_x + bar_width:.2f},{y + bar_height / 2:.2f});")
+            cursor = bar_x
+            if clean_width > 0:
+                lines.append(rf"    \filldraw[draw=ralBorder, fill=ralPanel] ({cursor:.2f},{y - bar_height / 2:.2f}) rectangle ({cursor + clean_width:.2f},{y + bar_height / 2:.2f});")
+                lines.append(rf"    \node[font=\scriptsize, text=ralSlate] at ({cursor + clean_width / 2:.2f},{y:.2f}) {{{row['clean_successes']}/{row['run_count']}}};")
+                cursor += clean_width
+            if recovered_width > 0:
+                lines.append(rf"    \filldraw[draw=ralRepair, fill=ralRepair!18] ({cursor:.2f},{y - bar_height / 2:.2f}) rectangle ({cursor + recovered_width:.2f},{y + bar_height / 2:.2f});")
+                lines.append(rf"    \node[font=\scriptsize, text=ralSlate] at ({cursor + recovered_width / 2:.2f},{y:.2f}) {{{row['recovered_successes']}/{row['run_count']}}};")
+                cursor += recovered_width
+            if invalid_width > 0:
+                lines.append(rf"    \filldraw[draw=ralWarn, fill=ralWarn!18] ({cursor:.2f},{y - bar_height / 2:.2f}) rectangle ({cursor + invalid_width:.2f},{y + bar_height / 2:.2f});")
+                lines.append(rf"    \node[font=\scriptsize, text=ralSlate] at ({cursor + invalid_width / 2:.2f},{y:.2f}) {{{row['invalid_failures']}/{row['run_count']}}};")
+            lines.append(rf"    \node[anchor=west, font=\scriptsize, text=ralMuted] at ({bar_x + bar_width + 0.12:.2f},{y:.2f}) {{retry {row['average_retries']}}};")
+        lines.append(rf"    \node[anchor=west, font=\scriptsize, text=ralMuted] at ({bar_x:.2f},{bar_y - 1.00:.2f}) {{invalid/run fixed at {recovery_lookup[(family, 'R0')]['average_invalid_actions']}}};")
+        bar_y -= 1.55
+
+    lines.extend(
+        [
+            r"    \filldraw[draw=ralBorder, fill=ralPanel] (0.0,0.22) rectangle (0.28,0.48);",
+            r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.36,0.35) {clean success};",
+            r"    \filldraw[draw=ralRepair, fill=ralRepair!18] (2.0,0.22) rectangle (2.28,0.48);",
+            r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.36,0.35) {recovered success};",
+            r"    \filldraw[draw=ralWarn, fill=ralWarn!18] (4.1,0.22) rectangle (4.38,0.48);",
+            r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (4.46,0.35) {invalid termination};",
+            r"  \end{tikzpicture}",
+            r"  \caption{Mechanism view. Top: under fixed \texttt{R0}, \texttt{P0} produces one invalid action per run in both families, while \texttt{P1}/\texttt{P2} reduce that to zero. Bottom: under fixed \texttt{P1}, \texttt{R1} turns the invalid half of the runtime-only slice into recovered success in both families, with retries rising from 0.0 to 0.5 per run.}",
+            r"  \label{fig:invalid-actions-recovery}",
+            r"\end{figure}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _build_overhead_figure_rows(
+    main_rows: dict[tuple[str, str, str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    contexts = [
+        ("navigation", "easy", "R0", "Nav. easy"),
+        ("navigation", "harder", "R0", "Nav. harder"),
+        ("manipulation", "easy", "R0", "Manip. easy"),
+        ("manipulation", "harder", "R0", "Manip. harder R0"),
+        ("manipulation", "harder", "R1", "Manip. harder R1"),
+    ]
+    rows: list[dict[str, Any]] = []
+    for family, difficulty, runtime_variant, context_label in contexts:
+        p1 = main_rows[(family, difficulty, "P1", runtime_variant)]
+        p2 = main_rows[(family, difficulty, "P2", runtime_variant)]
+        rows.append(
+            {
+                "context_label": context_label,
+                "family": family,
+                "difficulty": difficulty,
+                "runtime_variant": runtime_variant,
+                "p1_success_rate": _fmt(p1["success_rate"]),
+                "p2_success_rate": _fmt(p2["success_rate"]),
+                "planner_p1": _fmt(p1["average_planner_calls"]),
+                "planner_p2": _fmt(p2["average_planner_calls"]),
+                "tool_p1": _fmt(p1["average_tool_calls"]),
+                "tool_p2": _fmt(p2["average_tool_calls"]),
+                "planner_tool_p1": f"{_fmt(p1['average_planner_calls'])}/{_fmt(p1['average_tool_calls'])}",
+                "planner_tool_p2": f"{_fmt(p2['average_planner_calls'])}/{_fmt(p2['average_tool_calls'])}",
+            }
+        )
+    return rows
+
+
+def _planner_tool_overhead_csv_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    csv_rows: list[dict[str, Any]] = []
+    for row in rows:
+        for metric_key, metric_label in (("planner", "planner_calls"), ("tool", "tool_calls")):
+            for prompt_variant in ("P1", "P2"):
+                csv_rows.append(
+                    {
+                        "context_label": row["context_label"],
+                        "family": row["family"],
+                        "difficulty": row["difficulty"],
+                        "runtime_variant": row["runtime_variant"],
+                        "metric": metric_label,
+                        "prompt_variant": prompt_variant,
+                        "value": row[f"{metric_key}_{prompt_variant.lower()}"],
+                    }
+                )
+    return csv_rows
+
+
+def _planner_tool_overhead_figure_tex(rows: list[dict[str, Any]]) -> str:
+    axis_x = 3.25
+    axis_width = 9.1
+    axis_max = 13.0
+    row_gap = 0.92
+    top_y = 5.2
+    bar_height = 0.18
+    lines = [
+        r"\begin{figure*}[!t]",
+        r"  \centering",
+        r"  \begin{tikzpicture}[x=1cm,y=1cm]",
+        r"    \node[anchor=west, font=\small\bfseries, text=ralSlate] at (0.0,6.15) {Covered \texttt{P1} vs \texttt{P2} workload comparisons};",
+        r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.0,5.82) {Bars show planner/tool calls per run. In these retained plotted slices, planner and tool counts are equal within each prompt variant, so each bar is labeled as planner/tool.};",
+    ]
+    for tick in (0, 4, 8, 12):
+        x = axis_x + axis_width * (tick / axis_max)
+        lines.append(rf"    \draw[draw=ralGrid] ({x:.2f},0.40) -- ({x:.2f},5.48);")
+        lines.append(rf"    \node[anchor=north, font=\scriptsize, text=ralMuted] at ({x:.2f},0.34) {{{tick}}};")
+    lines.append(rf"    \draw[draw=ralBorder] ({axis_x:.2f},0.40) rectangle ({axis_x + axis_width:.2f},5.48);")
+    lines.append(rf"    \node[anchor=north, font=\footnotesize, text=ralSlate] at ({axis_x + axis_width / 2:.2f},0.02) {{Calls per run}};")
+    lines.append(r"    \filldraw[draw=ralP1R0, fill=ralP1R0] (0.0,5.42) rectangle (0.26,5.68);")
+    lines.append(r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.36,5.55) {\texttt{P1}};")
+    lines.append(r"    \filldraw[draw=ralP2R0, fill=ralP2R0] (1.10,5.42) rectangle (1.36,5.68);")
+    lines.append(r"    \node[anchor=west, font=\scriptsize, text=ralMuted] at (1.46,5.55) {\texttt{P2}};")
+    for index, row in enumerate(rows):
+        center_y = top_y - index * row_gap
+        p1_width = axis_width * (float(row["planner_p1"]) / axis_max)
+        p2_width = axis_width * (float(row["planner_p2"]) / axis_max)
+        lines.append(rf"    \node[anchor=east, font=\scriptsize\bfseries, text=ralSlate] at ({axis_x - 0.18:.2f},{center_y:.2f}) {{{_escape_latex(row['context_label'])}}};")
+        lines.append(rf"    \filldraw[draw=ralP1R0, fill=ralP1R0] ({axis_x:.2f},{center_y + 0.10 - bar_height / 2:.2f}) rectangle ({axis_x + p1_width:.2f},{center_y + 0.10 + bar_height / 2:.2f});")
+        lines.append(rf"    \filldraw[draw=ralP2R0, fill=ralP2R0] ({axis_x:.2f},{center_y - 0.10 - bar_height / 2:.2f}) rectangle ({axis_x + p2_width:.2f},{center_y - 0.10 + bar_height / 2:.2f});")
+        lines.append(rf"    \node[anchor=west, font=\scriptsize, text=ralSlate] at ({axis_x + p1_width + 0.10:.2f},{center_y + 0.10:.2f}) {{{_escape_latex(row['planner_tool_p1'])}}};")
+        lines.append(rf"    \node[anchor=west, font=\scriptsize, text=ralSlate] at ({axis_x + p2_width + 0.10:.2f},{center_y - 0.10:.2f}) {{{_escape_latex(row['planner_tool_p2'])}}};")
+    lines.extend(
+        [
+            r"  \end{tikzpicture}",
+            r"  \caption{Workload comparison for the covered \texttt{P1} versus \texttt{P2} slices. The retained navigation and easy-manipulation cohorts contribute one row each because the \texttt{P1}/\texttt{P2} workload is identical under \texttt{R0} and \texttt{R1} there; the harder manipulation slice contributes separate \texttt{R0} and \texttt{R1} rows. The comparison is descriptive only: in these covered slices, \texttt{P2} matches the success profile of \texttt{P1} while using fewer planner/tool calls.}",
+            r"  \label{fig:planner-tool-overhead}",
+            r"\end{figure*}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _makecell(text: str) -> str:
+    return rf"\makecell[l]{{{text}}}"
 
 
 def _build_experimental_design_rows(
@@ -452,7 +638,7 @@ def _build_experimental_design_rows(
             "tasks": coverage_rows[("navigation", "easy")]["task_count"],
             "runs_per_cell": coverage_rows[("navigation", "easy")]["run_count"] // 6,
             "total_runs": coverage_rows[("navigation", "easy")]["run_count"],
-            "role": "Main contract/runtime ordering",
+            "role": "Main ordering",
         },
         {
             "block": "Main factorial",
@@ -462,7 +648,7 @@ def _build_experimental_design_rows(
             "tasks": coverage_rows[("manipulation", "easy")]["task_count"],
             "runs_per_cell": coverage_rows[("manipulation", "easy")]["run_count"] // 6,
             "total_runs": coverage_rows[("manipulation", "easy")]["run_count"],
-            "role": "Main contract/runtime ordering",
+            "role": "Main ordering",
         },
         {
             "block": "Main factorial",
@@ -472,7 +658,7 @@ def _build_experimental_design_rows(
             "tasks": coverage_rows[("navigation", "harder")]["task_count"],
             "runs_per_cell": coverage_rows[("navigation", "harder")]["run_count"] // 6,
             "total_runs": coverage_rows[("navigation", "harder")]["run_count"],
-            "role": "Harder-task robustness",
+            "role": "Harder robustness",
         },
         {
             "block": "Main factorial",
@@ -482,7 +668,7 @@ def _build_experimental_design_rows(
             "tasks": manipulation_harder_task_count,
             "runs_per_cell": manipulation_harder_run_count,
             "total_runs": manipulation_harder["overall"]["summarized_runs"],
-            "role": "Harder-task robustness",
+            "role": "Harder robustness",
         },
         {
             "block": "Action-interface ablation",
@@ -492,7 +678,7 @@ def _build_experimental_design_rows(
             "tasks": prompt_only["matrix"]["task_count"],
             "runs_per_cell": prompt_only["overall"]["summarized_runs"] // 3,
             "total_runs": prompt_only["overall"]["summarized_runs"],
-            "role": "Invalid-action mechanism check",
+            "role": "Contract mechanism",
         },
         {
             "block": "Runtime-only ablation",
@@ -502,7 +688,7 @@ def _build_experimental_design_rows(
             "tasks": runtime_only["matrix"]["task_count"],
             "runs_per_cell": runtime_only["overall"]["summarized_runs"] // 2,
             "total_runs": runtime_only["overall"]["summarized_runs"],
-            "role": "Validation/retry mechanism check",
+            "role": "Runtime recovery",
         },
     ]
 
@@ -690,14 +876,14 @@ def _experimental_design_table_tex(rows: list[dict[str, Any]]) -> str:
         [
             "\\begin{table*}[!t]",
             "  \\centering",
-            "  \\caption{Evaluation matrix used by the manuscript. The main factorial sweep remains frozen, while the two compact ablations isolate contract and runtime effects without adding new experiments.}",
+            "  \\caption{Frozen evaluation matrix used by the manuscript. The main factorial rows carry the retained ordering comparison, while the two compact ablations isolate contract and runtime effects without adding new experiments.}",
             "  \\label{tab:experimental-design-summary}",
             "  \\footnotesize",
             "  \\setlength{\\tabcolsep}{4pt}",
             "  \\rowcolors{2}{ralPanel}{white}",
             "  \\begin{tabularx}{\\textwidth}{L{2.2cm} L{1.5cm} L{1.9cm} L{2.6cm} >{\\centering\\arraybackslash}p{0.9cm} >{\\centering\\arraybackslash}p{1.2cm} >{\\centering\\arraybackslash}p{1.1cm} Y}",
             "    \\toprule",
-            "    Block & Family & Slice & Varying axes & Tasks & Runs/cell & Runs & Role \\\\",
+            "    Block & Family & Slice & Varying axes & Tasks & Runs/cell & Total & Purpose \\\\",
             "    \\midrule",
             *body,
             "    \\bottomrule",
@@ -711,11 +897,11 @@ def _main_outcome_table_tex(rows: list[dict[str, Any]]) -> str:
     return _cohort_summary_table_tex(
         rows=rows,
         caption=(
-            "Outcome summary across the retained cohorts. Each cohort entry reports success, invalid actions per run, "
-            "and retries per run in that order."
+            "Outcome summary across the retained cohorts. Each entry keeps success, invalid/run, and retry/run together "
+            "so the archival table still distinguishes recovered \\texttt{P0/R1} cells from clean structured cells."
         ),
         label="tab:main-outcome-summary",
-        note="Cell entries are \\emph{success; invalid/run; retries/run}.",
+        note="Cell entries are \\emph{success; invalid/run; retry/run}.",
     )
 
 
@@ -733,8 +919,8 @@ def _planner_overhead_table_tex(rows: list[dict[str, Any]]) -> str:
     return _cohort_summary_table_tex(
         rows=rows,
         caption=(
-            "Planner/tool workload across the retained cohorts. The table stays descriptive and is separated from the "
-            "outcome table so the main text does not hide workload inside outcome cells."
+            "Planner/tool workload across the retained cohorts. Figure~\\ref{fig:planner-tool-overhead} compresses the "
+            "duplicated plotted pairs for readability; this table preserves the full per-cell breakdown."
         ),
         label="tab:planner-tool-overhead-summary",
         note="Cell entries are \\emph{planner calls/tool calls per run}.",

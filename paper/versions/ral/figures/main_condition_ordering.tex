@@ -1,59 +1,21 @@
 \begin{figure*}[!t]
   \centering
-  \begin{tikzpicture}
-    \begin{groupplot}[
-      group style={group size=2 by 2, horizontal sep=1.15cm, vertical sep=0.95cm},
-      width=0.43\textwidth,
-      height=0.25\textwidth,
-      ybar,
-      ymin=0, ymax=1.00,
-      ylabel={Success rate},
-      symbolic x coords={P0/R0,P0/R1,P1/R0,P1/R1,P2/R0,P2/R1,P0,P1,P2,R0,R1,P1-P,P1-T,P2-P,P2-T},
-      xtick=data,
-      xticklabel style={font=\scriptsize, rotate=35, anchor=east},
-      ymajorgrids=true,
-      grid style={draw=ralGrid},
-      axis line style={draw=ralBorder},
-      tick style={draw=ralBorder},
-      title style={font=\small\bfseries, text=ralSlate},
-      label style={font=\footnotesize, text=ralSlate},
-      tick label style={font=\scriptsize, text=ralMuted},
-      every axis plot/.append style={draw opacity=1, fill opacity=1},
-    ]
-      \nextgroupplot[title={Navigation Easy}]
-      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0/R0,0.000000)};
-      \addplot+[ybar, fill=ralP0R1, draw=ralP0R1, area legend] coordinates {(P0/R1,1.000000)};
-      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1/R0,1.000000)};
-      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1/R1,1.000000)};
-      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2/R0,1.000000)};
-      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2/R1,1.000000)};
-      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {11 runs/cell};
-      \nextgroupplot[title={Manipulation Easy}]
-      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0/R0,0.000000)};
-      \addplot+[ybar, fill=ralP0R1, draw=ralP0R1, area legend] coordinates {(P0/R1,1.000000)};
-      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1/R0,1.000000)};
-      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1/R1,1.000000)};
-      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2/R0,1.000000)};
-      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2/R1,1.000000)};
-      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {3 runs/cell};
-      \nextgroupplot[title={Navigation Harder}]
-      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0/R0,0.000000)};
-      \addplot+[ybar, fill=ralP0R1, draw=ralP0R1, area legend] coordinates {(P0/R1,1.000000)};
-      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1/R0,1.000000)};
-      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1/R1,1.000000)};
-      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2/R0,1.000000)};
-      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2/R1,1.000000)};
-      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {4 runs/cell};
-      \nextgroupplot[title={Manipulation Harder}]
-      \addplot+[ybar, fill=ralP0R0, draw=ralP0R0, area legend] coordinates {(P0/R0,0.000000)};
-      \addplot+[ybar, fill=ralP0R1, draw=ralP0R1, area legend] coordinates {(P0/R1,1.000000)};
-      \addplot+[ybar, fill=ralP1R0, draw=ralP1R0, area legend] coordinates {(P1/R0,1.000000)};
-      \addplot+[ybar, fill=ralP1R1, draw=ralP1R1, area legend] coordinates {(P1/R1,1.000000)};
-      \addplot+[ybar, fill=ralP2R0, draw=ralP2R0, area legend] coordinates {(P2/R0,1.000000)};
-      \addplot+[ybar, fill=ralP2R1, draw=ralP2R1, area legend] coordinates {(P2/R1,1.000000)};
-      \node[anchor=north east,font=\scriptsize,text=ralMuted] at (rel axis cs:0.98,0.98) {3 runs/cell};
-    \end{groupplot}
-  \end{tikzpicture}
-  \caption{Success rate across the retained navigation and manipulation cohorts for all six contract/runtime cells. \texttt{P0/R0} is consistently weakest, \texttt{P0/R1} recovers, and the typed contracts remain successful in the covered slices.}
+  \setlength{\tabcolsep}{5pt}
+  \renewcommand{\arraystretch}{1.18}
+  \begin{tabular}{L{2.85cm} *{6}{>{\centering\arraybackslash}p{1.35cm}}}
+    \toprule
+    & \multicolumn{2}{c}{\textcolor{ralP0R0}{\textbf{P0}}} & \multicolumn{2}{c}{\textcolor{ralP1R0}{\textbf{P1}}} & \multicolumn{2}{c}{\textcolor{ralP2R0}{\textbf{P2}}} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+    Cohort & R0 & R1 & R0 & R1 & R0 & R1 \\
+    \midrule
+    \makecell[l]{Navigation Easy\\\scriptsize 11 runs/cell} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{0/11}\\\scriptsize fail} & \cellcolor{ralP0R1!16}\makecell[c]{\textbf{11/11}\\\scriptsize recovered} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{11/11}\\\scriptsize clean} & \cellcolor{ralP1R1!16}\makecell[c]{\textbf{11/11}\\\scriptsize clean} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{11/11}\\\scriptsize clean} & \cellcolor{ralP2R1!16}\makecell[c]{\textbf{11/11}\\\scriptsize clean} \\
+    \makecell[l]{Manipulation Easy\\\scriptsize 3 runs/cell} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{0/3}\\\scriptsize fail} & \cellcolor{ralP0R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize recovered} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP1R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP2R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} \\
+    \makecell[l]{Navigation Harder\\\scriptsize 4 runs/cell} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{0/4}\\\scriptsize fail} & \cellcolor{ralP0R1!16}\makecell[c]{\textbf{4/4}\\\scriptsize recovered} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{4/4}\\\scriptsize clean} & \cellcolor{ralP1R1!16}\makecell[c]{\textbf{4/4}\\\scriptsize clean} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{4/4}\\\scriptsize clean} & \cellcolor{ralP2R1!16}\makecell[c]{\textbf{4/4}\\\scriptsize clean} \\
+    \makecell[l]{Manipulation Harder\\\scriptsize 3 runs/cell} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{0/3}\\\scriptsize fail} & \cellcolor{ralP0R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize recovered} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP1R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} & \cellcolor{ralP2R1!16}\makecell[c]{\textbf{3/3}\\\scriptsize clean} \\
+    \bottomrule
+  \end{tabular}
+  \\[2pt]
+  {\raggedright\scriptsize Cell text shows successful runs / runs. The harder rows preserve the same ordering as the easy rows; workload growth is summarized separately in Fig.~\ref{fig:planner-tool-overhead} and Table~\ref{tab:planner-tool-overhead-summary}.\par}
+  \caption{Main outcome ordering across the retained navigation and manipulation cohorts. The under-specified direct-action cell \texttt{P0/R0} is consistently weakest, \texttt{P0/R1} recovers, and the typed-contract cells remain successful in the covered slices.}
   \label{fig:main-condition-ordering}
 \end{figure*}

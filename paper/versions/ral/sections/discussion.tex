@@ -3,7 +3,8 @@
 \subsection{Discussion}
 
 The clearest lesson is that planner-to-executor contract design is a systems
-lever, not a presentation detail. Under the under-specified contract, the
+lever, not a presentation detail. Under the under-specified direct-action
+contract, the
 planner often knows the task family but still speaks in a vocabulary the
 executor cannot dispatch. Explicit contracts move that ambiguity out of ad hoc
 interpretation and into a declared interface.
@@ -12,7 +13,7 @@ Runtime validation plays a complementary role. It does not replace a
 well-specified contract, but it can intercept a bad first emission, surface a
 concrete error, and recover the run with minimal additional machinery. That
 pattern matters for embodied execution stacks that preserve
-planner/executor separation, including middleware-style action interfaces and
+planner-to-executor separation, including middleware-style action interfaces and
 guarded execution policies.
 
 At a higher level, the studied boundary maps cleanly onto execution

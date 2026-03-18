@@ -145,3 +145,21 @@
   the present manuscript is self-contained, and adding another full-width
   figure would likely displace a more important result asset or worsen float
   delay.
+
+## Figure Readability Pass
+
+- Kept Figure 1 frozen and out of scope.
+- Reworked the three active result figures around readability rather than
+  continuity with the old layouts:
+  - Fig. 2 now uses a full-width matrix with explicit `fail`, `recovered`, and
+    `clean` states so `P0/R1` no longer looks identical to clean `P1/P2`
+    success.
+  - Fig. 3 now collapses redundant planner/tool pairs into single workload bars
+    labeled `planner/tool`, because the retained plotted slices have equal
+    planner and tool counts within each prompt variant.
+  - Fig. 4 now shows invalid-action elimination plus runtime recovery, with
+    retries kept as annotation instead of being the only runtime signal.
+- Kept the claims unchanged: the redesigns preserve frozen data and current
+  scientific conclusions while making the comparisons legible at reviewer scale.
+- Refreshed the supporting table captions/labels so the tables complement, and
+  do not duplicate, the redesigned figures.

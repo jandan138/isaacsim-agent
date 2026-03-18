@@ -1,11 +1,11 @@
-panel,note,bar_label,value,color
-Navigation Invalid,Fixed R0 contract ablation,P0,1.0,ralP0R0
-Navigation Invalid,Fixed R0 contract ablation,P1,0.0,ralP1R0
-Navigation Invalid,Fixed R0 contract ablation,P2,0.0,ralP2R0
-Manipulation Invalid,Fixed R0 contract ablation,P0,1.0,ralP0R0
-Manipulation Invalid,Fixed R0 contract ablation,P1,0.0,ralP1R0
-Manipulation Invalid,Fixed R0 contract ablation,P2,0.0,ralP2R0
-Navigation Retries,Fixed P1 runtime ablation,R0,0.0,ralP1R0
-Navigation Retries,Fixed P1 runtime ablation,R1,0.5,ralP1R1
-Manipulation Retries,Fixed P1 runtime ablation,R0,0.0,ralP1R0
-Manipulation Retries,Fixed P1 runtime ablation,R1,0.5,ralP1R1
+section,family,family_label,prompt_variant,runtime_variant,run_count,average_invalid_actions,clean_successes,recovered_successes,invalid_failures,clean_success_rate,recovered_success_rate,invalid_failure_rate,average_retries
+invalid_actions,navigation,Navigation,P0,R0,2,1.0,,,,,,,
+invalid_actions,navigation,Navigation,P1,R0,2,0.0,,,,,,,
+invalid_actions,navigation,Navigation,P2,R0,2,0.0,,,,,,,
+invalid_actions,manipulation,Manipulation,P0,R0,2,1.0,,,,,,,
+invalid_actions,manipulation,Manipulation,P1,R0,2,0.0,,,,,,,
+invalid_actions,manipulation,Manipulation,P2,R0,2,0.0,,,,,,,
+runtime_recovery,navigation,Navigation,,R0,2,0.5,1,0,1,0.5,0.0,0.5,0.0
+runtime_recovery,navigation,Navigation,,R1,2,0.5,1,1,0,0.5,0.5,0.0,0.5
+runtime_recovery,manipulation,Manipulation,,R0,2,0.5,1,0,1,0.5,0.0,0.5,0.0
+runtime_recovery,manipulation,Manipulation,,R1,2,0.5,1,1,0,0.5,0.5,0.0,0.5
