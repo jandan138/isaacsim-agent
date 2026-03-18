@@ -163,3 +163,49 @@
   scientific conclusions while making the comparisons legible at reviewer scale.
 - Refreshed the supporting table captions/labels so the tables complement, and
   do not duplicate, the redesigned figures.
+
+## Expert Blocking-Issue Pass
+
+- Added `tables/contract_interface_examples.tex` as a compact
+  manuscript-facing display of real `P0` / `P1` / `P2` outputs drawn from saved
+  task configs and archived planner traces.
+- Reframed the manuscript around a deterministic planner and fixed task set:
+  - empirical unit is the task instance
+  - main comparison covers 21 task instances across four cohorts
+  - two focused ablations add 8 task instances
+  - total reported evaluation set is 29 task instances / 146 executions
+  - comparisons are descriptive rather than stochastic-rollout inference
+- Clarified the exact `R1` retry semantics: the retry keeps the same tool list
+  and appends a literal validation-error string plus a repair instruction.
+- Clarified the executor-visible meaning of `navigate_to` and
+  `scripted_pick_place_step` as deterministic task-scoped action primitives.
+- Removed reviewer-facing internal terminology from the active manuscript where
+  possible and reduced repeated main-conclusion wording.
+- Added shared `IEEEkeywords` and confirmed that both manuscript variants still
+  compile.
+- Added non-color labels in Fig. 2's runtime panel so recovered cells remain
+  distinguishable in grayscale / color-deficient viewing.
+
+## Expert-Review Blocker Pass
+
+- Added `tables/contract_interface_examples.tex` so the manuscript now shows
+  one concrete P0 / P1 / P2 output example using real `planner_trace.json`
+  responses instead of only prose labels.
+- Reframed the evaluation protocol around the deterministic local planner
+  backend and fixed task instances:
+  - 21 main-factorial task instances across four cohorts
+  - 126 deterministic main-matrix runs
+  - two focused four-task ablations for a reported total of 146 runs
+  - descriptive comparison rather than confidence intervals or significance
+    tests
+- Tightened the setup/results wording around R1 so the manuscript now states
+  exactly what validation checks, what failure string is returned, and what the
+  retry adds beyond the first-pass typed contract.
+- Tightened the setup wording around Isaac Sim execution semantics so
+  `navigate_to` and `scripted_pick_place_step` are described as task-scoped
+  deterministic executor actions rather than generic low-level controls.
+- Added `IEEEkeywords` to the shared abstract and removed remaining active
+  reviewer-visible internal terms from the shared `.tex` files.
+- Reduced repeated main-conclusion wording by narrowing the abstract to the
+  headline result, the introduction to the study question, and the conclusion
+  to the bounded takeaway.

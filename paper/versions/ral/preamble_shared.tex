@@ -13,6 +13,14 @@
 \usetikzlibrary{arrows.meta,backgrounds,calc,fit,positioning,shapes.geometric}
 \pgfplotsset{compat=1.18}
 
+\makeatletter
+\@ifundefined{IEEEkeywords}{
+  \newenvironment{IEEEkeywords}
+    {\par\vspace{0.35em}\noindent\textbf{Keywords}: }
+    {\par}
+}{}
+\makeatother
+
 \definecolor{ralP0R0}{HTML}{B55B4E}
 \definecolor{ralP0R1}{HTML}{D58F73}
 \definecolor{ralP1R0}{HTML}{2E6EA7}

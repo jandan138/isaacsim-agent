@@ -7,17 +7,17 @@
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `M11. Paper drafting`
 - Milestone state:
-  - this run completed `Fig. 2 / 3 / 4 readability, table/setup clarity, and bibliography polish`
+  - this run completed `expert-review blocking issues pass`
 - Completion level:
-  - the reviewer-facing submission variant compiles successfully at `7` pages:
+  - the reviewer-facing submission variant compiles successfully at `8` pages:
     `paper/versions/ral/reviewer_submission/main.pdf`
-  - the journal scaffold compiles successfully at `7` pages:
+  - the journal scaffold compiles successfully at `8` pages:
     `paper/versions/ral/main.pdf`
   - Figure 1 remains frozen at
     `paper/versions/ral/figures/fig1_system_overview_frozen.*`
-  - the active manuscript-facing result figures are now regenerated from the
-    frozen processed summaries with figure-specific layouts rather than the old
-    generic grouped-bar template
+  - the manuscript now includes a compact contract/interface display, explicit
+    deterministic-planner framing, shared keywords, and clarified runtime /
+    executor semantics
 
 ## Run context
 
@@ -25,11 +25,9 @@
   - no new experiments
   - no Figure 1 redesign, regeneration, relabeling, or replacement
   - no venue switch
-  - no change to the paper's contract / runtime-validation framing
-  - no reversion to prompt-first wording
-  - no strong P2 efficiency overclaim
-  - no large-scale prose rewrite
-  - no invented numbers or citations
+  - no prompt-first reframing
+  - no exaggerated efficiency claims
+  - no fabricated examples, interface schemas, or citations
 - Source-of-truth docs consumed in this run:
   - `plan.md`
   - `AGENTS.md`
@@ -63,149 +61,155 @@
   - `results/processed/block_a_cross_family_summary/`
   - `scripts/package_block_a_ral_assets.py`
   - `src/isaacsim_agent/eval/block_a_ral_assets.py`
+  - `src/isaacsim_agent/planner/`
+  - `src/isaacsim_agent/runtime/`
 - Agent teaming:
-  - used three sub-agents with completed worklogs:
-    - figure-audit explorer:
-      `.codex/worklogs/subagents/2026-03-18/figure-audit.md`
-    - text/table worker:
-      `.codex/worklogs/subagents/2026-03-18/text-table-worker.md`
-    - citation-audit explorer:
-      `.codex/worklogs/subagents/2026-03-18/citation-audit.md`
-  - all three sub-agents completed normally; no interruptions or stall
-    interventions were needed
+  - two explorer subagent worklogs were created for the current pass:
+    - `.codex/worklogs/subagents/2026-03-18/impl-semantics-audit.md`
+    - `.codex/worklogs/subagents/2026-03-18/manuscript-audit-current.md`
+  - neither produced a usable result in the workspace; both worklogs record
+    abandonment and the main session completed the audits locally
 
 ## Milestone summary
 
 - Completed in this run:
-  - audited the current reviewer-facing PDF, manuscript figure wrappers,
-    generator code, and frozen result summaries to separate data-equality
-    effects from layout problems
-  - replaced the old generic grouped-bar result-figure pipeline with
-    figure-specific manuscript designs:
-    - Fig. 2:
-      full-width outcome matrix with in-cell counts and explicit
-      `fail` / `recovered` / `clean` states
-    - Fig. 3:
-      consolidated retained `P1` versus `P2` workload comparison with
-      `planner/tool` pair labels instead of duplicated planner/tool panels
-    - Fig. 4:
-      two-part mechanism figure showing fixed-`R0` invalid-action elimination
-      plus fixed-`P1` runtime recovery, with retries demoted to annotation
-  - tightened `sections/results.tex` to match the redesigned figures
-  - tightened `sections/setup.tex`, `sections/intro.tex`,
-    `sections/discussion.tex`, and `sections/conclusion.tex` for local
-    readability and reproducibility clarity without changing findings
-  - improved the table captions/labels in the generator-owned RA-L tables
-  - polished the bibliography conservatively:
-    - aligned `RT-2` to official PMLR proceedings metadata
-    - added checked version/access notes to the BehaviorTree.CPP
-      documentation entries
-    - left `OK-Robot` as a manual author decision rather than auto-swapping to
-      a different-title RSS demo citation
-  - rebuilt both manuscript variants and checked figure rendering from the
-    reviewer-facing PDF rasterization
+  - added `paper/versions/ral/tables/contract_interface_examples.tex` as a
+    compact manuscript-facing table with real `P0` / `P1` / `P2` outputs taken
+    from saved prompt texts and archived `planner_trace.json` files
+  - revised `sections/setup.tex`, `sections/results.tex`,
+    `sections/discussion.tex`, and `sections/conclusion.tex` so the manuscript
+    now states explicitly that:
+    - the planner backend is deterministic by design
+    - the empirical unit is the task instance, not repeated stochastic rollout
+      replication
+    - the main comparison covers 21 task instances across four cohorts
+    - the two focused ablations add 8 task instances
+    - the reported evaluation set contains 29 task instances and 146
+      executions
+    - the quantitative comparisons are descriptive rather than a
+      confidence-interval / significance-test exercise
+  - removed reviewer-facing internal wording from the active manuscript where
+    avoidable and tightened repeated main-conclusion wording
+  - added shared `IEEEkeywords` in `sections/abstract.tex`; both variants
+    compile with the same keyword line
+  - clarified the exact `R1` retry semantics:
+    - same tool list on retry
+    - literal `validation_error` string
+    - appended repair instruction
+    - one retry only
+  - clarified executor-visible action semantics:
+    - `navigate_to` dispatches one deterministic step toward the configured
+      goal
+    - `scripted_pick_place_step` advances one phase of a fixed scripted
+      pick-and-place sequence
+  - polished the related-work comparison to SayCan, Code as Policies, and
+    ProgPrompt around affordance grounding, code/program generation, and
+    declared action interfaces
+  - added non-color labels inside Fig. 2's runtime panel cells so recovered
+    outcomes remain distinguishable in grayscale / color-deficient viewing
+  - rebuilt both manuscript variants, confirmed 8 pages for both, and checked
+    that the new contract/interface display is present as Table I
 - Not completed in this run:
   - no new experiments
   - no Figure 1 work beyond preserving the frozen asset
-  - no bulk cite-key rename pass
+  - no bibliography expansion beyond the already-shared citation state
 
-## Files changed
+## Files changed in this run
 
 - `STATUS.md`
 - `paper/versions/ral/README.md`
-- `paper/versions/ral/asset_manifest.md`
 - `paper/versions/ral/figure_table_binding.md`
 - `paper/versions/ral/latex_assembly_notes.md`
 - `paper/versions/ral/full_draft_v1_notes.md`
-- `paper/versions/ral/figures/main_condition_ordering.csv`
-- `paper/versions/ral/figures/main_condition_ordering.tex`
-- `paper/versions/ral/figures/invalid_actions_recovery.csv`
-- `paper/versions/ral/figures/invalid_actions_recovery.tex`
-- `paper/versions/ral/figures/planner_tool_overhead.csv`
-- `paper/versions/ral/figures/planner_tool_overhead.tex`
-- `paper/versions/ral/refs/references.bib`
-- `paper/versions/ral/refs/references_note.tex`
-- `paper/versions/ral/sections/conclusion.tex`
-- `paper/versions/ral/sections/discussion.tex`
+- `paper/versions/ral/sections/abstract.tex`
 - `paper/versions/ral/sections/intro.tex`
-- `paper/versions/ral/sections/results.tex`
+- `paper/versions/ral/sections/related_work.tex`
 - `paper/versions/ral/sections/setup.tex`
-- `paper/versions/ral/tables/experimental_design_summary.csv`
-- `paper/versions/ral/tables/experimental_design_summary.tex`
-- `paper/versions/ral/tables/main_outcome_summary.tex`
-- `paper/versions/ral/tables/planner_tool_overhead_summary.tex`
+- `paper/versions/ral/sections/results.tex`
+- `paper/versions/ral/sections/discussion.tex`
+- `paper/versions/ral/sections/conclusion.tex`
+- `paper/versions/ral/tables/contract_interface_examples.tex`
 - `paper/versions/ral/main.pdf`
 - `paper/versions/ral/reviewer_submission/main.pdf`
-- `src/isaacsim_agent/eval/block_a_ral_assets.py`
+- `.codex/worklogs/main/2026-03-18/session-plan.md`
+- `.codex/worklogs/main/2026-03-18/session-research.md`
+- `.codex/worklogs/main/2026-03-18/session-handoff.md`
+- `.codex/worklogs/subagents/2026-03-18/impl-semantics-audit.md`
+- `.codex/worklogs/subagents/2026-03-18/manuscript-audit-current.md`
 
 ## Commands run
 
 - Source-of-truth and repo-state reads:
   - `sed -n '1,220p' plan.md`
-  - `sed -n '1,240p' AGENTS.md`
+  - `sed -n '1,260p' AGENTS.md`
   - `sed -n '1,260p' STATUS.md`
   - `sed -n '1,260p' docs/ral_writing_playbook.md`
   - `git status --short --untracked-files=all`
-- Manuscript and asset audit:
+- Manuscript and implementation audit:
   - `sed -n ...` over the requested paper-level `.md`, `.tex`, `.csv`, and
     `.bib` files
-  - `pdftoppm -png paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_review_current`
-  - `pdftoppm -f 4 -l 6 -png paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_review_new`
-- Packaging and code validation:
-  - `python -m py_compile src/isaacsim_agent/eval/block_a_ral_assets.py`
-  - `python scripts/package_block_a_ral_assets.py`
+  - `rg -n ...` across `paper/versions/ral/`, `results/`, and
+    `src/isaacsim_agent/`
+  - `find results -name 'planner_trace.json' ...`
+  - `python - <<'PY' ...` snippets to inspect saved task configs, planner
+    traces, processed summaries, and final-closure counts
 - Compile validation:
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
     with working directory `paper/versions/ral`
   - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
     with working directory `paper/versions/ral/reviewer_submission`
+  - follow-up single-pass `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    in both `paper/versions/ral` and `paper/versions/ral/reviewer_submission`
+    after inserting the manual contract table
   - `pdfinfo main.pdf | sed -n '1,20p'`
     with working directory `paper/versions/ral`
   - `pdfinfo main.pdf | sed -n '1,20p'`
     with working directory `paper/versions/ral/reviewer_submission`
+  - `pdftotext paper/versions/ral/reviewer_submission/main.pdf - | rg -n ...`
+    to confirm contract-table text appears in the reviewer-facing PDF
 
 ## Validation results
 
 - Reviewer-facing submission:
   - `paper/versions/ral/reviewer_submission/main.pdf` compiles successfully
-  - `pdfinfo` reports `Pages: 7`
-  - reviewer-scale rasterization confirms that:
-    - Fig. 2 is now a readable full-width matrix
-    - Fig. 3 is now a readable retained-workload comparison
-    - Fig. 4 is now a readable invalid/recovery mechanism figure
+  - `pdfinfo` reports `Pages: 8`
+  - `main.aux` records `\newlabel{tab:contract-interface-examples}{{I}{2}}`,
+    so the new contract/interface display resolves as Table I on page 2
 - Journal scaffold:
   - `paper/versions/ral/main.pdf` compiles successfully
-  - `pdfinfo` reports `Pages: 7`
+  - `pdfinfo` reports `Pages: 8`
+  - `main.aux` records `\newlabel{tab:contract-interface-examples}{{I}{2}}`
+- Keywords:
+  - the shared `IEEEkeywords` block compiles in both variants
 - Figure 1 state:
   - still inserted via `figures/fig1_system_overview_frozen.tex`
   - still resolves to the frozen manual asset
   - intentionally not modified in this pass
-- Bibliography state:
-  - `references.bib` compiles successfully after the conservative metadata
-    cleanup
 - Remaining warnings / non-blockers:
   - underfull-box warnings remain in narrow-column prose
-  - small overfull-box warnings remain in the compact Fig. 2 / Fig. 4
-    table-figure hybrids, but the rendered reviewer PDF is legible
-  - the reviewer-facing `conference` build still emits the standard
+  - small overfull-box warnings remain in:
+    - `tables/contract_interface_examples.tex`
+    - `figures/main_condition_ordering.tex`
+    - `figures/invalid_actions_recovery.tex`
+  - the reviewer-facing conference build still emits the standard last-page
     column-balance reminder
 
 ## Remaining gaps
 
 - do the final author-side line edit and anonymity pass
-- optionally decide whether `OK-Robot` should stay arXiv-only or move to the
-  RSS demo-format citation
-- optionally trim the setup implementation snapshot if another small page/flow
+- decide whether any setup prose should be trimmed if another small page-margin
   reduction is needed
+- optionally refine the new contract/interface table wording if the authors want
+  the examples to be navigation-only or manipulation-only rather than mixed
 - keep Figure 1 unchanged unless the authors explicitly choose a different
   frozen manual asset later
 
 ## Next recommended sub-milestone
 
-- Move from `Fig. 2 / 3 / 4 readability pass` to `author final-edit /
+- Move from `expert-review blocking issues pass` to `author final-edit /
   submission prep` by:
   - reviewing `paper/versions/ral/reviewer_submission/main.pdf` line by line
   - checking anonymity and wording one last time
-  - making the final manual decision on any optional bibliography swaps
+  - deciding whether any final page-pressure trimming is still needed
   - preserving the frozen Figure 1 asset and the current contract/runtime
-    framing unless authors explicitly request another scope change
+    framing unless the authors explicitly request another scope change

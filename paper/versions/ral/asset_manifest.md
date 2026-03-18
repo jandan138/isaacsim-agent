@@ -1,15 +1,11 @@
 # RA-L Asset Manifest
 
-- Evidence base: frozen Block A final closure plus retained slice summaries.
+- Evidence base: fixed evaluation summary plus supporting slice summaries.
 - Final closure merged runs: `146`
 - Final closure successful runs: `119`
 - Cross-family prompt/runtime rows: `12`
 - Figure style: manuscript figures are emitted as PGF/TikZ-backed `.tex` assets for vector-first compilation.
 - Figure 1 is a frozen manually selected asset and is intentionally out of scope for this generator.
-- Latest readability pass:
-  - `main_condition_ordering` is a count-based outcome matrix with explicit `fail` / `recovered` / `clean` states
-  - `planner_tool_overhead` is a consolidated retained-workload comparison with `planner/tool` pair labels
-  - `invalid_actions_recovery` is a two-part invalid-plus-recovery mechanism figure
 - Main reviewer-facing figures:
   - `figures/fig1_system_overview_frozen.png`
   - `figures/fig1_system_overview_frozen.pdf` (optional when present)
@@ -17,6 +13,7 @@
   - `figures/invalid_actions_recovery.tex`
   - `figures/planner_tool_overhead.tex`
 - Main reviewer-facing tables:
+  - `tables/contract_interface_examples.tex`
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
   - `tables/planner_tool_overhead_summary.tex`

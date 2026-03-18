@@ -36,7 +36,8 @@ emit a task-level next action without binding it to the executor's tool
 namespace. P1 uses a typed tool-call contract, requiring the planner to
 choose one exposed tool and provide dispatchable arguments. P2 keeps the same
 typed tool-call contract and adds a brief planner-side self-check before
-emission.
+emission. Table~\ref{tab:contract-interface-examples} shows concrete
+examples of those three output formats.
 
 R0 is a bare-dispatch runtime: it does not perform pre-dispatch validation or
 offer a repair path. R1 is a validate-and-retry runtime: it checks the
@@ -50,27 +51,40 @@ still slip through.
 
 \subsection{Implementation Snapshot}
 
-The frozen Block A evidence uses the repo-local \texttt{mock\_block\_a}
-planner backend rather than a hosted foundation-model API. In the archived run
-summaries, this appears as \texttt{planner\_backend=mock\_block\_a} with
-\texttt{model\_variant=null}; the implementation is the local file
-\texttt{src/isaacsim\_agent/planner/mock.py}. The planner emits one
-deterministic JSON action per call, so there are no temperature, top-$p$, or
-stochastic decoding settings to tune in this frozen study.
+The study uses a repo-local deterministic planner backend implemented in
+\texttt{src/isaacsim\_agent/planner/mock.py} rather than a hosted
+foundation-model API. Given the current task state, exposed tools, and any
+retry message, it emits one JSON action per planner call; there are therefore
+no temperature, top-$p$, or rollout-sampling settings in this evaluation.
 
 P0 realizes a direct-action JSON contract, P1 realizes typed tool JSON, and
 P2 keeps the same typed tool JSON while adding a planner-side
-\texttt{self\_check} field. R0 performs bare dispatch, while R1 validates tool
-name and arguments against the active task-specific namespace and allows one
-repair attempt before termination. Navigation exposes
-\texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and
-\texttt{navigate\_to}. Manipulation exposes \texttt{get\_gripper\_state},
+\texttt{self\_check} string. The planner request already exposes the valid tool
+names, descriptions, and required arguments through \texttt{available\_tools}.
+R1 adds one more element: if parsing or validation fails, it appends the
+literal error string to a short repair instruction and allows one retry. The
+runtime parses the emitted JSON, validates the tool name against the
+task-specific registry, enforces the exact required argument set, and then
+checks task-specific payload semantics. For navigation,
+\texttt{navigate\_to} must carry a valid \texttt{target\_pose} that matches the
+configured goal pose. For manipulation,
+\texttt{scripted\_pick\_place\_step} must carry the next scripted
+\texttt{phase\_name}. The added P2 \texttt{self\_check} field is recorded in the
+planner trace but does not replace runtime contract checking.
+
+Navigation exposes \texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and
+\texttt{navigate\_to}. The first two are state queries; \texttt{navigate\_to}
+dispatches one deterministic executor step toward the configured goal and
+returns the applied target pose, progress, moved distance, and stuck-step
+count. Manipulation exposes \texttt{get\_gripper\_state},
 \texttt{get\_object\_state}, \texttt{get\_target\_state}, and
-\texttt{scripted\_pick\_place\_step}. The archived task configs, trajectories,
-and processed summaries record the selected backend realization, contract and
-runtime variants, termination reason, and Isaac runtime metadata such as
-\texttt{backend\_variant} and \texttt{kit\_version}=106.5.0, so the reported
-slices remain traceable to fixed local artifacts.
+\texttt{scripted\_pick\_place\_step}. The first three are state queries;
+\texttt{scripted\_pick\_place\_step} advances one phase of a fixed pick-and-place
+script such as \texttt{move\_to\_pregrasp}, \texttt{descend\_to\_grasp}, or
+\texttt{close\_gripper\_and\_attach}, and returns the applied phase plus the
+updated observation and motion deltas. The executor therefore exposes
+task-scoped, deterministic action primitives rather than raw controls or
+free-form code execution.
 
 \subsection{Metrics and Evaluation Protocol}
 
@@ -81,9 +95,22 @@ still ends successfully after runtime handling. Retries capture the extra
 repair work used in R1. Planner calls and tool calls together define
 planner/tool overhead, which is the paper's efficiency proxy.
 
-The paper draws its quantitative comparisons from the frozen main factorial
-results plus targeted runtime-only, action-interface ablation, and harder-task
-summaries.
-The final closure summary provides the canonical aggregate view, while the
+The planner backend is deterministic by design, so the empirical unit is the
+task instance under a specified condition rather than repeated stochastic
+rollouts. The four main comparison cohorts cover 21 fixed task instances
+(11 navigation easy, 3 manipulation easy, 4 navigation harder, and 3
+manipulation harder), evaluated once under all six contract/runtime cells for
+126 main-matrix runs. Two focused ablation cohorts add four task instances
+each to isolate the action-interface and runtime effects, giving 29 task
+instances and 146 total condition evaluations in the full fixed evaluation
+set. We therefore report descriptive comparisons over this fixed evaluation
+set rather than confidence intervals or significance tests across i.i.d.
+stochastic replications.
+
+The paper draws its quantitative comparisons from the main factorial results
+plus targeted runtime-only, action-interface ablation, and harder-task
+summaries. The combined summary provides the aggregate view, while the
 slice-specific summaries support the ablations and the failure-case
-interpretation.
+interpretation. Within each slice, every compared condition is evaluated on the
+same fixed tasks, which is why this task coverage still supports a controlled
+systems comparison even without stochastic rollout replication.

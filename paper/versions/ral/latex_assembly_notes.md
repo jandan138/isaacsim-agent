@@ -2,12 +2,18 @@
 
 ## Scope of this pass
 
-- Preserve the journal-style scaffold under `paper/versions/ral/`.
-- Keep the existing anonymous reviewer-facing submission entry under
+- Preserve the shared RA-L scaffold under `paper/versions/ral/`.
+- Keep the anonymous reviewer-facing entry under
   `paper/versions/ral/reviewer_submission/`.
-- Keep the contract / runtime-validation framing intact.
 - Keep Figure 1 frozen and out of scope.
 - Do not add experiments, invent numbers, or widen the evidence base.
+- Address the expert-review blocking issues around:
+  - a concrete contract/interface display
+  - deterministic-planner framing and fixed-task-set coverage
+  - reviewer-facing internal terminology cleanup
+  - precise R1 feedback semantics and executor semantics
+  - repeated main-conclusion wording and related-work polish
+  - keywords and a low-risk Fig. 2 accessibility follow-through
 
 ## Variant split
 
@@ -18,7 +24,7 @@
   - current compiled PDF:
     `paper/versions/ral/reviewer_submission/main.pdf`
   - current page count:
-    `7`
+    `8`
 - Accepted-version journal assembly scaffold:
   `paper/versions/ral/main.tex`
   - class mode:
@@ -26,7 +32,7 @@
   - current compiled PDF:
     `paper/versions/ral/main.pdf`
   - current page count:
-    `7`
+    `8`
 - Shared content for both:
   - `sections/`
   - `figures/`
@@ -36,80 +42,90 @@
 
 ## Figure assembly changes
 
-- Figure 1 is now frozen to the manually selected asset:
+- Figure 1 remains frozen to the manually selected asset:
   - `figures/fig1_system_overview_frozen.png`
   - `figures/fig1_system_overview_frozen.pdf` when present
-- The shared manuscript now reaches that frozen asset through
-  `figures/fig1_system_overview_frozen.tex`.
-- This pass does not redesign, regenerate, or iterate on Figure 1.
-- Replaced the old shared grouped-bar template with figure-specific
-  manuscript-facing assets:
+  - `figures/fig1_system_overview_frozen.tex`
+- This pass did not redesign, regenerate, or iterate on Figure 1.
+- The active result figures remain:
   - `main_condition_ordering`
-    - now a full-width outcome matrix with explicit `fail`, `recovered`, and
-      `clean` states
+    - full-width outcome matrix with explicit `fail`, `recovered`, and `clean`
+      labels in the cells
   - `planner_tool_overhead`
-    - now a consolidated retained `P1` / `P2` workload comparison with
-      `planner/tool` labels instead of duplicated planner/tool panels
+    - consolidated workload comparison with `planner/tool` labels
   - `invalid_actions_recovery`
-    - now a two-part mechanism figure showing invalid-action elimination and
-      runtime recovery rather than retry-only micro-panels
+    - two-part mechanism figure; the runtime panel now carries explicit text
+      labels inside the colored cells so the distinction does not rely on color
+      alone
 
 ## Table assembly changes
 
-- Kept the three main-text tables but refreshed their captions/labels so their
-  roles are clearer beside the redesigned figures:
+- Added one manual manuscript-facing table:
+  - `tables/contract_interface_examples.tex`
+  - built from saved prompt texts and archived planner traces
+- Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
   - `tables/planner_tool_overhead_summary.tex`
-- Kept `tables/final_closure_result_summary.tex`,
-  `tables/focused_ablation_summary.tex`, and `tables/harder_task_summary.tex`
-  as support-only assets.
+- Kept the support-only tables:
+  - `tables/final_closure_result_summary.tex`
+  - `tables/focused_ablation_summary.tex`
+  - `tables/harder_task_summary.tex`
 
-## Reproducibility wording
+## Reproducibility and wording changes
 
-- Added a compact implementation snapshot in `sections/setup.tex` covering:
-  - planner identity and local access path
-  - deterministic JSON decoding / no temperature or top-$p$
-  - P0/P1/P2 realizations
-  - R0/R1 realizations
-  - executor tool namespaces
-
-## Citation and prose cleanup
-
-- Tightened the introduction, setup, discussion, and conclusion wording without
-  rewriting the manuscript around a new thesis.
-- Updated `refs/references.bib` conservatively:
-  - aligned `RT-2` to official PMLR proceedings metadata
-  - added version/access notes to the BehaviorTree.CPP documentation entries
-  - left `OK-Robot` and the two 2025 benchmark citations conservative where no
-    same-title archival replacement was safely introduced in this pass
+- `sections/setup.tex` now states explicitly that:
+  - the planner backend is deterministic by design
+  - the empirical unit is the task instance, not i.i.d. stochastic rollout
+    replication
+  - the main comparison covers 21 task instances across four cohorts
+  - the two focused ablations add 8 task instances
+  - the reported evaluation set contains 29 task instances and 146 executions
+  - the quantitative comparisons are descriptive rather than a
+    confidence-interval / significance-test exercise
+- The setup/results text now explains the exact `R1` repair path:
+  - same tool list on retry
+  - literal `validation_error` string
+  - appended repair instruction
+  - one retry only
+- The setup text now clarifies the executor-visible action semantics:
+  - `navigate_to` dispatches one deterministic step toward the configured goal
+  - `scripted_pick_place_step` advances one phase of a fixed scripted
+    pick-and-place sequence
+- Reviewer-facing internal wording was removed where avoidable in the active
+  manuscript.
+- The related-work comparison to SayCan, Code as Policies, and ProgPrompt was
+  tightened around affordance grounding, code/program generation, and declared
+  action interfaces.
+- Shared `IEEEkeywords` were added in `sections/abstract.tex`; both variants
+  compile with the same keyword line.
 
 ## Build verification
 
-- Shared asset regeneration:
-  `python scripts/package_block_a_ral_assets.py`
-- Journal scaffold:
-  `cd paper/versions/ral && pdflatex ... && bibtex main && pdflatex ...`
+- Full rebuild, journal scaffold:
+  `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - compile status:
     success
   - page count:
-    `7`
-- Reviewer-facing submission:
-  `cd paper/versions/ral/reviewer_submission && pdflatex ... && bibtex main && pdflatex ...`
+    `8`
+- Full rebuild, reviewer-facing submission:
+  `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - compile status:
     success
   - page count:
-    `7`
+    `8`
+- Follow-up compile after the manual contract table insertion:
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - both completed successfully
 
 ## Remaining non-blockers
 
-- Underfull-box warnings remain from narrow-column line breaking and float-page
-  composition.
-- Small overfull-box warnings remain in the compact Fig. 2 / Fig. 4
-  table-figure hybrids, but the rendered reviewer PDF is legible.
-- The reviewer-facing system-overview insets are schematic renderings grounded
-  in frozen layouts and traces; authors may still swap in literal simulator
-  screenshots later if desired.
-- Figure 1 itself is no longer an active generator-owned asset.
-- The `IEEEtran` conference build emits the standard last-page column-balance
-  reminder for camera-ready handling.
+- Underfull-box warnings remain in narrow-column prose.
+- Small overfull-box warnings remain in:
+  - one row of `tables/contract_interface_examples.tex`
+  - `figures/main_condition_ordering.tex`
+  - `figures/invalid_actions_recovery.tex`
+- The reviewer-facing conference build still emits the standard last-page
+  column-balance reminder.
+- Figure 1 itself remains out of scope for this branch.

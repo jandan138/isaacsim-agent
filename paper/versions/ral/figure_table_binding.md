@@ -1,25 +1,26 @@
 # Figure and Table Binding
 
 This file records the current reviewer-facing binding state for the RA-L
-artifact stack after the artifact-overhaul pass.
+artifact stack after the expert blocking-issue pass.
 
 ## Main-text bindings
 
-| Asset | Regenerated file(s) | Inserted from | Evidence binding | Notes |
+| Asset | File(s) | Inserted from | Evidence binding | Notes |
 | --- | --- | --- | --- | --- |
-| Figure 1: system overview | `paper/versions/ral/figures/fig1_system_overview_frozen.png` and optional `paper/versions/ral/figures/fig1_system_overview_frozen.pdf`, wrapped by `paper/versions/ral/figures/fig1_system_overview_frozen.tex` | `sections/intro.tex` via `\input{figures/fig1_system_overview_frozen.tex}` | Manually selected frozen asset | Frozen by author choice. This figure is now out of scope for further generator-driven iteration or redesign. |
-| Main condition ordering | `paper/versions/ral/figures/main_condition_ordering.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Full-width table-figure hybrid. In-cell counts and `fail` / `recovered` / `clean` labels replace the old repeated success-rate bar panels. |
-| Invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Two-part mechanism figure: fixed-`R0` invalid-action elimination on top, fixed-`P1` runtime recovery on bottom, with retries kept as annotation rather than the only runtime signal. |
-| Planner/tool overhead | `paper/versions/ral/figures/planner_tool_overhead.{csv,tex}` | `sections/results.tex` | retained `P1` / `P2` rows from `results/processed/block_a_master_summary/block_a_master_summary.json` plus `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Consolidated retained-workload comparison. Equal planner/tool pairs are collapsed into single bars labeled `planner/tool` so the `P1` versus `P2` contrast stays legible. |
-| Table I: experimental design | `paper/versions/ral/tables/experimental_design_summary.{csv,tex}` | `sections/setup.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` plus retained ablation and harder-manipulation summaries | Reformatted as a full-width reviewer-facing matrix summary. |
-| Table II: outcomes | `paper/versions/ral/tables/main_outcome_summary.{csv,tex}` | `sections/results.tex` | Main retained cohorts from final closure, master summary, and harder manipulation | Splits success / invalid / retries away from workload metrics. |
-| Table III: planner/tool overhead | `paper/versions/ral/tables/planner_tool_overhead_summary.{csv,tex}` | `sections/results.tex` | Main retained cohorts from final closure, master summary, and harder manipulation | Keeps workload cells separate from outcome cells. |
+| Figure 1: system overview | `paper/versions/ral/figures/fig1_system_overview_frozen.png` and optional `paper/versions/ral/figures/fig1_system_overview_frozen.pdf`, wrapped by `paper/versions/ral/figures/fig1_system_overview_frozen.tex` | `sections/intro.tex` via `\input{figures/fig1_system_overview_frozen.tex}` | Manually selected frozen asset | Figure 1 stayed frozen by author request and was not redesigned or regenerated in this pass. |
+| Table I: contract/interface examples | `paper/versions/ral/tables/contract_interface_examples.tex` | `sections/setup.tex` | Saved prompt texts from the task configs plus archived planner responses from `results/block_a_navigation_prompt_runtime_expanded_e2e_20260316_py2/.../p0-r0-s0/artifacts/planner_trace.json`, `.../p1-r0-s0/artifacts/planner_trace.json`, and `results/block_a_manipulation_prompt_runtime_pilot/.../p2-r0-s0/artifacts/planner_trace.json` | Manual manuscript-facing table. Shows one real `P0` under-specified action, one real `P1` typed tool call, and one real `P2` typed tool call with `self_check`. |
+| Table II: experimental design | `paper/versions/ral/tables/experimental_design_summary.{csv,tex}` | `sections/setup.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` plus the focused ablation and harder-manipulation summaries | Full-width reviewer-facing matrix summary. |
+| Figure 2: main condition ordering | `paper/versions/ral/figures/main_condition_ordering.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Full-width table-figure hybrid. In-cell counts and `fail` / `recovered` / `clean` labels replace the old repeated success-rate bar panels. |
+| Table III: outcomes | `paper/versions/ral/tables/main_outcome_summary.{csv,tex}` | `sections/results.tex` | Main reported cohorts from final closure, master summary, and harder manipulation | Splits success / invalid / retries away from workload metrics. |
+| Figure 3: planner/tool overhead | `paper/versions/ral/figures/planner_tool_overhead.{csv,tex}` | `sections/results.tex` | `P1` / `P2` rows from `results/processed/block_a_master_summary/block_a_master_summary.json` plus `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Consolidated workload comparison with `planner/tool` labels. |
+| Table IV: planner/tool overhead | `paper/versions/ral/tables/planner_tool_overhead_summary.{csv,tex}` | `sections/results.tex` | Main reported cohorts from final closure, master summary, and harder manipulation | Keeps workload cells separate from outcome cells. |
+| Figure 4: invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Two-part mechanism figure: fixed-`R0` invalid-action elimination on top, fixed-`P1` runtime recovery on bottom, with explicit non-color labels inside the runtime panel cells. |
 
 ## Support-only bindings
 
 - `paper/versions/ral/tables/final_closure_result_summary.{csv,tex}`
   - Evidence:
-    retained cohorts from final closure, master summary, and harder
+    reported cohorts from final closure, master summary, and harder
     manipulation
   - Status:
     generated but not inserted in the main manuscript
@@ -48,9 +49,7 @@ artifact stack after the artifact-overhaul pass.
 
 ## Asset format note
 
-- Figure 1 is now a frozen manual asset; the remaining manuscript-facing result
-  figures are TeX/TikZ vector assets.
-- The current result figures deliberately preserve the frozen data and claims,
-  not the older bar-panel layouts.
-- The dormant PNG files from earlier packaging are no longer the
-  manuscript-facing source of truth.
+- Figure 1 remains a frozen manual asset.
+- The three result figures remain TeX/TikZ vector assets.
+- `tables/contract_interface_examples.tex` is the only manual manuscript-facing
+  table added in this pass; it is not regenerated by the packaging script.

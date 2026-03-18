@@ -26,17 +26,17 @@ compares two runtime variants: bare dispatch (R0) and validation with a
 single retry (R1). These variants are implemented through different planner
 instructions, but the manipulated system variables are the action interface
 presented to the executor and the runtime validation policy applied before
-dispatch.
+dispatch. The planner backend is deterministic by design, so each
+condition is compared once per task instance rather than through repeated
+stochastic rollouts.
 
-The findings are stable across the covered slices. P0/R0 is consistently the
-weakest condition; adding runtime validation to that weak contract recovers
-fragile invalid-first-action failures; explicit contracts P1 and P2
-eliminate the invalid-action failure mode in the fixed-R0 slice; and P2 is
-associated with lower planner/tool overhead than P1 in the covered
-comparisons. Harder tasks increase planner and tool activity without reversing
-the ordering. The paper is limited to this controlled simulator study and
-draws bounded execution-design lessons rather than new-model or benchmark
-claims.
+The study is designed to separate two effects: whether a declared tool
+interface prevents invalid dispatches at the source, and whether one
+validation-and-retry step recovers a narrow class of violations that still
+occur. Harder tasks are included to test whether additional burden changes the
+qualitative ordering or mainly increases planner/tool activity. The paper is
+limited to this controlled simulator study and draws bounded execution-design
+lessons rather than new-model or benchmark claims.
 
 This paper makes three contributions:
 
@@ -50,7 +50,7 @@ validation with a single retry converts recoverable invalid-first actions
 into successful executions in both covered task families.
 \item It extracts a compact architectural lesson from the tested setup: contract
 design, runtime validation, and a brief planner-side self-check are separate
-systems levers that shape reliability and planner/tool overhead without
+architectural choices that shape reliability and planner/tool overhead without
 changing the underlying task matrix.
 \end{enumerate}
 
@@ -62,3 +62,11 @@ throughout the paper. The same figure also carries the compact failure-repair
 trace that anchors the recovery discussion.
 
 \input{figures/fig1_system_overview_frozen.tex}
+
+Table~\ref{tab:contract-interface-examples} grounds those variants with
+recorded planner emissions from the study's saved traces. It makes the
+contract distinction concrete: P0 leaves the executor-visible tool
+underspecified, P1 names a callable tool and its arguments, and P2 adds a
+brief planner-side self-check string to the same typed call surface.
+
+\input{tables/contract_interface_examples.tex}

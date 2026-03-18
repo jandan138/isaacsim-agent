@@ -1,8 +1,7 @@
 \section{Results}
 
-Across the aggregated evaluation slices, the same contract x runtime ordering
-recurs: P0/R0 is the weakest condition, P0/R1 recovers, and the explicit-contract
-conditions remain strong.
+We report the main cohort comparison first, then the mechanism-focused
+ablations, and finally the harder-task check.
 
 \subsection{Main Contract x Runtime Effect}
 
@@ -11,18 +10,21 @@ tabletop manipulation easy, harder navigation, and harder manipulation. In
 each slice, P0/R0 is the weakest cell. Pairing the same under-specified
 contract with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
 P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. The same ordering holds
-across both task families and persists as tasks become harder.
+across both task families and persists as tasks become harder. Because the
+backend and executor are deterministic by design, each cell is interpreted as
+a descriptive comparison over a fixed cohort of task instances rather than as
+an estimate from repeated stochastic rollouts.
 
 \input{figures/main_condition_ordering.tex}
 \input{tables/main_outcome_summary.tex}
 
-Table~\ref{tab:main-outcome-summary} records the same retained cohorts
-in a reviewer-facing layout that keeps success, invalid-action exposure, and
+Table~\ref{tab:main-outcome-summary} records the same four evaluation cohorts
+in a compact layout that keeps success, invalid-action exposure, and
 retries readable without forcing planner/tool counts into every cell.
 Figure~\ref{fig:main-condition-ordering} makes the same distinction visually:
 the recovered \texttt{P0/R1} cells are separated from the clean
-\texttt{P1}/\texttt{P2} cells, so the repeated 1.0 success values remain
-interpretable at manuscript scale.
+\texttt{P1}/\texttt{P2} cells, and the cell text carries the status label so
+that the comparison does not rely on color alone.
 
 The same comparison separates the roles of contract design and runtime
 validation. Invalid-action failures are concentrated in the P0 cells, showing
@@ -30,10 +32,10 @@ that loose task-level verbs are brittle at the planner/executor boundary. Once
 the planner is forced into a typed tool namespace, the dominant failure mode
 disappears in the covered fixed-R0 slice. Within the successful structured
 conditions, P2 matches P1 on success while showing lower planner/tool
-overhead across the retained \texttt{P1} versus \texttt{P2} comparisons.
+overhead across the covered \texttt{P1} versus \texttt{P2} comparisons.
 Table~\ref{tab:planner-tool-overhead-summary} isolates that workload
 comparison so the manuscript can report it without overloading the outcome
-table. Figure~\ref{fig:planner-tool-overhead} compresses those retained
+table. Figure~\ref{fig:planner-tool-overhead} compresses those
 comparisons into one workload mark per row because planner and tool counts are
 equal within the plotted \texttt{P1}/\texttt{P2} pairs. We interpret that
 pattern as a workload association within already-strong contracts, not as
@@ -57,7 +59,11 @@ The mechanism is recovery, not suppression: invalid-action runs remain 2
 under both runtimes, but successful invalid-action recoveries rise from 0 to
 2 once validation and one retry are enabled. The same direction appears in
 each family separately, with navigation and manipulation each moving from
-0.5 to 1.0 success in this slice.
+0.5 to 1.0 success in this slice. In the runtime traces, the first retry for
+the navigation probe switches from \texttt{move\_to\_goal} to
+\texttt{get\_robot\_state}, and the first retry for the manipulation probe
+switches from \texttt{move\_object} to \texttt{get\_object\_state}; the repair
+signal is the explicit error string rather than a new second-pass tool schema.
 
 With runtime fixed at R0, P0/R0 fails on all 4/4 evaluated tasks and
 accumulates four total invalid actions, whereas P1/R0 and P2/R0 succeed on
@@ -82,9 +88,14 @@ P0 runs repeatedly emit the unsupported tool name
 \texttt{move\_object}. Both are semantically plausible task verbs, but the
 executor accepts \texttt{navigate\_to} and
 \texttt{scripted\_pick\_place\_step} instead. R1 helps because the runtime
-catches the unknown tool before dispatch, returns a validation error, and
-allows a corrected retry. The runtime does not erase the contract violation; it
-turns a terminating handoff failure into a recoverable one.
+parses the JSON, checks the proposed tool against the exposed task namespace,
+enforces the required argument set, and then returns the literal validation
+error string to the planner before one retry. The retry does not expose a
+stronger second schema than P1: the same tool list and required arguments were
+already available on the first pass. Instead, it turns a terminating handoff
+failure into a recoverable one by appending a concrete error such as
+\texttt{unknown tool: move\_to\_goal} or
+\texttt{unknown tool: move\_object} to the repair instruction.
 Figure~\ref{fig:system-overview} includes compact navigation and manipulation
 traces for exactly that
 non-dispatchable-to-corrected transition.

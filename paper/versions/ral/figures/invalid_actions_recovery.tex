@@ -8,8 +8,8 @@
     \toprule
     Family & \textcolor{ralP0R0}{\textbf{P0}} & \textcolor{ralP1R0}{\textbf{P1}} & \textcolor{ralP2R0}{\textbf{P2}} \\
     \midrule
-      \makecell[l]{Navigation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}} \\
-      \makecell[l]{Manipulation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}} \\
+      \makecell[l]{Navigation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} \\
+      \makecell[l]{Manipulation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} \\
     \bottomrule
   \end{tabular}
   \\[4pt]
@@ -22,32 +22,32 @@
     \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,3.15) {R0};
     \draw[draw=ralBorder] (2.00,2.93) rectangle (6.45,3.37);
     \filldraw[draw=ralBorder, fill=ralPanel] (2.00,2.93) rectangle (4.22,3.37);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,3.15) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (3.11,3.15) {\makecell[c]{clean\\1/2}};
     \filldraw[draw=ralWarn, fill=ralWarn!18] (4.22,2.93) rectangle (6.45,3.37);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,3.15) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (5.34,3.15) {\makecell[c]{fail\\1/2}};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,3.15) {retry 0.0};
     \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,2.53) {R1};
     \draw[draw=ralBorder] (2.00,2.31) rectangle (6.45,2.75);
     \filldraw[draw=ralBorder, fill=ralPanel] (2.00,2.31) rectangle (4.22,2.75);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,2.53) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (3.11,2.53) {\makecell[c]{clean\\1/2}};
     \filldraw[draw=ralRepair, fill=ralRepair!18] (4.22,2.31) rectangle (6.45,2.75);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,2.53) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (5.34,2.53) {\makecell[c]{recov.\\1/2}};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,2.53) {retry 0.5};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.00,2.15) {invalid/run fixed at 0.5};
     \node[anchor=east, font=\scriptsize\bfseries, text=ralSlate] at (1.85,1.82) {Manipulation};
     \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,1.60) {R0};
     \draw[draw=ralBorder] (2.00,1.38) rectangle (6.45,1.82);
     \filldraw[draw=ralBorder, fill=ralPanel] (2.00,1.38) rectangle (4.22,1.82);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,1.60) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (3.11,1.60) {\makecell[c]{clean\\1/2}};
     \filldraw[draw=ralWarn, fill=ralWarn!18] (4.22,1.38) rectangle (6.45,1.82);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,1.60) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (5.34,1.60) {\makecell[c]{fail\\1/2}};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,1.60) {retry 0.0};
     \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,0.98) {R1};
     \draw[draw=ralBorder] (2.00,0.76) rectangle (6.45,1.20);
     \filldraw[draw=ralBorder, fill=ralPanel] (2.00,0.76) rectangle (4.22,1.20);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,0.98) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (3.11,0.98) {\makecell[c]{clean\\1/2}};
     \filldraw[draw=ralRepair, fill=ralRepair!18] (4.22,0.76) rectangle (6.45,1.20);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,0.98) {1/2};
+    \node[font=\scriptsize, text=ralSlate] at (5.34,0.98) {\makecell[c]{recov.\\1/2}};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,0.98) {retry 0.5};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.00,0.60) {invalid/run fixed at 0.5};
     \filldraw[draw=ralBorder, fill=ralPanel] (0.0,0.22) rectangle (0.28,0.48);

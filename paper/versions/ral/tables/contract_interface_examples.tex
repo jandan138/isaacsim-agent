@@ -1,0 +1,26 @@
+\begin{table*}[!t]
+  \centering
+  \caption{Recorded planner outputs from the short-forward navigation traces used in the manuscript. Each request exposed the same declared tool list: \texttt{get\_robot\_state}, \texttt{get\_goal\_state}, and \texttt{navigate\_to(target\_pose)}.}
+  \label{tab:contract-interface-examples}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \rowcolors{2}{ralPanel}{white}
+  \begin{tabularx}{\textwidth}{L{0.7cm} L{3.25cm} L{4.35cm} Y}
+    \toprule
+    Variant & Instruction cue from planner request & Example output fields from planner response & Interface consequence \\
+    \midrule
+    P0 &
+    Direct next action as minimal JSON. &
+    \makecell[l]{\texttt{tool\_name: move\_to\_goal}\\\texttt{arguments: \{\}}} &
+    The tool list is visible, but the response is not required to bind itself to that callable namespace. Under \texttt{R0}, this output later terminates at dispatch. \\
+    P1 &
+    Choose one tool and emit \texttt{tool\_name} + \texttt{arguments}. &
+    \makecell[l]{\texttt{tool\_name: navigate\_to}\\\texttt{target\_pose: (1.0, 0.0, 0.0)}} &
+    The response names one declared callable tool and supplies its required argument. This is the typed tool-call contract used at dispatch. \\
+    P2 &
+    Same typed tool call, plus one brief \texttt{self\_check}. &
+    \makecell[l]{\texttt{tool\_name: navigate\_to}\\\texttt{target\_pose: (1.0, 0.0, 0.0)}\\\texttt{self\_check: target\_pose matches}\\\texttt{the configured goal pose}} &
+    P2 keeps the same dispatchable call surface as P1 and adds a planner-side check string. Runtime validation still verifies the tool name and argument payload independently. \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}

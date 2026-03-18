@@ -18,6 +18,16 @@ paper is narrower: it holds the Isaac Sim setting fixed and studies how
 planner-to-executor contract design changes invalid actions, recovery, success,
 and planner/tool overhead.
 
+The comparison to SayCan, Code as Policies, and ProgPrompt is the
+planner/executor interface itself. SayCan ranks candidate skills through
+affordance grounding, whereas our manipulated variable is whether the planner
+must emit one typed tool call from a declared task-scoped interface. Code as
+Policies synthesizes executable code over robot APIs, while our planner emits
+one structured call rather than a generated control program. ProgPrompt is
+closer in its use of programmatic primitives, but our study focuses on the
+declared per-step action interface and the runtime validation boundary rather
+than on program generation itself.
+
 \subsection{Execution Contracts, Runtime Validation, and Robotics Middleware}
 
 A second line of work addresses execution architecture rather than only planner

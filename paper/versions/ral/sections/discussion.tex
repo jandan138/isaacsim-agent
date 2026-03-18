@@ -2,9 +2,9 @@
 
 \subsection{Discussion}
 
-The clearest lesson is that planner-to-executor contract design is a systems
-lever, not a presentation detail. Under the under-specified direct-action
-contract, the
+The clearest lesson is that planner-to-executor contract design is an
+architectural design variable, not a presentation detail. Under the
+under-specified direct-action contract, the
 planner often knows the task family but still speaks in a vocabulary the
 executor cannot dispatch. Explicit contracts move that ambiguity out of ad hoc
 interpretation and into a declared interface.
@@ -32,7 +32,7 @@ The P2 pattern suggests a second, narrower lesson. In the covered slices, a
 brief planner-side self-check leaves the success profile unchanged while
 reducing planner/tool overhead. The bounded interpretation is not that
 self-checks are universally best, but that contract design and runtime design
-remain separable levers once the callable interface is explicit.
+remain separable design choices once the callable interface is explicit.
 
 \subsection{Limitations}
 
@@ -45,6 +45,12 @@ checks rather than broad sweeps, and backend coverage differs across slices.
 The runtime-only ablation is especially specific: it is designed around
 recoverable invalid-first-action probes, so its strongest claim is about
 lightweight repair at that boundary.
+
+The empirical frame is also descriptive rather than inferential. The planner
+backend and task executors are deterministic by design, and the study evaluates
+a fixed task set rather than repeated stochastic rollouts. The manuscript
+therefore does not treat confidence intervals or significance tests as the
+right summary for this comparison.
 
 These limits still allow a concrete systems conclusion. In the tested setting,
 planner-to-executor contracts and lightweight runtime safeguards materially
