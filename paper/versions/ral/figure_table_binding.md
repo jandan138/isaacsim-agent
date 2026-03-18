@@ -7,7 +7,7 @@ artifact stack after the artifact-overhaul pass.
 
 | Asset | Regenerated file(s) | Inserted from | Evidence binding | Notes |
 | --- | --- | --- | --- | --- |
-| Figure 1: system overview | `paper/versions/ral/figures/system_overview.{csv,tex}` | `sections/intro.tex` via `\input{figures/system_overview.tex}` | Frozen task layouts plus runtime-only run traces under `results/block_a_runtime_only_ablation/` | Reviewer-facing method figure. The environment insets and compact traces are schematic renderings grounded in frozen layouts and traces, not new experiments. |
+| Figure 1: system overview | `paper/versions/ral/figures/fig1_system_overview_frozen.png` and optional `paper/versions/ral/figures/fig1_system_overview_frozen.pdf`, wrapped by `paper/versions/ral/figures/fig1_system_overview_frozen.tex` | `sections/intro.tex` via `\input{figures/fig1_system_overview_frozen.tex}` | Manually selected frozen asset | Frozen by author choice. This figure is now out of scope for further generator-driven iteration or redesign. |
 | Main condition ordering | `paper/versions/ral/figures/main_condition_ordering.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Vector-first PGF/TikZ replacement for the old packaged success-rate figure. |
 | Invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Main mechanism figure for invalid-action elimination and runtime-assisted repair. |
 | Planner/tool overhead | `paper/versions/ral/figures/planner_tool_overhead.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Caption and prose keep the effect descriptive rather than overstating P2 efficiency. |
@@ -48,6 +48,7 @@ artifact stack after the artifact-overhaul pass.
 
 ## Asset format note
 
-- The manuscript-facing figures are now TeX/TikZ vector assets.
+- Figure 1 is now a frozen manual asset; the remaining manuscript-facing result
+  figures are TeX/TikZ vector assets.
 - The dormant PNG files from earlier packaging are no longer the
   manuscript-facing source of truth.

@@ -81,14 +81,6 @@ def package_block_a_ral_assets(
 
     written_outputs: dict[str, Path] = {}
 
-    system_overview = _load_system_overview_assets(runtime_only=runtime_only)
-    system_overview_csv = figures_dir / "system_overview.csv"
-    _write_csv(system_overview_csv, _system_overview_csv_rows(system_overview))
-    written_outputs["system_overview_csv"] = system_overview_csv
-    system_overview_tex = figures_dir / "system_overview.tex"
-    _write_text(system_overview_tex, _system_overview_figure_tex(system_overview))
-    written_outputs["system_overview_tex"] = system_overview_tex
-
     main_panels = _build_main_condition_panels(main_rows)
     main_figure_csv = figures_dir / "main_condition_ordering.csv"
     _write_csv(main_figure_csv, _panel_csv_rows(main_panels))
@@ -1139,8 +1131,10 @@ def _asset_manifest(
         f"- Final closure successful runs: `{final_closure['overall']['successful_runs']}`",
         f"- Cross-family prompt/runtime rows: `{len(cross_family['group_by_task_family_prompt_runtime'])}`",
         "- Figure style: manuscript figures are emitted as PGF/TikZ-backed `.tex` assets for vector-first compilation.",
+        "- Figure 1 is a frozen manually selected asset and is intentionally out of scope for this generator.",
         "- Main reviewer-facing figures:",
-        "  - `figures/system_overview.tex`",
+        "  - `figures/fig1_system_overview_frozen.png`",
+        "  - `figures/fig1_system_overview_frozen.pdf` (optional when present)",
         "  - `figures/main_condition_ordering.tex`",
         "  - `figures/invalid_actions_recovery.tex`",
         "  - `figures/planner_tool_overhead.tex`",

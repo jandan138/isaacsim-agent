@@ -25,7 +25,7 @@
   - current compiled PDF:
     `paper/versions/ral/main.pdf`
   - current page count:
-    `6`
+    `7`
 - Shared content for both:
   - `sections/`
   - `figures/`
@@ -35,9 +35,12 @@
 
 ## Figure assembly changes
 
-- Added `figures/system_overview.tex` as the new Figure 1.
-- Folded the compact failure trace into Figure 1 rather than allocating a
-  separate main-text float.
+- Figure 1 is now frozen to the manually selected asset:
+  - `figures/fig1_system_overview_frozen.png`
+  - `figures/fig1_system_overview_frozen.pdf` when present
+- The shared manuscript now reaches that frozen asset through
+  `figures/fig1_system_overview_frozen.tex`.
+- This pass does not redesign, regenerate, or iterate on Figure 1.
 - Replaced the manuscript-facing raster wrappers with vector-first TikZ/PGF
   assets for:
   - `main_condition_ordering`
@@ -84,7 +87,7 @@
   - compile status:
     success
   - page count:
-    `6`
+    `7`
 - Reviewer-facing submission:
   `cd paper/versions/ral/reviewer_submission && pdflatex ... && bibtex main && pdflatex ...`
   - compile status:
@@ -99,5 +102,6 @@
 - The reviewer-facing system-overview insets are schematic renderings grounded
   in frozen layouts and traces; authors may still swap in literal simulator
   screenshots later if desired.
+- Figure 1 itself is no longer an active generator-owned asset.
 - The `IEEEtran` conference build emits the standard last-page column-balance
   reminder for camera-ready handling.
