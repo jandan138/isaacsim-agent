@@ -2,140 +2,121 @@
 
 ## Current status
 
-- Date: 2026-03-18
+- Date: 2026-03-19
 - Plan source of truth: `plan.md`
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
-- Active milestone: `M11. Paper drafting`
+- Active milestone: `M12. Isaac Sim 4.5 render migration phase 1`
 - Milestone state:
-  - this run completed `expert-review blocking issues pass`
+  - this run completed `phase-one project-demo render implementation`
+  - this run also completed `agent-teams implementation pass` with worker-owned
+    slices plus a reviewer acceptance pass
 - Completion level:
-  - the reviewer-facing submission variant compiles successfully at `8` pages:
-    `paper/versions/ral/reviewer_submission/main.pdf`
-  - the journal scaffold compiles successfully at `8` pages:
-    `paper/versions/ral/main.pdf`
-  - Figure 1 remains frozen at
-    `paper/versions/ral/figures/fig1_system_overview_frozen.*`
-  - the manuscript now includes a compact contract/interface display, explicit
-    deterministic-planner framing, shared keywords, and clarified runtime /
-    executor semantics
+  - standalone stage-population seams now exist for both task families:
+    - `populate_navigation_stage(...)`
+    - `populate_pickplace_stage(...)`
+  - the new headless render package now exists under
+    `src/isaacsim_agent/render/`
+  - the project-demo render CLI now works for both task families under
+    `scripts/render_demo_views.py`
+  - external USD entrypoints exist only as honest phase-two placeholders:
+    - `scripts/render_usd_asset.py`
+    - `scripts/render_usd_batch.py`
 
 ## Run context
 
 - This run stayed within the requested boundaries:
-  - no new experiments
-  - no Figure 1 redesign, regeneration, relabeling, or replacement
-  - no venue switch
-  - no prompt-first reframing
-  - no exaggerated efficiency claims
-  - no fabricated examples, interface schemas, or citations
+  - pivoted intentionally from the previous paper-only milestone into the
+    render-migration implementation round
+  - kept implementation ownership split across agent workers
+  - avoided paper paths and evaluation packaging paths
+  - limited Isaac validation to narrow render smokes and one-view demo renders
 - Source-of-truth docs consumed in this run:
   - `plan.md`
   - `AGENTS.md`
   - `STATUS.md`
-  - `docs/ral_writing_playbook.md`
-  - `paper/README.md`
-  - `paper/shared/core_claim.md`
-  - `paper/shared/contributions.md`
-  - `paper/shared/findings.md`
-  - `paper/shared/limitations.md`
-  - `paper/shared/terminology.md`
-  - `paper/shared/figures_and_tables.md`
-  - `paper/versions/ral/README.md`
-  - `paper/versions/ral/figure_table_binding.md`
-  - `paper/versions/ral/page_pressure_plan.md`
-  - `paper/versions/ral/latex_assembly_notes.md`
-  - `paper/versions/ral/full_draft_v1.md`
-  - `paper/versions/ral/full_draft_v1_notes.md`
-  - `paper/versions/ral/reviewer_submission/main.tex`
-  - `paper/versions/ral/main.tex`
-  - `paper/versions/ral/sections/`
-  - `paper/versions/ral/figures/`
-  - `paper/versions/ral/tables/`
-  - `paper/versions/ral/refs/`
-  - `paper/versions/ral/asset_manifest.md`
-  - `results/processed/block_a_final_closure/`
-  - `results/processed/block_a_master_summary/`
-  - `results/processed/block_a_prompt_only_ablation/`
-  - `results/processed/block_a_runtime_only_ablation/`
-  - `results/processed/block_a_manipulation_harder/`
-  - `results/processed/block_a_cross_family_summary/`
-  - `scripts/package_block_a_ral_assets.py`
-  - `src/isaacsim_agent/eval/block_a_ral_assets.py`
-  - `src/isaacsim_agent/planner/`
-  - `src/isaacsim_agent/runtime/`
+  - `src/isaacsim_agent/tasks/navigation/isaac_world.py`
+  - `src/isaacsim_agent/tasks/manipulation/isaac_world.py`
+  - `src/isaacsim_agent/tasks/navigation/baseline.py`
+  - `src/isaacsim_agent/tasks/manipulation/baseline.py`
+  - `src/isaacsim_agent/runtime/session.py`
+  - `tests/test_nav_smoke.py`
+  - `tests/test_pickplace_smoke.py`
+  - `scripts/smoke_test_isaac.py`
+  - `.codex/worklogs/subagents/2026-03-19/agent-teams-collision-risk-audit.md`
+  - `.codex/worklogs/subagents/2026-03-19/agent-teams-interface-audit.md`
 - Agent teaming:
-  - two explorer subagent worklogs were created for the current pass:
-    - `.codex/worklogs/subagents/2026-03-18/impl-semantics-audit.md`
-    - `.codex/worklogs/subagents/2026-03-18/manuscript-audit-current.md`
-  - neither produced a usable result in the workspace; both worklogs record
-    abandonment and the main session completed the audits locally
+  - worker `019d0441-8c6f-73e1-8538-f1273a679974`
+    completed stage-population extraction and compatibility updates
+  - worker `019d0441-8c8e-7d83-b429-13f1ec76f36f`
+    completed the new render package
+  - worker `019d0441-8cb0-76a1-8cfc-e523f6ec4562`
+    completed CLI, tests, and docs
+  - reviewer `019d044f-36dd-76e0-8e6c-1aa6fee6b892`
+    initially rejected because PNG emission was not yet proven, then accepted
+    after the cache-directory fix and follow-up Isaac smoke evidence
 
 ## Milestone summary
 
 - Completed in this run:
-  - added `paper/versions/ral/tables/contract_interface_examples.tex` as a
-    compact manuscript-facing table with real `P0` / `P1` / `P2` outputs taken
-    from saved prompt texts and archived `planner_trace.json` files
-  - revised `sections/setup.tex`, `sections/results.tex`,
-    `sections/discussion.tex`, and `sections/conclusion.tex` so the manuscript
-    now states explicitly that:
-    - the planner backend is deterministic by design
-    - the empirical unit is the task instance, not repeated stochastic rollout
-      replication
-    - the main comparison covers 21 task instances across four cohorts
-    - the two focused ablations add 8 task instances
-    - the reported evaluation set contains 29 task instances and 146
-      executions
-    - the quantitative comparisons are descriptive rather than a
-      confidence-interval / significance-test exercise
-  - removed reviewer-facing internal wording from the active manuscript where
-    avoidable and tightened repeated main-conclusion wording
-  - added shared `IEEEkeywords` in `sections/abstract.tex`; both variants
-    compile with the same keyword line
-  - clarified the exact `R1` retry semantics:
-    - same tool list on retry
-    - literal `validation_error` string
-    - appended repair instruction
-    - one retry only
-  - clarified executor-visible action semantics:
-    - `navigate_to` dispatches one deterministic step toward the configured
-      goal
-    - `scripted_pick_place_step` advances one phase of a fixed scripted
-      pick-and-place sequence
-  - polished the related-work comparison to SayCan, Code as Policies, and
-    ProgPrompt around affordance grounding, code/program generation, and
-    declared action interfaces
-  - added non-color labels inside Fig. 2's runtime panel cells so recovered
-    outcomes remain distinguishable in grayscale / color-deficient viewing
-  - rebuilt both manuscript variants, confirmed 8 pages for both, and checked
-    that the new contract/interface display is present as Table I
+  - extracted reusable stage-population helpers and handle dataclasses from the
+    two Isaac-backed task environments while keeping constructor signatures
+    stable
+  - preserved existing baseline-facing environment behavior including
+    `runtime_details` and `stage_artifact_text()`
+  - added `src/isaacsim_agent/render/` with:
+    - `VisualizationConfig`
+    - `CameraViewSpec`
+    - `RenderSessionConfig`
+    - `RenderCaptureArtifact`
+    - `RenderSession`
+    - `start_render_app(...)`
+    - `render_rgb_views(...)`
+  - added `scripts/render_demo_views.py` as the phase-one project-demo render
+    entrypoint
+  - added `scripts/render_usd_asset.py` and `scripts/render_usd_batch.py` as
+    explicit phase-two placeholders
+  - added `tests/test_render_cli_smoke.py`
+  - added `docs/render_phase1_cli.md`
+  - added an orchestrator-owned integration fix so
+    `scripts/render_demo_views.py` uses the actual `RenderSession` API and no
+    longer passes an invalid palette type into the task helpers
+  - added an orchestrator-owned runtime fix in
+    `src/isaacsim_agent/render/session.py` so the render path pre-creates
+    `~/.cache/warp` and `~/.cache/ov/texturecache` before `SimulationApp`
+    startup
+  - validated:
+    - `scripts/render_demo_views.py --task-type navigation` emits `front.png`
+      and `stage.usda`
+    - `scripts/render_demo_views.py --task-type pick_place` emits `front.png`
+      and `stage.usda`
 - Not completed in this run:
-  - no new experiments
-  - no Figure 1 work beyond preserving the frozen asset
-  - no bibliography expansion beyond the already-shared citation state
+  - no direct helper-level tests yet cover
+    `populate_navigation_stage(...)` / `populate_pickplace_stage(...)`
+  - no phase-two external USD rendering implementation
+  - no consolidation yet of the duplicated `VisualizationConfig` definitions
+    across task modules and the render package
 
 ## Files changed in this run
 
 - `STATUS.md`
-- `paper/versions/ral/README.md`
-- `paper/versions/ral/figure_table_binding.md`
-- `paper/versions/ral/latex_assembly_notes.md`
-- `paper/versions/ral/full_draft_v1_notes.md`
-- `paper/versions/ral/sections/abstract.tex`
-- `paper/versions/ral/sections/intro.tex`
-- `paper/versions/ral/sections/related_work.tex`
-- `paper/versions/ral/sections/setup.tex`
-- `paper/versions/ral/sections/results.tex`
-- `paper/versions/ral/sections/discussion.tex`
-- `paper/versions/ral/sections/conclusion.tex`
-- `paper/versions/ral/tables/contract_interface_examples.tex`
-- `paper/versions/ral/main.pdf`
-- `paper/versions/ral/reviewer_submission/main.pdf`
-- `.codex/worklogs/main/2026-03-18/session-plan.md`
-- `.codex/worklogs/main/2026-03-18/session-research.md`
-- `.codex/worklogs/main/2026-03-18/session-handoff.md`
-- `.codex/worklogs/subagents/2026-03-18/impl-semantics-audit.md`
-- `.codex/worklogs/subagents/2026-03-18/manuscript-audit-current.md`
+- `src/isaacsim_agent/tasks/navigation/isaac_world.py`
+- `src/isaacsim_agent/tasks/manipulation/isaac_world.py`
+- `src/isaacsim_agent/render/__init__.py`
+- `src/isaacsim_agent/render/errors.py`
+- `src/isaacsim_agent/render/types.py`
+- `src/isaacsim_agent/render/session.py`
+- `scripts/render_demo_views.py`
+- `scripts/render_usd_asset.py`
+- `scripts/render_usd_batch.py`
+- `tests/test_render_cli_smoke.py`
+- `docs/render_phase1_cli.md`
+- `.codex/worklogs/main/2026-03-19/render-migration-implementation-session-plan.md`
+- `.codex/worklogs/main/2026-03-19/render-migration-implementation-session-research.md`
+- `.codex/worklogs/main/2026-03-19/render-migration-implementation-session-handoff.md`
+- `.codex/worklogs/subagents/2026-03-19/render-worker-stage-population.md`
+- `.codex/worklogs/subagents/2026-03-19/render-worker-render-session.md`
+- `.codex/worklogs/subagents/2026-03-19/render-worker-cli-tests-docs.md`
+- `.codex/worklogs/subagents/2026-03-19/render-phase1-review.md`
 
 ## Commands run
 
@@ -143,73 +124,73 @@
   - `sed -n '1,220p' plan.md`
   - `sed -n '1,260p' AGENTS.md`
   - `sed -n '1,260p' STATUS.md`
-  - `sed -n '1,260p' docs/ral_writing_playbook.md`
   - `git status --short --untracked-files=all`
-- Manuscript and implementation audit:
-  - `sed -n ...` over the requested paper-level `.md`, `.tex`, `.csv`, and
-    `.bib` files
-  - `rg -n ...` across `paper/versions/ral/`, `results/`, and
-    `src/isaacsim_agent/`
-  - `find results -name 'planner_trace.json' ...`
-  - `python - <<'PY' ...` snippets to inspect saved task configs, planner
-    traces, processed summaries, and final-closure counts
-- Compile validation:
-  - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-    with working directory `paper/versions/ral`
-  - `pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-    with working directory `paper/versions/ral/reviewer_submission`
-  - follow-up single-pass `pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-    in both `paper/versions/ral` and `paper/versions/ral/reviewer_submission`
-    after inserting the manual contract table
-  - `pdfinfo main.pdf | sed -n '1,20p'`
-    with working directory `paper/versions/ral`
-  - `pdfinfo main.pdf | sed -n '1,20p'`
-    with working directory `paper/versions/ral/reviewer_submission`
-  - `pdftotext paper/versions/ral/reviewer_submission/main.pdf - | rg -n ...`
-    to confirm contract-table text appears in the reviewer-facing PDF
+- Planning and implementation inspection:
+  - `sed -n ...` over the current task environment files, baseline callers,
+    render scripts, tests, docs, and `.codex` worklogs
+  - `rg -n ...` over the task modules, render package, tests, and docs
+- Worker-owned validations:
+  - `python -m py_compile src/isaacsim_agent/tasks/navigation/isaac_world.py src/isaacsim_agent/tasks/manipulation/isaac_world.py`
+  - `PYTHONPATH=src python -m unittest tests.test_nav_smoke tests.test_pickplace_smoke -q`
+  - `PYTHONPATH=src python -c "from isaacsim_agent.render import CameraViewSpec, RenderSession, RenderSessionConfig, VisualizationConfig, start_render_app, render_rgb_views; print('IMPORT_OK')"`
+  - `python -m compileall src/isaacsim_agent/render`
+  - `python -m py_compile scripts/render_demo_views.py scripts/render_usd_asset.py scripts/render_usd_batch.py tests/test_render_cli_smoke.py`
+  - `python -m unittest tests.test_render_cli_smoke`
+- Orchestrator validations:
+  - `python -m py_compile scripts/render_demo_views.py`
+  - `python -m py_compile src/isaacsim_agent/render/session.py scripts/render_demo_views.py`
+  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke -q`
+  - `PYTHONPATH=src python -m unittest tests.test_nav_smoke tests.test_pickplace_smoke -q`
+  - one mistaken command:
+    - `python -m py_compile src/isaacsim_agent/render/session.py docs/render_phase1_cli.md`
+    - result: failed because `docs/render_phase1_cli.md` is Markdown, not
+      Python; this was a bad validation command, not a code defect
+  - minimal Isaac render smoke under `./scripts/isaac_python.sh` using the new
+    render package
+  - repeat minimal Isaac render smoke after deleting
+    `/tmp/.cache/warp` and `/tmp/.cache/ov/texturecache`
+  - `PYTHONPATH=src ./scripts/isaac_python.sh scripts/render_demo_views.py --task-type navigation --output-dir /tmp/render_nav_demo --view front --save-stage`
+  - `PYTHONPATH=src ./scripts/isaac_python.sh scripts/render_demo_views.py --task-type pick_place --output-dir /tmp/render_pick_demo --view front --save-stage`
 
 ## Validation results
 
-- Reviewer-facing submission:
-  - `paper/versions/ral/reviewer_submission/main.pdf` compiles successfully
-  - `pdfinfo` reports `Pages: 8`
-  - `main.aux` records `\newlabel{tab:contract-interface-examples}{{I}{2}}`,
-    so the new contract/interface display resolves as Table I on page 2
-- Journal scaffold:
-  - `paper/versions/ral/main.pdf` compiles successfully
-  - `pdfinfo` reports `Pages: 8`
-  - `main.aux` records `\newlabel{tab:contract-interface-examples}{{I}{2}}`
-- Keywords:
-  - the shared `IEEEkeywords` block compiles in both variants
-- Figure 1 state:
-  - still inserted via `figures/fig1_system_overview_frozen.tex`
-  - still resolves to the frozen manual asset
-  - intentionally not modified in this pass
-- Remaining warnings / non-blockers:
-  - underfull-box warnings remain in narrow-column prose
-  - small overfull-box warnings remain in:
-    - `tables/contract_interface_examples.tex`
-    - `figures/main_condition_ordering.tex`
-    - `figures/invalid_actions_recovery.tex`
-  - the reviewer-facing conference build still emits the standard last-page
-    column-balance reminder
+- Python-level smoke:
+  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke -q`
+    passed with `Ran 6 tests ... OK`
+  - `PYTHONPATH=src python -m unittest tests.test_nav_smoke tests.test_pickplace_smoke -q`
+    passed with `Ran 4 tests ... OK`
+- Render package:
+  - import and compile checks passed
+- Minimal Isaac render smoke:
+  - after the cache-directory fix, deleting `/tmp/.cache/warp` and
+    `/tmp/.cache/ov/texturecache` no longer blocks rendering
+  - the smoke recreated the cache directories and wrote
+    `/tmp/codex_render_smoke/smoke.png`
+  - reviewer follow-up confirmed `smoke.png` has a valid PNG signature and a
+    non-zero size
+- Demo CLI render validation:
+  - navigation demo:
+    - `/tmp/render_nav_demo/front.png`
+    - `/tmp/render_nav_demo/stage.usda`
+    - both written with exit status `0`
+  - pick-place demo:
+    - `/tmp/render_pick_demo/front.png`
+    - `/tmp/render_pick_demo/stage.usda`
+    - both written with exit status `0`
 
 ## Remaining gaps
 
-- do the final author-side line edit and anonymity pass
-- decide whether any setup prose should be trimmed if another small page-margin
-  reduction is needed
-- optionally refine the new contract/interface table wording if the authors want
-  the examples to be navigation-only or manipulation-only rather than mixed
-- keep Figure 1 unchanged unless the authors explicitly choose a different
-  frozen manual asset later
+- add direct helper-level tests for:
+  - `populate_navigation_stage(...)`
+  - `populate_pickplace_stage(...)`
+- consolidate the duplicated `VisualizationConfig` definitions across the task
+  modules and the render package
+- implement phase-two external USD rendering when that milestone starts
 
 ## Next recommended sub-milestone
 
-- Move from `expert-review blocking issues pass` to `author final-edit /
-  submission prep` by:
-  - reviewing `paper/versions/ral/reviewer_submission/main.pdf` line by line
-  - checking anonymity and wording one last time
-  - deciding whether any final page-pressure trimming is still needed
-  - preserving the frozen Figure 1 asset and the current contract/runtime
-    framing unless the authors explicitly request another scope change
+- `M12.1 render hardening`:
+  - add direct helper-level tests for the standalone stage-population seams
+  - keep the phase-one demo render path stable
+  - then decide whether to proceed to phase-two external USD rendering or do a
+    small shared-type cleanup first

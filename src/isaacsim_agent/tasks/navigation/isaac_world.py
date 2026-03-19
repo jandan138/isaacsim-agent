@@ -5,7 +5,9 @@ from __future__ import annotations
 import math
 import tempfile
 from dataclasses import dataclass
+from dataclasses import field
 from pathlib import Path
+from typing import Any
 
 from isaacsim_agent.contracts import TerminationReason
 from isaacsim_agent.tools.navigation import Pose2D
@@ -19,15 +21,229 @@ from .baseline import NavigationTaskDefinition
 
 
 @dataclass(frozen=True)
+class VisualizationConfig:
+    """Optional render-oriented overlays for stage population."""
+
+    show_trajectory: bool = False
+    show_goal_region: bool = False
+    show_labels: bool = False
+    palette: dict[str, tuple[float, float, float]] = field(
+        default_factory=lambda: {
+            "agent": (0.1, 0.4, 0.9),
+            "goal": (0.1, 0.75, 0.2),
+            "goal_region": (0.95, 0.85, 0.2),
+            "trajectory": (0.95, 0.45, 0.1),
+        }
+    )
+
+
+@dataclass(frozen=True)
 class IsaacNavigationWorldConfig:
     """Settings for the minimal Isaac stage used by the navigation baseline."""
 
+    world_prim_path: str = "/World"
     agent_prim_path: str = "/World/Robot"
     goal_prim_path: str = "/World/Goal"
     physics_scene_path: str = "/World/PhysicsScene"
+    trajectory_prim_path: str = "/World/Trajectory"
+    goal_region_prim_path: str = "/World/GoalRegion"
     robot_radius_m: float = 0.15
     goal_marker_size_m: float = 0.25
+    goal_region_height_m: float = 0.01
+    trajectory_width_m: float = 0.02
     stage_updates_per_action: int = 2
+
+
+@dataclass
+class NavigationStageHandles:
+    """Handles and metadata returned from stage population."""
+
+    world_prim_path: str
+    agent_prim_path: str
+    goal_prim_path: str
+    physics_scene_path: str
+    trajectory_prim_path: str | None
+    goal_region_prim_path: str | None
+    agent_translate_op: Any
+    agent_rotate_op: Any
+    goal_translate_op: Any
+    goal_rotate_op: Any
+    metadata: dict[str, object]
+
+
+def _resolve_palette(visualization_config: VisualizationConfig | None) -> dict[str, tuple[float, float, float]]:
+    if visualization_config is None:
+        return VisualizationConfig().palette
+    return {**VisualizationConfig().palette, **visualization_config.palette}
+
+
+def _apply_navigation_pose(translate_op, rotate_op, pose: Pose2D, z_height: float, Gf) -> None:
+    translate_op.Set(Gf.Vec3d(float(pose.x), float(pose.y), float(z_height)))
+    rotate_op.Set(Gf.Vec3f(0.0, 0.0, float(math.degrees(pose.yaw))))
+
+
+def _define_goal_region(
+    stage,
+    definition: NavigationTaskDefinition,
+    world_config: IsaacNavigationWorldConfig,
+    visualization_config: VisualizationConfig | None,
+    palette: dict[str, tuple[float, float, float]],
+    Gf,
+    UsdGeom,
+) -> str | None:
+    if visualization_config is None or not visualization_config.show_goal_region:
+        return None
+
+    goal_region = UsdGeom.Cylinder.Define(stage, world_config.goal_region_prim_path)
+    goal_region.GetRadiusAttr().Set(float(definition.success_radius_m))
+    goal_region.GetHeightAttr().Set(float(world_config.goal_region_height_m))
+    goal_region.GetAxisAttr().Set(UsdGeom.Tokens.z)
+    goal_region.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([palette["goal_region"]])
+    goal_region_xformable = UsdGeom.Xformable(goal_region.GetPrim())
+    goal_region_translate = goal_region_xformable.AddTranslateOp()
+    goal_region_rotate = goal_region_xformable.AddRotateXYZOp()
+    _apply_navigation_pose(
+        translate_op=goal_region_translate,
+        rotate_op=goal_region_rotate,
+        pose=definition.goal_pose,
+        z_height=world_config.goal_region_height_m / 2.0,
+        Gf=Gf,
+    )
+    return world_config.goal_region_prim_path
+
+
+def _define_trajectory(
+    stage,
+    definition: NavigationTaskDefinition,
+    world_config: IsaacNavigationWorldConfig,
+    visualization_config: VisualizationConfig | None,
+    palette: dict[str, tuple[float, float, float]],
+    Gf,
+    UsdGeom,
+) -> str | None:
+    if visualization_config is None or not visualization_config.show_trajectory:
+        return None
+
+    trajectory = UsdGeom.BasisCurves.Define(stage, world_config.trajectory_prim_path)
+    trajectory.CreateTypeAttr().Set(UsdGeom.Tokens.linear)
+    trajectory.CreateWrapAttr().Set(UsdGeom.Tokens.nonperiodic)
+    trajectory.CreateCurveVertexCountsAttr().Set([2])
+    trajectory.CreatePointsAttr().Set(
+        [
+            Gf.Vec3f(
+                float(definition.start_pose.x),
+                float(definition.start_pose.y),
+                float(world_config.goal_region_height_m),
+            ),
+            Gf.Vec3f(
+                float(definition.goal_pose.x),
+                float(definition.goal_pose.y),
+                float(world_config.goal_region_height_m),
+            ),
+        ]
+    )
+    trajectory.CreateWidthsAttr().Set([float(world_config.trajectory_width_m)])
+    trajectory.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([palette["trajectory"]])
+    return world_config.trajectory_prim_path
+
+
+def populate_navigation_stage(
+    stage,
+    definition: NavigationTaskDefinition,
+    world_config: IsaacNavigationWorldConfig,
+    visualization_config: VisualizationConfig | None = None,
+) -> NavigationStageHandles:
+    """Populate an existing stage with the minimal navigation scene."""
+
+    import omni.kit.app  # type: ignore
+    from pxr import Gf  # type: ignore
+    from pxr import UsdGeom  # type: ignore
+    from pxr import UsdPhysics  # type: ignore
+
+    palette = _resolve_palette(visualization_config)
+
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+    UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+
+    UsdGeom.Xform.Define(stage, world_config.world_prim_path)
+    UsdPhysics.Scene.Define(stage, world_config.physics_scene_path)
+
+    robot = UsdGeom.Sphere.Define(stage, world_config.agent_prim_path)
+    robot.GetRadiusAttr().Set(float(world_config.robot_radius_m))
+    robot.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([palette["agent"]])
+    robot_xformable = UsdGeom.Xformable(robot.GetPrim())
+    agent_translate_op = robot_xformable.AddTranslateOp()
+    agent_rotate_op = robot_xformable.AddRotateXYZOp()
+
+    goal = UsdGeom.Cube.Define(stage, world_config.goal_prim_path)
+    goal.GetSizeAttr().Set(float(world_config.goal_marker_size_m))
+    goal.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([palette["goal"]])
+    goal_xformable = UsdGeom.Xformable(goal.GetPrim())
+    goal_translate_op = goal_xformable.AddTranslateOp()
+    goal_rotate_op = goal_xformable.AddRotateXYZOp()
+
+    _apply_navigation_pose(
+        translate_op=goal_translate_op,
+        rotate_op=goal_rotate_op,
+        pose=definition.goal_pose,
+        z_height=world_config.goal_marker_size_m / 2.0,
+        Gf=Gf,
+    )
+    _apply_navigation_pose(
+        translate_op=agent_translate_op,
+        rotate_op=agent_rotate_op,
+        pose=definition.start_pose,
+        z_height=world_config.robot_radius_m,
+        Gf=Gf,
+    )
+
+    trajectory_prim_path = _define_trajectory(
+        stage=stage,
+        definition=definition,
+        world_config=world_config,
+        visualization_config=visualization_config,
+        palette=palette,
+        Gf=Gf,
+        UsdGeom=UsdGeom,
+    )
+    goal_region_prim_path = _define_goal_region(
+        stage=stage,
+        definition=definition,
+        world_config=world_config,
+        visualization_config=visualization_config,
+        palette=palette,
+        Gf=Gf,
+        UsdGeom=UsdGeom,
+    )
+
+    app = omni.kit.app.get_app()
+    metadata: dict[str, object] = {
+        "backend": "isaac",
+        "kit_version": app.get_build_version(),
+        "world_prim_path": world_config.world_prim_path,
+        "agent_prim_path": world_config.agent_prim_path,
+        "goal_prim_path": world_config.goal_prim_path,
+        "physics_scene_path": world_config.physics_scene_path,
+        "stage_updates_per_action": world_config.stage_updates_per_action,
+    }
+    if trajectory_prim_path is not None:
+        metadata["trajectory_prim_path"] = trajectory_prim_path
+    if goal_region_prim_path is not None:
+        metadata["goal_region_prim_path"] = goal_region_prim_path
+
+    return NavigationStageHandles(
+        world_prim_path=world_config.world_prim_path,
+        agent_prim_path=world_config.agent_prim_path,
+        goal_prim_path=world_config.goal_prim_path,
+        physics_scene_path=world_config.physics_scene_path,
+        trajectory_prim_path=trajectory_prim_path,
+        goal_region_prim_path=goal_region_prim_path,
+        agent_translate_op=agent_translate_op,
+        agent_rotate_op=agent_rotate_op,
+        goal_translate_op=goal_translate_op,
+        goal_rotate_op=goal_rotate_op,
+        metadata=metadata,
+    )
 
 
 class MinimalIsaacNavigationEnvironment:
@@ -44,6 +260,7 @@ class MinimalIsaacNavigationEnvironment:
 
         self._simulation_app = None
         self._stage = None
+        self._stage_handles: NavigationStageHandles | None = None
         self._agent_translate_op = None
         self._agent_rotate_op = None
         self._goal_translate_op = None
@@ -62,11 +279,7 @@ class MinimalIsaacNavigationEnvironment:
         self._simulation_app = SimulationApp({"headless": True, "sync_loads": True})
 
         try:
-            import omni.kit.app  # type: ignore
             import omni.usd  # type: ignore
-            from pxr import Gf  # type: ignore
-            from pxr import UsdGeom  # type: ignore
-            from pxr import UsdPhysics  # type: ignore
         except ModuleNotFoundError as exc:
             self.close()
             raise NavigationBackendUnavailableError(
@@ -82,51 +295,17 @@ class MinimalIsaacNavigationEnvironment:
                 raise RuntimeError("Isaac Sim returned no active USD stage")
 
             self._stage = stage
-            UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
-            UsdGeom.SetStageMetersPerUnit(stage, 1.0)
-
-            UsdGeom.Xform.Define(stage, "/World")
-            UsdPhysics.Scene.Define(stage, self.world_config.physics_scene_path)
-
-            robot = UsdGeom.Sphere.Define(stage, self.world_config.agent_prim_path)
-            robot.GetRadiusAttr().Set(float(self.world_config.robot_radius_m))
-            robot.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([(0.1, 0.4, 0.9)])
-            robot_xformable = UsdGeom.Xformable(robot.GetPrim())
-            self._agent_translate_op = robot_xformable.AddTranslateOp()
-            self._agent_rotate_op = robot_xformable.AddRotateXYZOp()
-
-            goal = UsdGeom.Cube.Define(stage, self.world_config.goal_prim_path)
-            goal.GetSizeAttr().Set(float(self.world_config.goal_marker_size_m))
-            goal.CreateDisplayColorPrimvar(UsdGeom.Tokens.constant).Set([(0.1, 0.75, 0.2)])
-            goal_xformable = UsdGeom.Xformable(goal.GetPrim())
-            self._goal_translate_op = goal_xformable.AddTranslateOp()
-            self._goal_rotate_op = goal_xformable.AddRotateXYZOp()
-
-            self._apply_pose(
-                translate_op=self._goal_translate_op,
-                rotate_op=self._goal_rotate_op,
-                pose=self.definition.goal_pose,
-                z_height=self.world_config.goal_marker_size_m / 2.0,
-                Gf=Gf,
+            self._stage_handles = populate_navigation_stage(
+                stage=stage,
+                definition=self.definition,
+                world_config=self.world_config,
             )
-            self._apply_pose(
-                translate_op=self._agent_translate_op,
-                rotate_op=self._agent_rotate_op,
-                pose=self.definition.start_pose,
-                z_height=self.world_config.robot_radius_m,
-                Gf=Gf,
-            )
+            self._agent_translate_op = self._stage_handles.agent_translate_op
+            self._agent_rotate_op = self._stage_handles.agent_rotate_op
+            self._goal_translate_op = self._stage_handles.goal_translate_op
+            self._goal_rotate_op = self._stage_handles.goal_rotate_op
+            self.runtime_details = dict(self._stage_handles.metadata)
             self._advance_updates()
-
-            app = omni.kit.app.get_app()
-            self.runtime_details = {
-                "backend": "isaac",
-                "kit_version": app.get_build_version(),
-                "agent_prim_path": self.world_config.agent_prim_path,
-                "goal_prim_path": self.world_config.goal_prim_path,
-                "physics_scene_path": self.world_config.physics_scene_path,
-                "stage_updates_per_action": self.world_config.stage_updates_per_action,
-            }
         except Exception:
             self.close()
             raise
@@ -137,18 +316,13 @@ class MinimalIsaacNavigationEnvironment:
         for _ in range(self.world_config.stage_updates_per_action):
             self._simulation_app.update()
 
-    @staticmethod
-    def _apply_pose(translate_op, rotate_op, pose: Pose2D, z_height: float, Gf) -> None:
-        translate_op.Set(Gf.Vec3d(float(pose.x), float(pose.y), float(z_height)))
-        rotate_op.Set(Gf.Vec3f(0.0, 0.0, float(math.degrees(pose.yaw))))
-
     def _set_agent_pose(self, pose: Pose2D) -> None:
         if self._agent_translate_op is None or self._agent_rotate_op is None:
             raise RuntimeError("Agent prim transform ops are not initialized")
 
         from pxr import Gf  # type: ignore
 
-        self._apply_pose(
+        _apply_navigation_pose(
             translate_op=self._agent_translate_op,
             rotate_op=self._agent_rotate_op,
             pose=pose,
@@ -243,3 +417,4 @@ class MinimalIsaacNavigationEnvironment:
         # Let the short-lived wrapper process own SimulationApp teardown.
         # Closing it here can terminate the interpreter before run artifacts are written.
         self._stage = None
+        self._stage_handles = None
