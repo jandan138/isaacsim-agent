@@ -21,6 +21,7 @@ class _RenderBackend:
     omni_usd: Any
     rep: Any
     Gf: Any
+    Usd: Any
     UsdGeom: Any
 
 
@@ -74,6 +75,7 @@ class RenderSession:
             import omni.replicator.core as rep  # type: ignore
             import omni.usd  # type: ignore
             from pxr import Gf  # type: ignore
+            from pxr import Usd  # type: ignore
             from pxr import UsdGeom  # type: ignore
         except ModuleNotFoundError as exc:
             self.close()
@@ -87,6 +89,7 @@ class RenderSession:
             omni_usd=omni.usd,
             rep=rep,
             Gf=Gf,
+            Usd=Usd,
             UsdGeom=UsdGeom,
         )
         self._apply_render_settings()

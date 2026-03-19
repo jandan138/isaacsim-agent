@@ -1,6 +1,6 @@
-# Render Phase 1 CLI
+# Render CLI
 
-This note documents the first-pass CLI surface for the Isaac Sim 4.5
+This note documents the current CLI surface for the Isaac Sim 4.5
 render-migration work.
 
 ## Scope
@@ -10,8 +10,7 @@ stages. The intended entrypoint is:
 
 - `scripts/render_demo_views.py`
 
-Phase 2 will cover external USD inputs. The two external USD scripts exist now
-only as honest placeholders with stable `--help` surfaces:
+Phase 2 covers external USD inputs with two entrypoints:
 
 - `scripts/render_usd_asset.py`
 - `scripts/render_usd_batch.py`
@@ -29,6 +28,28 @@ only as honest placeholders with stable `--help` surfaces:
   its help surface remains available even before the worker-owned backends are
   integrated.
 
+## Phase 2 external USD behavior
+
+- `render_usd_asset.py` renders one real external `.usd` / `.usda` / `.usdc`
+  asset to the canonical four views:
+  - `<output-dir>/front.png`
+  - `<output-dir>/three_quarter.png`
+  - `<output-dir>/top.png`
+  - `<output-dir>/side.png`
+- `--save-stage` writes `<output-dir>/stage.usda`
+- `--skip-existing` short-circuits only when every requested PNG already
+  exists, and when `--save-stage` is set, `stage.usda` also exists
+- if Isaac Sim is unavailable from the current interpreter, the single-asset
+  CLI exits with `EXPECTED_MISSING_DEPENDENCY` code `3`
+- `render_usd_batch.py` discovers assets under `--input-root`, shells out to
+  `render_usd_asset.py` once per asset, and writes outputs under:
+  - `<output-root>/<relative_asset_path_without_ext>/...`
+- batch always writes:
+  - `<output-root>/batch_summary.json`
+- batch exit codes:
+  - `0` when every asset is `success` or `skipped`
+  - `1` when any asset fails
+
 ## Current limitations
 
 - `render_demo_views.py` is now wired to the phase-one task helpers and render
@@ -37,9 +58,8 @@ only as honest placeholders with stable `--help` surfaces:
 - The render session pre-creates the Isaac/Replicator cache directories under
   `~/.cache/` because missing `warp` / `ov/texturecache` paths can prevent PNG
   artifacts from being written.
-- `render_usd_asset.py` and `render_usd_batch.py` deliberately return a
-  phase-two placeholder exit code instead of pretending the external USD flow
-  already exists.
+- The external USD flow uses bbox-driven camera placement, so it is general for
+  arbitrary assets but does not attempt task-specific art direction.
 - This pass does not add heavy Isaac validation on its own; it only establishes
-  the user-facing CLI, smoke test, and documentation surface for later
-  integration.
+  the user-facing CLI, smoke test, and documentation surface plus a minimal
+  external-USD render path.
