@@ -36,3 +36,6 @@ results/*
 *.tmp
 *.temp
 *.pid
+
+# Local real-asset validation trees
+asset/render_test/grscenes_uid_subset_10/

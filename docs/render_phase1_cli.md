@@ -15,6 +15,10 @@ Phase 2 covers external USD inputs with two entrypoints:
 - `scripts/render_usd_asset.py`
 - `scripts/render_usd_batch.py`
 
+For local real-asset integration smoke against the GRScenes bottle subset, see:
+
+- `docs/render_grscenes_smoke.md`
+
 ## Phase 1 assumptions
 
 - The stage-population helpers will be provided by the task ownership slice:
@@ -49,6 +53,13 @@ Phase 2 covers external USD inputs with two entrypoints:
 - batch exit codes:
   - `0` when every asset is `success` or `skipped`
   - `1` when any asset fails
+- for the external USD path only:
+  - asset-provided lights take precedence when they exist on the opened stage
+  - if the opened asset stage has no effective lights, the external USD path
+    may inject a minimal fallback light rig so the render is not fully black
+- a separate local smoke wrapper may be used to drive these CLIs against a
+  machine-specific GRScenes asset root without changing the core phase-two CLI
+  contract
 
 ## Current limitations
 
@@ -60,6 +71,9 @@ Phase 2 covers external USD inputs with two entrypoints:
   artifacts from being written.
 - The external USD flow uses bbox-driven camera placement, so it is general for
   arbitrary assets but does not attempt task-specific art direction.
+- The fallback lighting behavior is only meant to prevent the no-light /
+  fully-black case for external USD assets; it is not a general art-direction
+  system and does not guarantee ideal visual quality for every asset.
 - This pass does not add heavy Isaac validation on its own; it only establishes
   the user-facing CLI, smoke test, and documentation surface plus a minimal
   external-USD render path.

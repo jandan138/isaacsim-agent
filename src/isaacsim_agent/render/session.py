@@ -23,6 +23,7 @@ class _RenderBackend:
     Gf: Any
     Usd: Any
     UsdGeom: Any
+    UsdLux: Any
 
 
 def _sanitize_prim_name(name: str) -> str:
@@ -77,6 +78,7 @@ class RenderSession:
             from pxr import Gf  # type: ignore
             from pxr import Usd  # type: ignore
             from pxr import UsdGeom  # type: ignore
+            from pxr import UsdLux  # type: ignore
         except ModuleNotFoundError as exc:
             self.close()
             raise RenderBackendUnavailableError(
@@ -91,6 +93,7 @@ class RenderSession:
             Gf=Gf,
             Usd=Usd,
             UsdGeom=UsdGeom,
+            UsdLux=UsdLux,
         )
         self._apply_render_settings()
         self.update(self.config.warmup_updates)

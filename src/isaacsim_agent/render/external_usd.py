@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 from typing import Sequence
 
 from .session import RenderSession
@@ -47,7 +48,111 @@ def load_external_usd_stage(session: RenderSession, usd_path: str | Path):
     stage = context.get_stage()
     if stage is None:
         raise RuntimeError(f"Isaac Sim returned no active USD stage after opening {resolved_path}")
+
+    if ensure_external_usd_lighting(
+        stage,
+        Gf_module=backend.Gf,
+        UsdGeom_module=backend.UsdGeom,
+        UsdLux_module=backend.UsdLux,
+    ):
+        session.update(session.config.warmup_updates)
     return stage
+
+
+def _resolve_usd_lighting_modules():
+    try:
+        from pxr import Gf  # type: ignore
+        from pxr import UsdGeom  # type: ignore
+        from pxr import UsdLux  # type: ignore
+    except ModuleNotFoundError as exc:
+        raise RuntimeError("External USD lighting helpers require USD Lux bindings at runtime") from exc
+    return Gf, UsdGeom, UsdLux
+
+
+def _resolve_usd_lux_module():
+    try:
+        from pxr import UsdLux  # type: ignore
+    except ModuleNotFoundError as exc:
+        raise RuntimeError("External USD light detection requires USD Lux bindings at runtime") from exc
+    return UsdLux
+
+
+def stage_has_lights(stage, usd_lux_module: Any | None = None) -> bool:
+    """Return True when the opened external USD stage already provides lights."""
+
+    if usd_lux_module is None:
+        usd_lux_module = _resolve_usd_lux_module()
+
+    light_api = getattr(usd_lux_module, "LightAPI", None)
+    boundable_light_base = getattr(usd_lux_module, "BoundableLightBase", None)
+    nonboundable_light_base = getattr(usd_lux_module, "NonboundableLightBase", None)
+
+    for prim in stage.Traverse():
+        if not prim.IsValid() or not prim.IsDefined() or not prim.IsActive():
+            continue
+        if light_api is not None and prim.HasAPI(light_api):
+            return True
+        if boundable_light_base is not None and prim.IsA(boundable_light_base):
+            return True
+        if nonboundable_light_base is not None and prim.IsA(nonboundable_light_base):
+            return True
+    return False
+
+
+def _ensure_rotate_xyz_attr(prim, xformable):
+    attr_name = "xformOp:rotateXYZ"
+    if not prim.HasAttribute(attr_name):
+        xformable.AddRotateXYZOp()
+    return prim.GetAttribute(attr_name)
+
+
+def ensure_external_usd_lighting(
+    stage,
+    *,
+    Gf_module: Any | None = None,
+    UsdGeom_module: Any | None = None,
+    UsdLux_module: Any | None = None,
+) -> bool:
+    """Inject a conservative default light rig when the external USD stage has none."""
+
+    if Gf_module is None or UsdGeom_module is None or UsdLux_module is None:
+        Gf_module, UsdGeom_module, UsdLux_module = _resolve_usd_lighting_modules()
+
+    if stage_has_lights(stage, usd_lux_module=UsdLux_module):
+        return False
+
+    UsdGeom_module.Xform.Define(stage, "/World")
+    light_root_path = "/World/ExternalUsdFallbackLights"
+    UsdGeom_module.Xform.Define(stage, light_root_path)
+
+    dome = UsdLux_module.DomeLight.Define(stage, f"{light_root_path}/Dome")
+    dome.CreateIntensityAttr().Set(150.0)
+    dome.CreateColorAttr().Set(Gf_module.Vec3f(1.0, 1.0, 1.0))
+    exposure_attr = getattr(dome, "CreateExposureAttr", None)
+    if callable(exposure_attr):
+        exposure_attr().Set(0.0)
+
+    key = UsdLux_module.DistantLight.Define(stage, f"{light_root_path}/Key")
+    key.CreateIntensityAttr().Set(550.0)
+    key.CreateColorAttr().Set(Gf_module.Vec3f(1.0, 0.97, 0.92))
+    key_angle_attr = getattr(key, "CreateAngleAttr", None)
+    if callable(key_angle_attr):
+        key_angle_attr().Set(0.53)
+    key_prim = key.GetPrim()
+    key_xformable = UsdGeom_module.Xformable(key_prim)
+    _ensure_rotate_xyz_attr(key_prim, key_xformable).Set(Gf_module.Vec3f(-40.0, 35.0, 0.0))
+
+    fill = UsdLux_module.DistantLight.Define(stage, f"{light_root_path}/Fill")
+    fill.CreateIntensityAttr().Set(120.0)
+    fill.CreateColorAttr().Set(Gf_module.Vec3f(0.84, 0.9, 1.0))
+    fill_angle_attr = getattr(fill, "CreateAngleAttr", None)
+    if callable(fill_angle_attr):
+        fill_angle_attr().Set(0.53)
+    fill_prim = fill.GetPrim()
+    fill_xformable = UsdGeom_module.Xformable(fill_prim)
+    _ensure_rotate_xyz_attr(fill_prim, fill_xformable).Set(Gf_module.Vec3f(-15.0, -130.0, 0.0))
+
+    return True
 
 
 def _iter_bbox_root_prims(stage) -> list[object]:

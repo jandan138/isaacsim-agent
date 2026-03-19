@@ -5,246 +5,206 @@
 - Date: 2026-03-19
 - Plan source of truth: `plan.md`
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
-- Active milestone: `M13 phase-two external USD rendering kickoff`
+- Active milestone: `M13 external USD lighting fix`
 - Milestone state:
-  - this run completed the phase-two external USD render-package helpers
-  - this run completed the single-asset external USD CLI
-  - this run completed the batch external USD CLI, render smoke tests, and docs
-  - this run completed a local fallback reviewer-style acceptance pass after a
-    delegated reviewer became unavailable during interrupted-session recovery
+  - this run completed a focused black-render investigation for the external
+    USD path
+  - this run completed an external-USD-only fallback lighting fix
+  - this run completed portable tests and concise docs for the lighting fix
+  - this run completed real Isaac-backed rerenders against the GRScenes bottle
+    assets and reviewer acceptance
 - Completion level:
-  - `src/isaacsim_agent/render/` now exposes
-    `load_external_usd_stage(...)` and `build_bbox_camera_views(...)`
-  - `scripts/render_usd_asset.py` now renders a real external `.usd` / `.usda`
-    / `.usdc` asset to `front.png`, `three_quarter.png`, `top.png`, and
-    `side.png`
-  - `scripts/render_usd_asset.py --save-stage` now writes `stage.usda`
-  - `scripts/render_usd_asset.py --skip-existing` now short-circuits only when
-    every requested PNG already exists and, when requested, `stage.usda` also
-    exists
-  - `scripts/render_usd_asset.py` now returns `EXPECTED_MISSING_DEPENDENCY`
-    exit code `3` when Isaac-backed imports are unavailable
-  - `scripts/render_usd_batch.py` now discovers assets, shells out once per
-    asset to `scripts/render_usd_asset.py`, writes
-    `<output-root>/batch_summary.json`, and returns `1` when any asset fails
-  - the phase-one project-demo render CLI remained working for both task
-    families
-  - a real external USD single-asset smoke passed with a temporary minimal
-    asset under `/tmp/isaacsim-agent-m13-final-dx85mmew/input/nested/`
-  - a real external USD batch smoke passed against that same temporary input
+  - the black-render root cause was identified as missing effective lights on
+    opened external USD stages
+  - `src/isaacsim_agent/render/external_usd.py` now detects whether an opened
+    stage already has effective lights
+  - `src/isaacsim_agent/render/external_usd.py` now injects a conservative
+    fallback light rig only when the external USD stage has no lights
+  - asset-provided lights still take precedence
+  - phase-one behavior remains unchanged because the fix is scoped to the
+    external USD path only
+  - `tests/test_external_usd_lighting.py` now provides portable regression
+    coverage for light detection and fallback invocation
+  - `docs/render_phase1_cli.md` and `docs/render_grscenes_smoke.md` now
+    document the fallback-lighting behavior honestly and narrowly
+  - rerendered GRScenes bottle outputs are no longer black
 
 ## Run context
 
 - This run stayed within the requested boundaries:
-  - phase-two external USD rendering only
+  - fix the black-render/no-light case for external USD assets only
   - no dataset-level pipeline expansion
-  - no DLC, caption, with-background, or paper-path edits
-  - no task-module refactor for external USD logic
-- Source-of-truth docs consumed in this run:
+  - no changes to the phase-one render path
+  - no broader art-direction redesign
+  - the local GRScenes validation tree remains machine-local and is ignored
+    from version control
+- Source-of-truth docs and inputs consumed in this run:
   - `plan.md`
   - `AGENTS.md`
   - `STATUS.md`
-  - `docs/render_phase1_cli.md`
-  - `docs/setup.md`
-  - `scripts/smoke_test_isaac.py`
-  - `scripts/isaac_python.sh`
-  - `src/isaacsim_agent/render/__init__.py`
-  - `src/isaacsim_agent/render/session.py`
   - `src/isaacsim_agent/render/external_usd.py`
-  - `scripts/render_demo_views.py`
-  - `scripts/render_usd_asset.py`
-  - `scripts/render_usd_batch.py`
-  - `tests/test_render_cli_smoke.py`
-  - `tests/test_render_usd_batch_cli.py`
+  - `results/render_smokes/grscenes_bottle_subset10_20260319/`
+  - `docs/render_phase1_cli.md`
+  - `docs/render_grscenes_smoke.md`
 - Agent teaming:
-  - worker `019d049c-63be-7a12-b04e-065be2589334`
-    was assigned the render-package slice
-  - worker `019d049c-643b-7811-bd68-adc35e9a2114`
-    was assigned the single-asset CLI slice
-  - worker `019d049c-6457-7c71-a7e2-c31f917a7311`
-    was assigned the batch/tests/docs slice
-  - orchestrator waited two 10-minute windows with no completed worker
-    responses, then sent one focused progress check
-  - because the mainline was still blocked after those waits and the focused
-    progress check, the orchestrator interrupted all three workers and
-    collected their final handoffs
-  - those worker handoffs were not reliable enough for close-out on their own,
-    so the orchestrator re-ran the milestone validations locally and
-    normalized the final records
-  - reviewer `019d04c2-68d8-7a93-ade1-602f3b4bbec8` became unavailable after a
-    user interruption during recovery; `wait_agent` later returned `not_found`
-    and no usable reviewer output was available from that attempt
-  - reviewer retry `019d04de-0778-78d2-8b51-68bcf8aa6f73` then completed with
-    no blocking findings and confirmed the M13 acceptance state
-  - final acceptance evidence is recorded in
-    `.codex/worklogs/subagents/2026-03-19/m13-review.md`, with the retry
-    attempt tracked separately in
-    `.codex/worklogs/subagents/2026-03-19/m13-review-retry.md`
+  - worker `019d0518-4b73-7080-84ca-3e87d9c496e6`
+    owned the render-package slice
+  - worker `019d0518-4baf-7bd0-8c9c-85981ae3214f`
+    owned the test slice
+  - worker `019d0518-4bf6-76b1-bddb-56c51bb288d5`
+    owned the docs slice
+  - all three workers completed without requiring interruption or reassignment
+  - orchestrator integrated the worker outputs, resolved one integration-level
+    test mismatch, reran the validation sequence locally, and performed the
+    real GRScenes rerenders
+  - reviewer `019d0525-2a30-7130-adb6-000b4b92c3b0`
+    accepted the milestone with no blocking findings
 
 ## Milestone summary
 
 - Completed in this run:
-  - added `src/isaacsim_agent/render/external_usd.py` with external-USD stage
-    loading and bbox-driven camera helpers
-  - updated `src/isaacsim_agent/render/__init__.py` so the shared render
-    package exports the new external USD helpers
-  - extended `src/isaacsim_agent/render/session.py` so the render backend keeps
-    `Usd` available to the external-USD helpers
-  - replaced the placeholder `scripts/render_usd_asset.py` path with a real
-    render flow that consumes the shared helpers, exports `stage.usda`, and
-    emits `EXPECTED_MISSING_DEPENDENCY` exit code `3` when Isaac is unavailable
-  - replaced the placeholder `scripts/render_usd_batch.py` path with per-asset
-    shell-out isolation, discovery, skip-existing propagation, and
-    `batch_summary.json`
-  - updated `tests/test_render_cli_smoke.py` to reflect phase-two behavior and
-    preserve the phase-one blocked-path smoke
-  - added `tests/test_render_usd_batch_cli.py` for additional batch/single-asset
-    discovery and skip-existing coverage
-  - updated `docs/render_phase1_cli.md` to document the current phase-two
-    external USD behavior and remaining limitations
-  - revalidated the milestone locally through py_compile, import smoke,
-    unittest smoke suites, diff hygiene, and real Isaac-backed single/batch
-    smokes
+  - confirmed via measurement that the pre-fix GRScenes renders were literally
+    black:
+    - single-asset `front`, `three_quarter`, `top`, and `side` all had
+      `gray_mean = 0.0`
+    - batch `front.png` outputs for all `10` bottle assets also had
+      `gray_mean = 0.0`
+  - confirmed that a one-off dome-light probe immediately produced non-black
+    output, isolating missing lighting as the primary cause
+  - extended `src/isaacsim_agent/render/session.py` so the cached render
+    backend now keeps `UsdLux`
+  - updated `src/isaacsim_agent/render/external_usd.py` with:
+    - `stage_has_lights(...)`
+    - `ensure_external_usd_lighting(...)`
+    - `load_external_usd_stage(...)` fallback-lighting application
+  - updated `tests/test_external_usd_lighting.py` for portable regression
+    coverage
+  - updated `docs/render_phase1_cli.md` and `docs/render_grscenes_smoke.md`
+    for the fallback-lighting behavior
+  - rerendered the same GRScenes bottle asset successfully with non-black
+    outputs
+  - rerendered the full `10`-asset bottle batch successfully with non-black
+    outputs
 - Not completed in this run:
-  - no dataset-level rendering pipeline
-  - no DLC submission or remote execution
-  - no caption, background, or broader art-direction work
-  - no larger-scale multi-asset soak beyond the required smoke coverage
+  - no flattening of the wrapper output layout
+  - no asset-quality repair for mesh-normal warnings inside the source assets
+  - no reference-image comparison beyond brightness / non-black confirmation
 
 ## Files changed in this run
 
 - `STATUS.md`
-- `docs/render_phase1_cli.md`
-- `scripts/render_usd_asset.py`
-- `scripts/render_usd_batch.py`
-- `src/isaacsim_agent/render/__init__.py`
+- `.gitignore`
 - `src/isaacsim_agent/render/session.py`
 - `src/isaacsim_agent/render/external_usd.py`
-- `tests/test_render_cli_smoke.py`
-- `tests/test_render_usd_batch_cli.py`
-- `.codex/worklogs/main/2026-03-19/m13-phase-two-understanding-session-research.md`
-- `.codex/worklogs/main/2026-03-19/m13-phase-two-session-plan.md`
-- `.codex/worklogs/main/2026-03-19/m13-phase-two-session-research.md`
-- `.codex/worklogs/main/2026-03-19/m13-phase-two-session-handoff.md`
-- `.codex/worklogs/subagents/2026-03-19/m13-worker1-render-package.md`
-- `.codex/worklogs/subagents/2026-03-19/m13-worker2-single-asset-cli.md`
-- `.codex/worklogs/subagents/2026-03-19/m13-worker3-batch-tests-docs.md`
-- `.codex/worklogs/subagents/2026-03-19/m13-review.md`
-- `.codex/worklogs/subagents/2026-03-19/m13-review-retry.md`
+- `tests/test_external_usd_lighting.py`
+- `docs/render_phase1_cli.md`
+- `docs/render_grscenes_smoke.md`
+- `.codex/worklogs/main/2026-03-19/black-render-investigation-session-research.md`
+- `.codex/worklogs/main/2026-03-19/m13-lighting-fix-session-plan.md`
+- `.codex/worklogs/main/2026-03-19/m13-lighting-fix-session-research.md`
+- `.codex/worklogs/main/2026-03-19/m13-lighting-fix-session-handoff.md`
+- `.codex/worklogs/subagents/2026-03-19/m13-lighting-worker1-render.md`
+- `.codex/worklogs/subagents/2026-03-19/m13-lighting-worker2-tests.md`
+- `.codex/worklogs/subagents/2026-03-19/m13-lighting-worker3-docs.md`
+- `.codex/worklogs/subagents/2026-03-19/m13-lighting-review.md`
 
 ## Commands run
 
 - Source-of-truth and repo-state reads:
   - `sed -n '1,220p' plan.md`
-  - `sed -n '1,260p' STATUS.md`
+  - `sed -n '1,280p' STATUS.md`
   - `sed -n '1,260p' AGENTS.md`
   - `git status --short --untracked-files=all`
-- Inspection:
-  - `sed -n ...` over the current render package, phase-one render CLI,
-    phase-two CLIs, docs, tests, and M13 worklogs
-  - `git diff --stat`
-  - `rg -n ...` over external USD markers, exit-code markers, and render hooks
-  - `rg --files . | rg '\\.(usd|usda)$'`
-- Runtime preparation:
-  - `./scripts/isaac_python.sh scripts/smoke_test_isaac.py`
-  - `python - <<'PY'` to create a temporary minimal external USD smoke asset
-    under `/tmp/isaacsim-agent-m13-final-dx85mmew/input/nested/minimal_asset.usda`
+- Investigation:
+  - `sed -n '1,240p'` over the exported `stage.usda`
+  - `rg -n ...` over `single.log` for warnings and light-related clues
+  - `/isaac-sim/python.sh - <<'PY'` brightness measurements for pre-fix PNGs
+  - `./scripts/isaac_python.sh - <<'PY'` runtime dome-light probe against one
+    bottle USD
+  - `/isaac-sim/python.sh - <<'PY'` brightness measurement of the dome-light
+    probe output
 - Lightweight validation:
-  - `python -m py_compile src/isaacsim_agent/render/__init__.py src/isaacsim_agent/render/session.py src/isaacsim_agent/render/external_usd.py scripts/render_usd_asset.py scripts/render_usd_batch.py tests/test_render_cli_smoke.py tests/test_render_usd_batch_cli.py`
+  - `python -m py_compile src/isaacsim_agent/render/session.py src/isaacsim_agent/render/external_usd.py tests/test_external_usd_lighting.py`
   - `PYTHONPATH=src python - <<'PY'` import smoke for
-    `DEFAULT_EXTERNAL_USD_VIEWS`, `build_bbox_camera_views`, and
-    `load_external_usd_stage`
-  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke tests.test_render_usd_batch_cli -q`
-  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke -q`
-  - `PYTHONPATH=src python -m unittest tests.test_render_usd_batch_cli -q`
-  - `PYTHONPATH=src python -m unittest tests.test_nav_smoke tests.test_pickplace_smoke -q`
+    `ensure_external_usd_lighting` and `stage_has_lights`
+  - `PYTHONPATH=src python -m unittest tests.test_external_usd_lighting -q`
+  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke tests.test_render_usd_batch_cli tests.test_render_grscenes_smoke -q`
+  - `./scripts/isaac_python.sh - <<'PY'` in-memory `UsdLux` schema probe for
+    `stage_has_lights(...)`
   - `git diff --check`
-- Real external USD smokes:
-  - `./scripts/isaac_python.sh scripts/render_usd_asset.py --usd-path /tmp/isaacsim-agent-m13-final-dx85mmew/input/nested/minimal_asset.usda --output-dir /tmp/isaacsim-agent-m13-final-dx85mmew/output-asset --save-stage`
-  - `./scripts/isaac_python.sh scripts/render_usd_batch.py --input-root /tmp/isaacsim-agent-m13-final-dx85mmew/input --output-root /tmp/isaacsim-agent-m13-final-dx85mmew/output-batch --save-stage`
+- Real rerenders:
+  - `./scripts/isaac_python.sh scripts/run_grscenes_render_smoke.py --asset-root /cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/asset/render_test/grscenes_uid_subset_10/GRScenes_assets/bottle --output-root results/render_smokes/grscenes_bottle_lightingfix2_20260319 --mode single --save-stage`
+  - `./scripts/isaac_python.sh scripts/run_grscenes_render_smoke.py --asset-root /cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/asset/render_test/grscenes_uid_subset_10/GRScenes_assets/bottle --output-root results/render_smokes/grscenes_bottle_lightingfix2_20260319 --mode batch --batch-limit 10 --save-stage`
+  - `/isaac-sim/python.sh - <<'PY'` brightness measurements for the rerendered
+    single and batch PNGs
 
 ## Validation results
 
-- Isaac runtime smoke:
-  - `./scripts/isaac_python.sh scripts/smoke_test_isaac.py`
-    passed with:
-    - exit code `0`
+- Pre-fix black-render confirmation:
+  - single-asset rendered PNGs all measured `gray_mean = 0.0`
+  - batch `front.png` outputs for all `10` bottle assets also measured
+    `gray_mean = 0.0`
+- Lighting probe:
+  - a one-off runtime probe with an injected dome light changed the same
+    bottle `front.png` from `gray_mean = 0.0` to `gray_mean = 241.629`
 - Syntax validation:
-  - `python -m py_compile src/isaacsim_agent/render/__init__.py src/isaacsim_agent/render/session.py src/isaacsim_agent/render/external_usd.py scripts/render_usd_asset.py scripts/render_usd_batch.py tests/test_render_cli_smoke.py tests/test_render_usd_batch_cli.py`
+  - `python -m py_compile src/isaacsim_agent/render/session.py src/isaacsim_agent/render/external_usd.py tests/test_external_usd_lighting.py`
     passed with:
     - no output
 - Import smoke:
   - `PYTHONPATH=src python - <<'PY'`
     passed with:
-    - `IMPORT_SMOKE_OK ('front', 'three_quarter', 'top', 'side') True True`
-- Combined render CLI smoke coverage:
-  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke tests.test_render_usd_batch_cli -q`
+    - `IMPORT_OK True True`
+- New lighting regression tests:
+  - `PYTHONPATH=src python -m unittest tests.test_external_usd_lighting -q`
     passed with:
-    - `Ran 12 tests in 1.520s`
+    - `Ran 3 tests in 0.001s`
     - `OK`
-- Render CLI smoke suite:
-  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke -q`
+- Existing portable smoke suites:
+  - `PYTHONPATH=src python -m unittest tests.test_render_cli_smoke tests.test_render_usd_batch_cli tests.test_render_grscenes_smoke -q`
     passed with:
-    - `Ran 9 tests in 1.014s`
-    - `OK`
-- New external USD batch CLI smoke tests:
-  - `PYTHONPATH=src python -m unittest tests.test_render_usd_batch_cli -q`
-    passed with:
-    - `Ran 3 tests in 0.505s`
-    - `OK`
-- Existing phase-one smoke suites:
-  - `PYTHONPATH=src python -m unittest tests.test_nav_smoke tests.test_pickplace_smoke -q`
-    passed with:
-    - `Ran 4 tests in 19.009s`
+    - `Ran 17 tests in 1.711s`
     - `OK`
 - Diff hygiene:
   - `git diff --check`
     passed with:
     - no output
-- Real external USD single-asset smoke:
-  - `./scripts/isaac_python.sh scripts/render_usd_asset.py --usd-path /tmp/isaacsim-agent-m13-final-dx85mmew/input/nested/minimal_asset.usda --output-dir /tmp/isaacsim-agent-m13-final-dx85mmew/output-asset --save-stage`
+- Real GRScenes single-asset rerender:
+  - `./scripts/isaac_python.sh scripts/run_grscenes_render_smoke.py --asset-root /cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/asset/render_test/grscenes_uid_subset_10/GRScenes_assets/bottle --output-root results/render_smokes/grscenes_bottle_lightingfix2_20260319 --mode single --save-stage`
     passed with:
     - exit code `0`
-    - output files:
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-asset/front.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-asset/three_quarter.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-asset/top.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-asset/side.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-asset/stage.usda`
-- Real external USD batch smoke:
-  - `./scripts/isaac_python.sh scripts/render_usd_batch.py --input-root /tmp/isaacsim-agent-m13-final-dx85mmew/input --output-root /tmp/isaacsim-agent-m13-final-dx85mmew/output-batch --save-stage`
+    - selected asset:
+      - `/cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/asset/render_test/grscenes_uid_subset_10/GRScenes_assets/bottle/0309dcb2f1cff82e56b5928b8258b489/usd/0309dcb2f1cff82e56b5928b8258b489.usd`
+    - brightness:
+      - `front mean = 89.046`
+      - `three_quarter mean = 79.715`
+      - `top mean = 115.002`
+      - `side mean = 98.006`
+- Real GRScenes batch rerender:
+  - `./scripts/isaac_python.sh scripts/run_grscenes_render_smoke.py --asset-root /cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/asset/render_test/grscenes_uid_subset_10/GRScenes_assets/bottle --output-root results/render_smokes/grscenes_bottle_lightingfix2_20260319 --mode batch --batch-limit 10 --save-stage`
     passed with:
     - exit code `0`
-    - summary:
-      - `counts = {'discovered': 1, 'success': 1, 'skipped': 0, 'failed': 0}`
-      - first asset status `success`
-      - first asset relative path `nested/minimal_asset.usda`
-      - first asset output dir `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset`
-    - output files:
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/batch_summary.json`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset/front.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset/three_quarter.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset/top.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset/side.png`
-      - `/tmp/isaacsim-agent-m13-final-dx85mmew/output-batch/nested/minimal_asset/stage.usda`
+    - summary counts:
+      - `{'discovered': 10, 'success': 10, 'skipped': 0, 'failed': 0}`
+    - batch front-image brightness range:
+      - `min_mean = 68.168`
+      - `max_mean = 98.985`
 - Reviewer:
   - final judgement: `Accept`
-  - recorded via local fallback review in
-    `.codex/worklogs/subagents/2026-03-19/m13-review.md`
-  - reviewer retry `019d04de-0778-78d2-8b51-68bcf8aa6f73` also returned
-    `Accept` with no blocking findings
-  - no blocking bugs or regressions found against the phase-two plan
+  - reviewer `019d0525-2a30-7130-adb6-000b4b92c3b0` reported no blocking findings
+  - only low-severity residual notes:
+    - some rerender logs still contain source-asset mesh-normal warnings
+    - the wrapper still preserves nested delegated output paths
 
 ## Remaining gaps
 
-- add a checked-in minimal external USD fixture only if later phases want a
-  deterministic repo-local smoke asset instead of a temporary one
-- broaden performance or multi-asset stress validation only if a later
-  milestone explicitly asks for it
+- decide later whether the wrapper should keep the current nested output layout
+- decide later whether to add a checked-in portable real-asset fixture
+- address per-asset mesh-normal issues only if a later milestone explicitly
+  wants asset-quality cleanup
 
 ## Next recommended sub-milestone
 
-- `M13 follow-up external USD hardening`:
-  - add a checked-in minimal external USD fixture for repeatable smoke coverage
-  - only after that, explicitly choose whether to continue into broader render
-    pipeline work or the next milestone beyond external USD kickoff
+- `M13 post-lighting polish decision`:
+  - decide whether to keep the current conservative fallback-light rig as-is
+  - decide whether wrapper output layout should be flattened or left thin
