@@ -5,11 +5,11 @@ from __future__ import annotations
 import math
 import tempfile
 from dataclasses import dataclass
-from dataclasses import field
 from pathlib import Path
 from typing import Any
 
 from isaacsim_agent.contracts import TerminationReason
+from isaacsim_agent.render.types import VisualizationConfig
 from isaacsim_agent.tools.navigation import Pose2D
 from isaacsim_agent.tools.navigation import compute_direct_navigation_step
 from isaacsim_agent.tools.navigation import distance_between_poses
@@ -20,21 +20,12 @@ from .baseline import NavigationStepResult
 from .baseline import NavigationTaskDefinition
 
 
-@dataclass(frozen=True)
-class VisualizationConfig:
-    """Optional render-oriented overlays for stage population."""
-
-    show_trajectory: bool = False
-    show_goal_region: bool = False
-    show_labels: bool = False
-    palette: dict[str, tuple[float, float, float]] = field(
-        default_factory=lambda: {
-            "agent": (0.1, 0.4, 0.9),
-            "goal": (0.1, 0.75, 0.2),
-            "goal_region": (0.95, 0.85, 0.2),
-            "trajectory": (0.95, 0.45, 0.1),
-        }
-    )
+DEFAULT_NAVIGATION_PALETTE: dict[str, tuple[float, float, float]] = {
+    "agent": (0.1, 0.4, 0.9),
+    "goal": (0.1, 0.75, 0.2),
+    "goal_region": (0.95, 0.85, 0.2),
+    "trajectory": (0.95, 0.45, 0.1),
+}
 
 
 @dataclass(frozen=True)
@@ -73,8 +64,8 @@ class NavigationStageHandles:
 
 def _resolve_palette(visualization_config: VisualizationConfig | None) -> dict[str, tuple[float, float, float]]:
     if visualization_config is None:
-        return VisualizationConfig().palette
-    return {**VisualizationConfig().palette, **visualization_config.palette}
+        return dict(DEFAULT_NAVIGATION_PALETTE)
+    return {**DEFAULT_NAVIGATION_PALETTE, **visualization_config.palette}
 
 
 def _apply_navigation_pose(translate_op, rotate_op, pose: Pose2D, z_height: float, Gf) -> None:

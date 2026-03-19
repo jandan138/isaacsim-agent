@@ -5,10 +5,10 @@ from __future__ import annotations
 import math
 import tempfile
 from dataclasses import dataclass
-from dataclasses import field
 from pathlib import Path
 from typing import Any
 
+from isaacsim_agent.render.types import VisualizationConfig
 from isaacsim_agent.tools.manipulation import Pose3D
 
 from .baseline import BasePickPlaceEnvironment
@@ -16,21 +16,12 @@ from .baseline import ManipulationBackendUnavailableError
 from .baseline import PickPlaceTaskDefinition
 
 
-@dataclass(frozen=True)
-class VisualizationConfig:
-    """Optional render-oriented palette and overlay toggles."""
-
-    show_trajectory: bool = False
-    show_goal_region: bool = False
-    show_labels: bool = False
-    palette: dict[str, tuple[float, float, float]] = field(
-        default_factory=lambda: {
-            "gripper": (0.1, 0.35, 0.9),
-            "object": (0.95, 0.45, 0.1),
-            "source_zone": (0.15, 0.65, 0.2),
-            "target_zone": (0.8, 0.2, 0.2),
-        }
-    )
+DEFAULT_PICKPLACE_PALETTE: dict[str, tuple[float, float, float]] = {
+    "gripper": (0.1, 0.35, 0.9),
+    "object": (0.95, 0.45, 0.1),
+    "source_zone": (0.15, 0.65, 0.2),
+    "target_zone": (0.8, 0.2, 0.2),
+}
 
 
 @dataclass(frozen=True)
@@ -75,8 +66,8 @@ class PickPlaceStageHandles:
 
 def _resolve_palette(visualization_config: VisualizationConfig | None) -> dict[str, tuple[float, float, float]]:
     if visualization_config is None:
-        return VisualizationConfig().palette
-    return {**VisualizationConfig().palette, **visualization_config.palette}
+        return dict(DEFAULT_PICKPLACE_PALETTE)
+    return {**DEFAULT_PICKPLACE_PALETTE, **visualization_config.palette}
 
 
 def _apply_pose(translate_op, rotate_op, pose: Pose3D, Gf) -> None:

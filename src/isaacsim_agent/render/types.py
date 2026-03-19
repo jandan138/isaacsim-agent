@@ -11,17 +11,6 @@ Vec2i = tuple[int, int]
 Vec3f = tuple[float, float, float]
 
 
-def _default_palette() -> dict[str, ColorRGB]:
-    return {
-        "agent": (0.1, 0.4, 0.9),
-        "goal": (0.1, 0.75, 0.2),
-        "object": (0.95, 0.45, 0.1),
-        "source_zone": (0.15, 0.65, 0.2),
-        "target_zone": (0.8, 0.2, 0.2),
-        "trajectory": (0.95, 0.85, 0.2),
-    }
-
-
 @dataclass(frozen=True)
 class VisualizationConfig:
     """Optional stage-visualization toggles shared across render entrypoints."""
@@ -29,7 +18,9 @@ class VisualizationConfig:
     show_trajectory: bool = False
     show_goal_region: bool = False
     show_labels: bool = False
-    palette: dict[str, ColorRGB] = field(default_factory=_default_palette)
+    # Task modules provide their own default colors and merge any caller-supplied
+    # palette overrides into those task-local defaults.
+    palette: dict[str, ColorRGB] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
