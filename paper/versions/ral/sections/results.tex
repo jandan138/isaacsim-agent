@@ -11,9 +11,9 @@ each slice, P0/R0 is the weakest cell. Pairing the same under-specified
 contract with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
 P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. The same ordering holds
 across both task families and persists as tasks become harder. Because the
-backend and executor are deterministic by design, each cell is interpreted as
-a descriptive comparison over a fixed cohort of task instances rather than as
-an estimate from repeated stochastic rollouts.
+planner backend and exposed task executors are deterministic by design, each
+cell is interpreted as a descriptive comparison over a fixed cohort of task
+instances rather than as an estimate from repeated stochastic rollouts.
 
 \input{figures/main_condition_ordering.tex}
 \input{tables/main_outcome_summary.tex}
@@ -30,16 +30,17 @@ The same comparison separates the roles of contract design and runtime
 validation. Invalid-action failures are concentrated in the P0 cells, showing
 that loose task-level verbs are brittle at the planner/executor boundary. Once
 the planner is forced into a typed tool namespace, the dominant failure mode
-disappears in the covered fixed-R0 slice. Within the successful structured
-conditions, P2 matches P1 on success while showing lower planner/tool
-overhead across the covered \texttt{P1} versus \texttt{P2} comparisons.
+disappears in the evaluated fixed-R0 ablation. Within the successful
+structured conditions, P2 matches P1 on success while showing lower
+planner/tool overhead across the evaluated \texttt{P1} versus \texttt{P2}
+comparisons.
 Table~\ref{tab:planner-tool-overhead-summary} isolates that workload
 comparison so the manuscript can report it without overloading the outcome
 table. Figure~\ref{fig:planner-tool-overhead} compresses those
 comparisons into one workload mark per row because planner and tool counts are
 equal within the plotted \texttt{P1}/\texttt{P2} pairs. We interpret that
 pattern as a workload association within already-strong contracts, not as
-evidence of a new success regime.
+evidence of a separate success mechanism.
 
 \input{figures/planner_tool_overhead.tex}
 
@@ -82,7 +83,7 @@ while the fixed-P1 runtime panel shows R1 converting the invalid half of the
 runtime-only slice from failure into recovery, with retries rising from 0.0 to
 0.5 per run.
 
-The failure traces explain what goes wrong under P0. In navigation, failing
+The failure traces identify the dominant P0 failure mode. In navigation, failing
 P0 runs repeatedly emit the unsupported tool name
 \texttt{move\_to\_goal}; in tabletop manipulation, they emit
 \texttt{move\_object}. Both are semantically plausible task verbs, but the

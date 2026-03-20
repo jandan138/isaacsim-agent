@@ -94,6 +94,11 @@
     pick-and-place sequence
 - Reviewer-facing internal wording was removed where avoidable in the active
   manuscript.
+- This final cleanup pass also normalized the last small reviewer-facing labels:
+  - `covered` -> `evaluated`
+  - `Main factorial` -> `Main matrix`
+  - `Recoverable probes` -> `Recovery probes`
+  - the ROS 2 analogy now emphasizes typed interface definition more directly
 - The related-work comparison to SayCan, Code as Policies, and ProgPrompt was
   tightened around affordance grounding, code/program generation, and declared
   action interfaces.
@@ -114,18 +119,21 @@
     success
   - page count:
     `8`
-- Follow-up compile after the manual contract table insertion:
+- Follow-up compile after the final reviewer-facing wording cleanup:
   - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-  - both completed successfully
+  - both completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
 - Underfull-box warnings remain in narrow-column prose.
 - Small overfull-box warnings remain in:
-  - one row of `tables/contract_interface_examples.tex`
+  - `tables/contract_interface_examples.tex`
   - `figures/main_condition_ordering.tex`
   - `figures/invalid_actions_recovery.tex`
+- The compact contract/interface table still fits in the manuscript, but it
+  does not compile perfectly cleanly yet because of that small overfull-box
+  warning.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

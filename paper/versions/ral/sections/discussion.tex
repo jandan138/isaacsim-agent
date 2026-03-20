@@ -5,9 +5,10 @@
 The clearest lesson is that planner-to-executor contract design is an
 architectural design variable, not a presentation detail. Under the
 under-specified direct-action contract, the
-planner often knows the task family but still speaks in a vocabulary the
-executor cannot dispatch. Explicit contracts move that ambiguity out of ad hoc
-interpretation and into a declared interface.
+planner often produces task-level verbs that are semantically plausible but not
+dispatchable under the executor's tool namespace. Explicit contracts instead
+declare the callable interface up front and reduce the need for executor-side
+interpretation.
 
 Runtime validation plays a complementary role. It does not replace a
 well-specified contract, but it can intercept a bad first emission, surface a
@@ -18,9 +19,10 @@ guarded execution policies.
 
 At a higher level, the studied boundary maps cleanly onto execution
 architectures already familiar in robotics. The contract specifies the form of
-a dispatchable request in much the same way that ROS 2 actions expose explicit
-goal, feedback, and result semantics, while runtime validation decides whether
-a malformed request should be rejected before execution
+a dispatchable request in much the same way that ROS 2 actions define typed
+goal, feedback, and result interfaces together with the required request
+fields, while runtime validation decides whether a malformed or mismatched
+request should be rejected before execution
 \cite{biggs2019ros2actions,macenski2022ros2,martin2021plansys2}. The same
 separation appears in behavior-tree and TAMP systems: contract checks act like
 precondition guards on callable nodes or operators, and runtime validation acts
@@ -28,7 +30,8 @@ like an execution guard that determines whether a proposed action can continue
 to the executor interface
 \cite{colledanchise2018behaviortrees,behaviortreecppdocs,behaviortreecppconditions,garrett2020pddlstream,garrett2021integratedtamp}.
 
-The P2 pattern suggests a second, narrower lesson. In the covered slices, a
+The P2 pattern suggests a second, narrower lesson. In the evaluated
+comparisons, a
 brief planner-side self-check leaves the success profile unchanged while
 reducing planner/tool overhead. The bounded interpretation is not that
 self-checks are universally best, but that contract design and runtime design

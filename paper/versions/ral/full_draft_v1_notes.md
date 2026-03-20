@@ -209,3 +209,27 @@
 - Reduced repeated main-conclusion wording by narrowing the abstract to the
   headline result, the introduction to the study question, and the conclusion
   to the bounded takeaway.
+
+## Reviewer-Facing Final Cleanup Pass
+
+- Audited the live manuscript, inserted assets, and code-backed semantics
+  against the expert-review checklist before further edits.
+- Confirmed that several high-priority items were already in place before this
+  final cleanup:
+  - the compact real P0 / P1 / P2 display
+  - deterministic task-instance framing
+  - shared `IEEEkeywords`
+  - precise `R1` and executor-semantics language
+  - Fig. 2's non-color status labels
+- Used this pass only to close the remaining narrow issues:
+  - flattened residual colloquial wording in results/discussion/conclusion
+  - tightened the results sentence so the planner backend and exposed task
+    executors are described as deterministic by design
+  - shifted the ROS 2 analogy toward typed interface-definition language
+  - normalized remaining figure/table wording such as
+    `covered` -> `evaluated`, `Main factorial` -> `Main matrix`, and
+    `Recoverable probes` -> `Recovery probes`
+  - removed the support-only `retained cohorts` wording
+- Recompiled both manuscript variants successfully after the cleanup and kept
+  both at `8` pages.
+- Figure 1 remained frozen and untouched throughout this pass.

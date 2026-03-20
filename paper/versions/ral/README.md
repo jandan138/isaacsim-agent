@@ -81,20 +81,30 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 
 ## Current notes
 
+- The active milestone for this branch is back on paper final-edit /
+  submission prep; render-side work is parked for this pass.
 - Figure 1 remains the frozen manually selected asset and was not redesigned or
   regenerated in this pass.
-- This pass addressed the expert-review blocking issues around:
-  - a compact contract/interface example display built from saved prompt texts
-    and archived planner traces
-  - deterministic-planner framing and fixed-task-set evaluation language
-  - reviewer-facing internal terminology cleanup
-  - precise R1 feedback semantics and executor semantics
-  - repeated conclusion wording, related-work polish, and keywords
-  - low-risk Fig. 2 label support for grayscale / color-deficient reading
+- Live-manuscript audit outcome for the expert-review checklist:
+  - already in place before this final cleanup:
+    - the compact real contract/interface display
+    - deterministic-planner and fixed-task-set framing
+    - shared `IEEEkeywords`
+    - precise executor and `R1` feedback semantics
+    - Fig. 2 non-color status labels
+  - newly tightened in this pass:
+    - residual reviewer-facing wording in abstract/results/discussion/conclusion
+    - the ROS 2 analogy toward typed interface-definition semantics
+    - remaining figure/table label cleanup such as
+      `covered` -> `evaluated`, `Main factorial` -> `Main matrix`, and
+      `Recoverable probes` -> `Recovery probes`
+    - support-only wording cleanup in `tables/harder_task_summary.tex`
 - The setup section now includes a compact implementation snapshot covering the
   deterministic local planner backend, the fixed evaluation set, contract and
   runtime realizations, and executor-visible action semantics.
 - `sections/abstract.tex` now inserts shared `IEEEkeywords`, which compile in
   both the journal scaffold and the reviewer-facing build.
+- Both manuscript variants were rebuilt successfully in this pass and remain at
+  `8` pages.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

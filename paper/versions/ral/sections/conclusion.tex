@@ -13,7 +13,6 @@ the source, runtime validation repairs some that remain, and a brief
 self-check can reduce planner/tool overhead within an already strong contract.
 Because the planner backend is deterministic, these are descriptive
 task-instance comparisons rather than stochastic rollout estimates. Within that
-scope, the practical conclusion is straightforward: make the callable
-interface explicit, validate it before dispatch, and treat planner-side
-self-checks as an efficiency-oriented refinement rather than a separate
-success mechanism.
+scope, the practical implication is to make the callable interface explicit,
+validate it before dispatch, and treat planner-side self-checks as an
+efficiency-oriented refinement rather than a separate success mechanism.

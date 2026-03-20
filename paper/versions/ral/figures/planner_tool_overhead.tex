@@ -1,7 +1,7 @@
 \begin{figure*}[!t]
   \centering
   \begin{tikzpicture}[x=1cm,y=1cm]
-    \node[anchor=west, font=\small\bfseries, text=ralSlate] at (0.0,6.15) {Covered \texttt{P1} vs \texttt{P2} workload comparisons};
+    \node[anchor=west, font=\small\bfseries, text=ralSlate] at (0.0,6.15) {Evaluated \texttt{P1} vs \texttt{P2} workload comparisons};
     \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.0,5.82) {Bars show planner/tool calls per run. In the plotted comparisons, planner and tool counts are equal within each prompt variant, so each bar is labeled as planner/tool.};
     \draw[draw=ralGrid] (3.25,0.40) -- (3.25,5.48);
     \node[anchor=north, font=\scriptsize, text=ralMuted] at (3.25,0.34) {0};
@@ -43,6 +43,6 @@
     \node[anchor=west, font=\scriptsize, text=ralSlate] at (11.52,1.62) {11.67/11.67};
     \node[anchor=west, font=\scriptsize, text=ralSlate] at (10.12,1.42) {9.67/9.67};
   \end{tikzpicture}
-  \caption{Workload comparison for the covered \texttt{P1} versus \texttt{P2} slices. Navigation easy and manipulation easy contribute one row each because the \texttt{P1}/\texttt{P2} workload is identical under \texttt{R0} and \texttt{R1} there; the harder manipulation slice contributes separate \texttt{R0} and \texttt{R1} rows. The comparison is descriptive: in these covered slices, \texttt{P2} matches the success profile of \texttt{P1} while using fewer planner/tool calls.}
+  \caption{Workload comparison for the evaluated \texttt{P1} versus \texttt{P2} rows. Navigation easy and manipulation easy contribute one row each because the \texttt{P1}/\texttt{P2} workload is identical under \texttt{R0} and \texttt{R1} there; the harder manipulation slice contributes separate \texttt{R0} and \texttt{R1} rows. The comparison is descriptive: in this evaluated set, \texttt{P2} matches the success profile of \texttt{P1} while using fewer planner/tool calls.}
   \label{fig:planner-tool-overhead}
 \end{figure*}

@@ -6,6 +6,8 @@
 - Cross-family prompt/runtime rows: `12`
 - Figure style: manuscript figures are emitted as PGF/TikZ-backed `.tex` assets for vector-first compilation.
 - Figure 1 is a frozen manually selected asset and is intentionally out of scope for this generator.
+- This final reviewer-facing cleanup pass did not change the asset inventory or
+  evidence bindings; it only normalized wording in shared figure/table text.
 - Main reviewer-facing figures:
   - `figures/fig1_system_overview_frozen.png`
   - `figures/fig1_system_overview_frozen.pdf` (optional when present)
