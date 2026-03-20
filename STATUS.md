@@ -17,8 +17,9 @@
     and appears uncommitted rather than half-finished
   - this run preserved that completed paper final-pass batch in local git
     history as commit `8dc54bb`
-  - push to `origin/main` did not complete because the current shell has no
-    usable GitHub write credentials
+  - after repo-local HTTPS credential repair, the completed batch and the
+    follow-up blocker note were pushed successfully to `origin/main`
+  - remote `main` now resolves to commit `4053593`
 - Completion level:
   - interrupted-session check is complete
   - no resumable broken task was found
@@ -78,7 +79,6 @@
 - Not completed in this run:
   - no new manuscript edits
   - no `Paper author final edit / submission packaging` work yet
-  - remote push of commit `8dc54bb` is still blocked on GitHub authentication
 
 ## Files changed in this run
 
@@ -114,6 +114,12 @@
     - `git config --show-origin --get-all credential.helper`
     - `git config --show-origin --get-regexp 'credential\\..*'`
     - `ssh -o BatchMode=yes -T git@github.com`
+  - repo-local HTTPS credential repair and successful retry:
+    - `git config --local credential.helper 'store --file=/cpfs/shared/simulation/zhuzihou/dev/isaacsim-agent/.git/credentials'`
+    - `git config --local credential.username 'jandan138'`
+    - manual PAT write to `.git/credentials`
+    - `env -u GIT_ASKPASS -u VSCODE_GIT_ASKPASS_EXTRA_ARGS -u VSCODE_GIT_ASKPASS_MAIN -u VSCODE_GIT_ASKPASS_NODE -u VSCODE_GIT_IPC_HANDLE git push origin main`
+    - `git ls-remote origin refs/heads/main`
 - Artifact verification:
   - `cd paper/versions/ral && pdfinfo main.pdf | rg '^Pages:'`
   - `cd paper/versions/ral/reviewer_submission && pdfinfo main.pdf | rg '^Pages:'`
@@ -130,7 +136,8 @@
 - Local preservation:
   - local commit `8dc54bb` now contains the completed paper final-pass batch
     plus this continuity audit record
-  - `git status --short --branch` reports `main...origin/main [ahead 1]`
+  - follow-up local commit `4053593` recorded the earlier push-auth blocker
+    honestly before the final successful retry
 - Diff hygiene:
   - `git diff --check`
     passed with:
@@ -146,18 +153,14 @@
     returned:
     - `Pages: 8`
 - Push status:
-  - `git push origin main`
-    failed with:
-    - `remote: No anonymous write access.`
-    - `fatal: Authentication failed for 'https://github.com/jandan138/isaacsim-agent.git/'`
-  - `ssh -o BatchMode=yes -T git@github.com`
-    failed with:
-    - `Permission denied (publickey).`
+  - initial HTTPS and SSH push attempts failed because no usable GitHub write
+    credentials were available in the shell
+  - after repo-local PAT configuration, `git push origin main` succeeded
+  - `git ls-remote origin refs/heads/main` now returns commit `4053593`
+  - `git status --short --branch` now reports `main...origin/main`
 
 ## Remaining gaps
 
-- GitHub write authentication must be restored before commit `8dc54bb` can be
-  pushed to `origin/main`
 - a human author final pass for wording, anonymization, metadata, and
   submission packaging is still outstanding
 
