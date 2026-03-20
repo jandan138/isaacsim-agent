@@ -244,11 +244,13 @@
   figure because the figure stack is already stable in the 8-page letter:
   preserving the table identity avoided renumbering Figure 2--4, disturbing the
   table sequence, or introducing extra float-order risk in the introduction.
-- Reworked Table I into a figure-like comparison panel with:
-  - one shared declared-tool strip
-  - a visible `P0 -> P1 -> P2` tightening progression
-  - three contract cards that isolate cue, example emission, and runtime
-    takeaway
+- This pass replaced the previous card-style Table I redesign with a cleaner
+  matrix-style manuscript table.
+- Reworked Table I into a compact comparison matrix with:
+  - one thin shared declared-tool strip
+  - a 4-column matrix (`row label`, `P0`, `P1`, `P2`)
+  - three short row labels: cue, example emission, and runtime effect
+- The goal was readability and main-paper fit, not decorative figure styling.
 - Kept the science fixed:
   - same declared tool list for all requests
   - `P0` still shows an undeclared emission

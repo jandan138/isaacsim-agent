@@ -67,10 +67,13 @@
   - retained as `Table I` instead of being converted to a formal figure
     because keeping the existing table identity avoids figure/table renumbering,
     caption churn, and new float-order risk in the 8-page RA-L layout
-  - redesigned as a figure-like comparison panel:
-    - shared declared-tool strip at the top
-    - explicit `P0 -> P1 -> P2` tightening cue
-    - three contract cards with cue, monospace emission, and runtime takeaway
+  - the previous card-style redesign was replaced with a cleaner matrix-style
+    manuscript table:
+    - one thin shared declared-tool strip at the top
+    - a 4-column comparison matrix
+    - three compact row labels: cue, example emission, and runtime effect
+  - the design goal was readability and main-paper fit, not decorative figure
+    styling
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -131,9 +134,10 @@
     success
   - page count:
     `8`
-- Follow-up compile after the Table I redesign:
+- Follow-up compile after the Table I matrix redesign:
   - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - repeated the same pair once more so labels settled after the Table I edits
   - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
@@ -143,8 +147,8 @@
   - `figures/main_condition_ordering.tex`
   - `figures/invalid_actions_recovery.tex`
 - The redesigned Table I now compiles without its previous table-local
-  overfull-box warning, but its larger visual footprint still means float
-  placement should be checked if nearby manuscript text changes again.
+  overfull-box warning; reviewer page 2 was checked after rebuild and the table
+  now reads as a manuscript comparison matrix rather than a card-style panel.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

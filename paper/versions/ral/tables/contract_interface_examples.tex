@@ -1,75 +1,39 @@
 \begin{table*}[!t]
   \centering
-  \caption{Shared declared tools, tighter planner contracts. In the recorded short-forward navigation traces, \texttt{P0} can emit an out-of-vocabulary action, \texttt{P1} binds the emission to a dispatchable typed tool call, and \texttt{P2} keeps the same runtime-callable surface while adding only a planner-side \texttt{self\_check}.}
+  \caption{Recorded short-forward navigation traces under a shared declared tool list. \texttt{P0} can emit an undeclared action, \texttt{P1} binds the emission to a dispatchable typed call, and \texttt{P2} adds only a brief planner-side \texttt{self\_check}.}
   \label{tab:contract-interface-examples}
   \footnotesize
-  \setlength{\tabcolsep}{0pt}
-  \renewcommand{\arraystretch}{1.0}
-  \fcolorbox{ralBorder}{ralPanel}{%
-    \parbox{0.975\textwidth}{%
-      \centering
-      \textbf{Shared declared tool list in every request}\\[2pt]
-      \texttt{get\_robot\_state} \hspace{1.0em}
-      \texttt{get\_goal\_state} \hspace{1.0em}
-      \texttt{navigate\_to(target\_pose)}\\[2pt]
-      {\scriptsize\textcolor{ralMuted}{\texttt{P0} $\rightarrow$ \texttt{P1} $\rightarrow$ \texttt{P2}: same request context, progressively stronger interface binding.}}
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{1.12}
+  \colorbox{ralPanel}{%
+    \parbox{0.968\textwidth}{%
+      \raggedright
+      \textbf{Shared declared tool list in every request: }
+      \texttt{get\_robot\_state} \hspace{0.35em}\textbar\hspace{0.35em}
+      \texttt{get\_goal\_state} \hspace{0.35em}\textbar\hspace{0.35em}
+      \texttt{navigate\_to(target\_pose)}\\[-1pt]
+      {\scriptsize\textcolor{ralMuted}{binding strength: \texttt{P0} $\rightarrow$ \texttt{P1} $\rightarrow$ \texttt{P2}}}
     }%
   }\\[4pt]
-  \begin{tabular}{@{}m{0.305\textwidth} >{\centering\arraybackslash}m{0.042\textwidth} m{0.305\textwidth} >{\centering\arraybackslash}m{0.042\textwidth} m{0.305\textwidth}@{}}
-    \fcolorbox{ralWarn}{white}{%
-      \parbox[t][5.45cm][t]{\dimexpr0.305\textwidth-2\fboxsep-2\fboxrule\relax}{%
-        \raggedright
-        \textbf{\textcolor{ralP0R0}{P0}} \hfill {\scriptsize under-specified direct action}\\[3pt]
-        {\scriptsize\textbf{Cue:} minimal JSON next action.}\\[5pt]
-        \fcolorbox{ralGrid}{ralPanel}{%
-          \parbox[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-            \ttfamily\scriptsize
-            tool\_name: move\_to\_goal\\
-            arguments: \{\}%
-          }%
-        }\\[6pt]
-        {\scriptsize\textbf{Takeaway:} the declared tools are visible, but the emission is not required to bind itself to that callable namespace. This example is out-of-vocabulary and is not dispatchable as issued under \texttt{R0}.}
-      }%
-    }
-    &
-    \makecell[c]{\textcolor{ralMuted}{\Large$\Rightarrow$}}
-    &
-    \fcolorbox{ralBorder}{white}{%
-      \parbox[t][5.45cm][t]{\dimexpr0.305\textwidth-2\fboxsep-2\fboxrule\relax}{%
-        \raggedright
-        \textbf{\textcolor{ralP1R0}{P1}} \hfill {\scriptsize typed tool-call contract}\\[3pt]
-        {\scriptsize\textbf{Cue:} choose one declared tool and emit \texttt{tool\_name + arguments}.}\\[5pt]
-        \fcolorbox{ralGrid}{ralPanel}{%
-          \parbox[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-            \ttfamily\scriptsize
-            tool\_name: navigate\_to\\
-            arguments.target\_pose:\\
-            (1.0, 0.0, 0.0)%
-          }%
-        }\\[6pt]
-        {\scriptsize\textbf{Takeaway:} the planner names one declared callable tool and supplies its required payload, yielding a dispatchable typed call.}
-      }%
-    }
-    &
-    \makecell[c]{\textcolor{ralMuted}{\Large$\Rightarrow$}}
-    &
-    \fcolorbox{ralBorder}{white}{%
-      \parbox[t][5.45cm][t]{\dimexpr0.305\textwidth-2\fboxsep-2\fboxrule\relax}{%
-        \raggedright
-        \textbf{\textcolor{ralP2R0}{P2}} \hfill {\scriptsize same typed call + \texttt{self\_check}}\\[3pt]
-        {\scriptsize\textbf{Cue:} keep \texttt{tool\_name + arguments}, then add one brief planner-side verification string.}\\[5pt]
-        \fcolorbox{ralGrid}{ralPanel}{%
-          \parbox[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-            \ttfamily\scriptsize
-            tool\_name: navigate\_to\\
-            arguments.target\_pose:\\
-            (1.0, 0.0, 0.0)\\
-            self\_check: target\_pose matches\\
-            the configured goal pose%
-          }%
-        }\\[6pt]
-        {\scriptsize\textbf{Takeaway:} the runtime-callable surface is unchanged from \texttt{P1}; the only added field is a planner-side check string recorded before dispatch.}
-      }%
-    } \\
-  \end{tabular}
+  \begin{tabularx}{0.982\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.15\textwidth} Y Y Y@{}}
+    \toprule
+    \rowcolor{ralPanel}
+    & \textbf{P0 --- Free JSON} & \textbf{P1 --- Typed call} & \textbf{P2 --- Typed call + self-check} \\
+    \midrule
+    Cue
+    & minimal JSON action
+    & choose one declared tool + args
+    & P1 + brief self-check \\
+    \addlinespace[2pt]
+    Example emission
+    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: move\_to\_goal\\arguments: \{\}}
+    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)}
+    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\the configured goal pose} \\
+    \addlinespace[2pt]
+    Runtime effect
+    & may emit undeclared tool; not dispatchable
+    & declared callable + required args; dispatchable
+    & same dispatch surface as P1 + planner-side verification \\
+    \bottomrule
+  \end{tabularx}
 \end{table*}

@@ -86,15 +86,18 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 - Figure 1 remains the frozen manually selected asset and was not redesigned or
   regenerated in this pass.
 - This pass focused on non-Figure-1 manuscript visuals, specifically Table I.
+- This pass replaced the previous card-style Table I redesign with a cleaner
+  matrix-style manuscript table.
 - Table I was intentionally retained as a table-numbered asset rather than
   converted into a formal figure so the manuscript could keep the existing
   figure numbering, table numbering, and intro/setup cross-references stable.
 - The manual `tables/contract_interface_examples.tex` asset was substantially
-  redesigned into a figure-like comparison panel with:
-  - one shared declared-tool header strip
-  - an explicit `P0 -> P1 -> P2` tightening progression
-  - per-contract cards that separate cue, example emission, and runtime
-    takeaway
+  redesigned into a cleaner matrix-style manuscript table with:
+  - one thin shared declared-tool strip
+  - a four-column comparison matrix
+  - row labels for cue, example emission, and runtime effect
+- The design goal was readability and main-paper fit, not decorative figure
+  styling.
 - The redesign touched only the Table I asset and the two short intro/setup
   sentences that frame it; the other main-text figures, tables, and core
   result claims were left unchanged.
