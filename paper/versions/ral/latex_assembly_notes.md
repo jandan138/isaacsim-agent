@@ -6,6 +6,7 @@
 - Keep the anonymous reviewer-facing entry under
   `paper/versions/ral/reviewer_submission/`.
 - Keep Figure 1 frozen and out of scope.
+- Focus this pass on improving Table I / non-Figure-1 manuscript visuals.
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -63,6 +64,13 @@
 - Added one manual manuscript-facing table:
   - `tables/contract_interface_examples.tex`
   - built from saved prompt texts and archived planner traces
+  - retained as `Table I` instead of being converted to a formal figure
+    because keeping the existing table identity avoids figure/table renumbering,
+    caption churn, and new float-order risk in the 8-page RA-L layout
+  - redesigned as a figure-like comparison panel:
+    - shared declared-tool strip at the top
+    - explicit `P0 -> P1 -> P2` tightening cue
+    - three contract cards with cue, monospace emission, and runtime takeaway
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -74,6 +82,10 @@
 
 ## Reproducibility and wording changes
 
+- This pass changed only the Table I asset and the short intro/setup sentences
+  that describe it; the deterministic-planner framing, executor semantics, and
+  other wording clarifications listed below remained in place from the earlier
+  reviewer-facing cleanup work.
 - `sections/setup.tex` now states explicitly that:
   - the planner backend is deterministic by design
   - the empirical unit is the task instance, not i.i.d. stochastic rollout
@@ -94,7 +106,7 @@
     pick-and-place sequence
 - Reviewer-facing internal wording was removed where avoidable in the active
   manuscript.
-- This final cleanup pass also normalized the last small reviewer-facing labels:
+- Earlier reviewer-facing cleanup work also normalized the last small labels:
   - `covered` -> `evaluated`
   - `Main factorial` -> `Main matrix`
   - `Recoverable probes` -> `Recovery probes`
@@ -119,21 +131,20 @@
     success
   - page count:
     `8`
-- Follow-up compile after the final reviewer-facing wording cleanup:
-  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+- Follow-up compile after the Table I redesign:
   - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-  - both completed successfully and remained at `8` pages
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
 - Underfull-box warnings remain in narrow-column prose.
 - Small overfull-box warnings remain in:
-  - `tables/contract_interface_examples.tex`
   - `figures/main_condition_ordering.tex`
   - `figures/invalid_actions_recovery.tex`
-- The compact contract/interface table still fits in the manuscript, but it
-  does not compile perfectly cleanly yet because of that small overfull-box
-  warning.
+- The redesigned Table I now compiles without its previous table-local
+  overfull-box warning, but its larger visual footprint still means float
+  placement should be checked if nearby manuscript text changes again.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

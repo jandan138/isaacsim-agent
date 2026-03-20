@@ -85,26 +85,23 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   submission prep; render-side work is parked for this pass.
 - Figure 1 remains the frozen manually selected asset and was not redesigned or
   regenerated in this pass.
-- Live-manuscript audit outcome for the expert-review checklist:
-  - already in place before this final cleanup:
-    - the compact real contract/interface display
-    - deterministic-planner and fixed-task-set framing
-    - shared `IEEEkeywords`
-    - precise executor and `R1` feedback semantics
-    - Fig. 2 non-color status labels
-  - newly tightened in this pass:
-    - residual reviewer-facing wording in abstract/results/discussion/conclusion
-    - the ROS 2 analogy toward typed interface-definition semantics
-    - remaining figure/table label cleanup such as
-      `covered` -> `evaluated`, `Main factorial` -> `Main matrix`, and
-      `Recoverable probes` -> `Recovery probes`
-    - support-only wording cleanup in `tables/harder_task_summary.tex`
-- The setup section now includes a compact implementation snapshot covering the
-  deterministic local planner backend, the fixed evaluation set, contract and
-  runtime realizations, and executor-visible action semantics.
-- `sections/abstract.tex` now inserts shared `IEEEkeywords`, which compile in
-  both the journal scaffold and the reviewer-facing build.
-- Both manuscript variants were rebuilt successfully in this pass and remain at
-  `8` pages.
+- This pass focused on non-Figure-1 manuscript visuals, specifically Table I.
+- Table I was intentionally retained as a table-numbered asset rather than
+  converted into a formal figure so the manuscript could keep the existing
+  figure numbering, table numbering, and intro/setup cross-references stable.
+- The manual `tables/contract_interface_examples.tex` asset was substantially
+  redesigned into a figure-like comparison panel with:
+  - one shared declared-tool header strip
+  - an explicit `P0 -> P1 -> P2` tightening progression
+  - per-contract cards that separate cue, example emission, and runtime
+    takeaway
+- The redesign touched only the Table I asset and the two short intro/setup
+  sentences that frame it; the other main-text figures, tables, and core
+  result claims were left unchanged.
+- The prior reviewer-facing cleanup items from the previous pass remain in
+  place; this pass did not reopen Figure 1, add experiments, or change the core
+  claim/contribution/finding/limitation layer.
+- After the Table I redesign, both manuscript variants were rebuilt
+  successfully and remain at `8` pages.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

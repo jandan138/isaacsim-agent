@@ -233,3 +233,27 @@
 - Recompiled both manuscript variants successfully after the cleanup and kept
   both at `8` pages.
 - Figure 1 remained frozen and untouched throughout this pass.
+
+## Table I Visual Redesign Pass
+
+- Figure 1 was intentionally frozen again in this pass; the work targeted only
+  non-Figure-1 manuscript visuals.
+- The pass focused on Table I / `tables/contract_interface_examples.tex`, which
+  had been informative but still read like a prose-heavy instruction table.
+- Kept Table I as a table-numbered asset instead of converting it into a formal
+  figure because the figure stack is already stable in the 8-page letter:
+  preserving the table identity avoided renumbering Figure 2--4, disturbing the
+  table sequence, or introducing extra float-order risk in the introduction.
+- Reworked Table I into a figure-like comparison panel with:
+  - one shared declared-tool strip
+  - a visible `P0 -> P1 -> P2` tightening progression
+  - three contract cards that isolate cue, example emission, and runtime
+    takeaway
+- Kept the science fixed:
+  - same declared tool list for all requests
+  - `P0` still shows an undeclared emission
+  - `P1` still shows a dispatchable typed call
+  - `P2` still keeps the same runtime-callable surface and adds only a
+    planner-side `self_check`
+- Recompiled the reviewer-facing and journal variants successfully after the
+  redesign and kept both at `8` pages.
