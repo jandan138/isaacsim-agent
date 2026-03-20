@@ -15,8 +15,10 @@
     `STATUS.md` entry and the matching `2026-03-19` main-session worklogs
   - the corresponding paper/STATUS diff is still present in the working tree
     and appears uncommitted rather than half-finished
-  - this run now preserves that completed paper final-pass batch operationally
-    via git commit and push on `main`
+  - this run preserved that completed paper final-pass batch in local git
+    history as commit `8dc54bb`
+  - push to `origin/main` did not complete because the current shell has no
+    usable GitHub write credentials
 - Completion level:
   - interrupted-session check is complete
   - no resumable broken task was found
@@ -76,6 +78,7 @@
 - Not completed in this run:
   - no new manuscript edits
   - no `Paper author final edit / submission packaging` work yet
+  - remote push of commit `8dc54bb` is still blocked on GitHub authentication
 
 ## Files changed in this run
 
@@ -105,6 +108,12 @@
   - `git add STATUS.md paper/versions/ral/README.md paper/versions/ral/asset_manifest.md paper/versions/ral/figure_table_binding.md paper/versions/ral/figures/main_condition_ordering.tex paper/versions/ral/figures/planner_tool_overhead.tex paper/versions/ral/full_draft_v1_notes.md paper/versions/ral/latex_assembly_notes.md paper/versions/ral/main.pdf paper/versions/ral/reviewer_submission/main.pdf paper/versions/ral/sections/abstract.tex paper/versions/ral/sections/conclusion.tex paper/versions/ral/sections/discussion.tex paper/versions/ral/sections/results.tex paper/versions/ral/tables/contract_interface_examples.tex paper/versions/ral/tables/experimental_design_summary.csv paper/versions/ral/tables/experimental_design_summary.tex paper/versions/ral/tables/harder_task_summary.tex`
   - `git commit -m "Finalize RA-L reviewer pass and record continuity audit"`
   - `git push origin main`
+  - follow-up auth diagnosis:
+    - `git status --short --branch`
+    - `git log --oneline --decorate -n 3`
+    - `git config --show-origin --get-all credential.helper`
+    - `git config --show-origin --get-regexp 'credential\\..*'`
+    - `ssh -o BatchMode=yes -T git@github.com`
 - Artifact verification:
   - `cd paper/versions/ral && pdfinfo main.pdf | rg '^Pages:'`
   - `cd paper/versions/ral/reviewer_submission && pdfinfo main.pdf | rg '^Pages:'`
@@ -118,6 +127,10 @@
   - current tracked diff matches the paper final-pass batch already recorded in
     the previous `STATUS.md`
   - no additional tracked files indicate a separate interrupted task
+- Local preservation:
+  - local commit `8dc54bb` now contains the completed paper final-pass batch
+    plus this continuity audit record
+  - `git status --short --branch` reports `main...origin/main [ahead 1]`
 - Diff hygiene:
   - `git diff --check`
     passed with:
@@ -132,9 +145,19 @@
   - `cd paper/versions/ral/reviewer_submission && pdfinfo main.pdf | rg '^Pages:'`
     returned:
     - `Pages: 8`
+- Push status:
+  - `git push origin main`
+    failed with:
+    - `remote: No anonymous write access.`
+    - `fatal: Authentication failed for 'https://github.com/jandan138/isaacsim-agent.git/'`
+  - `ssh -o BatchMode=yes -T git@github.com`
+    failed with:
+    - `Permission denied (publickey).`
 
 ## Remaining gaps
 
+- GitHub write authentication must be restored before commit `8dc54bb` can be
+  pushed to `origin/main`
 - a human author final pass for wording, anonymization, metadata, and
   submission packaging is still outstanding
 
