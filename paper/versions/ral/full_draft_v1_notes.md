@@ -283,3 +283,31 @@
 - Remaining non-blockers stayed limited to narrow-column underfull warnings,
   the small overfull warnings in Fig. 2 / Fig. 4, and the reviewer-facing
   conference column-balance reminder.
+
+## Table I Three-Card Redesign Pass
+
+- Figure 1 was intentionally frozen again; this redesign targeted only
+  non-Figure-1 manuscript improvement.
+- The redesign was explicitly requested after the earlier final-polish state
+  and intentionally moved Table I from a plain comparison grid to a
+  reviewer-safe figure-like panel.
+- Kept the same table identity:
+  - `table*` asset
+  - label `tab:contract-interface-examples`
+  - insertion in `sections/intro.tex`
+  - same scientific meaning for `P0`, `P1`, and `P2`
+- Reworked the internal layout into:
+  - one subtle declared-tools strip
+  - three horizontally aligned cards for `P0`, `P1`, and `P2`
+  - accent-tinted header bands
+  - light-gray monospace example-emission boxes
+  - short dispatchability blocks
+- Kept the surrounding prose edits minimal:
+  - `records` -> `juxtaposes` in `sections/intro.tex`
+  - `records` -> `juxtaposes` in `sections/setup.tex`
+- Recompiled the reviewer-facing and journal variants successfully after the
+  redesign pass and final sync reruns; both remained at `8` pages.
+- Remaining non-blockers stayed limited to the pre-existing narrow-column
+  underfull warnings, the small overfull warnings in Fig. 2 / Fig. 4, the
+  reviewer-facing conference column-balance reminder, and the expected tradeoff
+  that the code text inside the cards is smaller than in the previous grid.

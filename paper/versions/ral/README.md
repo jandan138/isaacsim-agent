@@ -117,5 +117,19 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   earlier intro/setup framing sentences remained unchanged in this round.
 - A fresh single-pass rebuild of both manuscript variants after the final
   polish follow-up kept both PDFs at `8` pages with stable references.
+- A later user-requested redesign pass intentionally superseded that
+  final-polish state while keeping the same table identity, label, insertion
+  point, and scientific meaning.
+- The current Table I asset is now a reviewer-safe figure-like comparison
+  panel:
+  - one subtle declared-tools strip
+  - three horizontally aligned P0 / P1 / P2 cards
+  - accent-tinted headers with light monospace emission boxes
+  - short dispatchability blocks
+- The redesign still keeps Figure 1 frozen and uses only minimal surrounding
+  prose edits in `sections/intro.tex` and `sections/setup.tex`
+  (`records` -> `juxtaposes`) to match the more figure-like presentation.
+- After the redesign pass and final sync rebuild, both manuscript variants
+  still compile successfully and remain at `8` pages.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

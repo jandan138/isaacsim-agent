@@ -9,6 +9,8 @@
 - Focus this pass on improving Table I / non-Figure-1 manuscript fit.
 - Treat the latest Table I follow-up as a final polish pass, not a redesign
   pass.
+- A later user-requested pass intentionally re-opened Table I as a redesign
+  task while keeping the same scientific content and table identity.
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -80,6 +82,13 @@
     - the shorter requested caption
     - the lower-weight `Declared tools:` note
     - lighter P2 example / dispatchability wording
+  - the later redesign pass kept the same caption, label, and semantics but
+    replaced the internal grid with:
+    - one subtle declared-tools strip
+    - three horizontally aligned P0 / P1 / P2 cards
+    - accent-tinted header bands
+    - light-gray monospace emission boxes
+    - short dispatchability blocks
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -95,6 +104,13 @@
   intro/setup sentences that describe it; the final polish follow-up changed
   only the live Table I asset and left those intro/setup framing sentences
   unchanged.
+- The redesign pass changed the live Table I asset again and made only two
+  surrounding prose updates so the presentation language matched the more
+  figure-like panel:
+  - `sections/intro.tex`
+    - `records` -> `juxtaposes`
+  - `sections/setup.tex`
+    - `records` -> `juxtaposes`
 - The deterministic-planner framing, executor semantics, and other wording
   clarifications listed below remained in place from the earlier
   reviewer-facing cleanup work.
@@ -155,6 +171,12 @@
   - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - both variants completed successfully and remained at `8` pages
+- Redesign pass compile sequence:
+  - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - reran the same pair once to clear a transient label-stability warning
+  - reran the same pair once more after the intro/setup `juxtaposes` sync
+  - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
@@ -167,6 +189,12 @@
   a quieter manuscript comparison table rather than an explanatory panel.
 - The final polish follow-up did not introduce new Table I-local warnings and
   further reduced the top-note and P2-column visual weight on reviewer page 2.
+- The redesign pass preserved page count and introduced no new undefined
+  references or rerun warnings; reviewer page 2 now shows Table I as a
+  restrained figure-like three-card comparison panel.
+- The main residual tradeoff is that the monospace code inside the cards is
+  smaller than in the old grid so the panel can fit beneath the frozen
+  Figure 1 on page 2.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

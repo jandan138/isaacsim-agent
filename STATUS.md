@@ -7,21 +7,115 @@
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `Paper final-edit / submission prep`
 - Milestone state:
-  - this run performed a final polish follow-up on Table I rather than another
-    redesign pass
+  - this run performed an intentional Table I redesign pass after the earlier
+    final-polish follow-up
   - Figure 1 was intentionally frozen and left untouched
   - no new experiments were added
   - Table I remained a table-numbered asset with the same label, insertion
     point, and reviewer-facing anonymity
-  - this run applied and compile-verified the requested minimal final-polish
-    refinements in the live Table I asset
-  - the goal of this pass was minimal reduction and manuscript fit, not
-    decorative styling
+  - this run redesigned the live Table I asset into a reviewer-safe
+    figure-like three-card comparison panel while preserving the same science
+  - the goal of this pass was a restrained figure-like comparison treatment,
+    not a change in claims, examples, or terminology
 - Completion level:
-  - the final Table I polish state is compile-verified
+  - the redesigned Table I state is compile-verified
   - reviewer-facing and journal scaffold PDFs both compile successfully
   - both compiled PDFs remain at `8` pages
-  - manuscript notes, bindings, and status docs are updated for this follow-up
+  - manuscript notes, bindings, and status docs are updated for this redesign
+
+## 2026-03-23 redesign pass
+
+- This redesign pass stayed within the requested boundaries:
+  - read the repository-level and RA-L source-of-truth files before editing
+  - keep Figure 1 frozen
+  - keep Table I as the same manual asset with the same label and insertion
+    path
+  - preserve P0 / P1 / P2 identity, declared-tools meaning, and example
+    semantics
+  - keep the reviewer-facing manuscript anonymous, compilable, and page-stable
+- Redesign implementation:
+  - replaced the internal 4-column grid in
+    `paper/versions/ral/tables/contract_interface_examples.tex` with a
+    reviewer-safe three-card horizontal panel for `P0`, `P1`, and `P2`
+  - added a subtle full-width declared-tools strip above the cards
+  - gave each card:
+    - a short subtitle cue
+    - a light-gray monospace example-emission box
+    - a short dispatchability block
+  - used low-saturation accent treatment only; no new experiments, claims, or
+    terminology were introduced
+  - kept the caption and label intact and made only the minimal surrounding
+    wording edits needed for the more figure-like presentation:
+    - `records` -> `juxtaposes` in
+      `paper/versions/ral/sections/intro.tex`
+    - `records` -> `juxtaposes` in
+      `paper/versions/ral/sections/setup.tex`
+- Commands run in this redesign pass:
+  - source-of-truth and manuscript reads:
+    - `sed -n '1,220p' AGENTS.md`
+    - `sed -n '1,220p' plan.md`
+    - `sed -n '1,220p' STATUS.md`
+    - `sed -n '1,220p' docs/ral_writing_playbook.md`
+    - `sed -n ...` over `paper/versions/ral/README.md`,
+      `paper/versions/ral/figure_table_binding.md`,
+      `paper/versions/ral/preamble_shared.tex`,
+      `paper/versions/ral/tables/contract_interface_examples.tex`,
+      `paper/versions/ral/sections/intro.tex`, and
+      `paper/versions/ral/sections/setup.tex`
+  - compile verification:
+    - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - reran the same pair once after a transient label-stability rerun warning
+    - reran the same pair once more after the `records` -> `juxtaposes`
+      wording sync
+  - page/log/visual checks:
+    - `pdfinfo paper/versions/ral/reviewer_submission/main.pdf | rg '^Pages:'`
+    - `pdfinfo paper/versions/ral/main.pdf | rg '^Pages:'`
+    - `rg -n "Undefined|undefined|Overfull|Underfull|Rerun|Warning: Citation|Warning: Reference|Label\\(s\\) may have changed|Conference Paper" paper/versions/ral/reviewer_submission/main.log paper/versions/ral/main.log`
+    - `cp paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_reviewer_main_table_i_redesign_final.pdf`
+    - `pdftoppm -png -f 2 -singlefile /tmp/ral_reviewer_main_table_i_redesign_final.pdf /tmp/ral_reviewer_page2_table_i_redesign_final`
+    - `view_image /tmp/ral_reviewer_page2_table_i_redesign_final.png`
+- Validation results in this redesign pass:
+  - reviewer-facing build:
+    - success
+    - `Pages: 8`
+  - journal scaffold:
+    - success
+    - `Pages: 8`
+  - reviewer page 2 visual check:
+    - Table I now reads as a restrained figure-like comparison panel rather
+      than a plain appendix-style table
+    - the three-card layout, declared-tools strip, and light code boxes fit
+      below the frozen Figure 1 without changing page count
+  - warning status:
+    - no undefined references, citation warnings, or rerun warnings remain
+    - remaining overfull warnings are still limited to
+      `paper/versions/ral/figures/main_condition_ordering.tex` and
+      `paper/versions/ral/figures/invalid_actions_recovery.tex`
+    - underfull box warnings remain in narrow-column prose
+    - the reviewer-facing conference build still emits the standard last-page
+      column-balance reminder
+    - one non-blocking tradeoff remains: the monospace code inside the cards is
+      smaller at reviewer scale so the redesigned panel can fit below Figure 1
+- Files updated in this redesign pass:
+  - `paper/versions/ral/tables/contract_interface_examples.tex`
+  - `paper/versions/ral/sections/intro.tex`
+  - `paper/versions/ral/sections/setup.tex`
+  - `STATUS.md`
+  - `paper/versions/ral/README.md`
+  - `paper/versions/ral/figure_table_binding.md`
+  - `paper/versions/ral/latex_assembly_notes.md`
+  - `paper/versions/ral/full_draft_v1_notes.md`
+  - `paper/versions/ral/main.pdf`
+  - `paper/versions/ral/reviewer_submission/main.pdf`
+- Agent teaming in this redesign pass:
+  - explorer audit completed and confirmed the redesign-safe boundary while
+    keeping Figure 1 frozen and the table identity stable
+  - worker implementation completed the single-file Table I redesign
+  - reviewer acceptance completed and found no blocking issues
+- Next recommended sub-milestone:
+  - author-facing submission sign-off / packaging only; avoid further Table I
+    redesign unless a new reviewer-facing readability issue appears
 
 ## 2026-03-23 final polish follow-up
 
