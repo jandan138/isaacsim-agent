@@ -2,24 +2,110 @@
 
 ## Current status
 
-- Date: 2026-03-20
+- Date: 2026-03-23
 - Plan source of truth: `plan.md`
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `Paper final-edit / submission prep`
 - Milestone state:
-  - this run refined the previous Table I matrix draft into a more restrained
-    manuscript-style comparison table
+  - this run performed a final polish follow-up on Table I rather than another
+    redesign pass
   - Figure 1 was intentionally frozen and left untouched
   - no new experiments were added
   - Table I remained a table-numbered asset with the same label, insertion
     point, and reviewer-facing anonymity
-  - the goal of this pass was reduction and manuscript fit, not decorative
-    styling
+  - this run applied and compile-verified the requested minimal final-polish
+    refinements in the live Table I asset
+  - the goal of this pass was minimal reduction and manuscript fit, not
+    decorative styling
 - Completion level:
-  - the reduced Table I pass is implemented
+  - the final Table I polish state is compile-verified
   - reviewer-facing and journal scaffold PDFs both compile successfully
   - both compiled PDFs remain at `8` pages
-  - manuscript notes, bindings, and status docs are updated for this pass
+  - manuscript notes, bindings, and status docs are updated for this follow-up
+
+## 2026-03-23 final polish follow-up
+
+- This follow-up stayed within the requested boundaries:
+  - read the listed repository-level and paper-level source-of-truth files
+  - do not modify Figure 1
+  - do not add experiments
+  - do not change Table I's scientific meaning, table identity, label, or
+    4-column matrix structure
+  - keep the reviewer-facing manuscript anonymous, compilable, and page-stable
+- Current-target verification in this follow-up:
+  - confirmed `paper/versions/ral/tables/contract_interface_examples.tex`
+    remains the existing `table*` + `minipage` note + `tabularx` 4-column
+    matrix
+  - confirmed label `tab:contract-interface-examples` remains unchanged
+  - confirmed insertion from `paper/versions/ral/sections/intro.tex` and prose
+    references in `paper/versions/ral/sections/intro.tex` and
+    `paper/versions/ral/sections/setup.tex`
+  - confirmed Figure 1 remained frozen and untouched in this pass
+  - confirmed the live Table I wording now carries only the requested
+    final-polish refinements:
+    - shorter caption with `P1 yields a dispatchable typed call`
+    - lower-weight shared note using `Declared tools:`
+    - compressed P2 example wording ending in `goal pose`
+    - compressed P2 dispatchability wording ending in
+      `+ planner-side check`
+- Commands run in this follow-up:
+  - source-of-truth and manuscript reads:
+    - `sed -n '1,220p' plan.md`
+    - `sed -n '1,240p' STATUS.md`
+    - `sed -n '1,220p' docs/ral_writing_playbook.md`
+    - `sed -n ...` / `rg -n ...` over the listed `paper/shared/*.md`,
+      `paper/versions/ral/*.md`, `paper/versions/ral/sections/*.tex`,
+      `paper/versions/ral/reviewer_submission/main.tex`, and
+      `paper/versions/ral/main.tex`
+  - compile verification:
+    - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - page/log/visual checks:
+    - `pdfinfo paper/versions/ral/reviewer_submission/main.pdf | rg '^Pages:'`
+    - `pdfinfo paper/versions/ral/main.pdf | rg '^Pages:'`
+    - `rg -n "Undefined|undefined|Overfull|Underfull|Rerun|Warning: Citation|Warning: Reference|Label\\(s\\) may have changed|Conference Paper" paper/versions/ral/reviewer_submission/main.log paper/versions/ral/main.log`
+    - `pdftoppm -png -f 2 -singlefile paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_reviewer_page2_table_i_polish`
+    - `view_image /tmp/ral_reviewer_page2_table_i_polish.png`
+- Validation results in this follow-up:
+  - reviewer-facing build:
+    - success
+    - `Pages: 8`
+  - journal scaffold:
+    - success
+    - `Pages: 8`
+  - reviewer page 2 visual check:
+    - shared-tool note reads as a low-key annotation rather than a secondary
+      heading
+    - the shorter caption and lighter P2 wording make the rightmost column feel
+      less dense while preserving the same science
+  - warning status:
+    - no undefined references or citation failures were introduced
+    - remaining overfull warnings are still limited to
+      `paper/versions/ral/figures/main_condition_ordering.tex` and
+      `paper/versions/ral/figures/invalid_actions_recovery.tex`
+    - underfull box warnings remain in narrow-column prose
+    - the reviewer-facing conference build still emits the standard last-page
+      column-balance reminder
+- Files updated in this follow-up:
+  - `paper/versions/ral/tables/contract_interface_examples.tex`
+  - `STATUS.md`
+  - `paper/versions/ral/README.md`
+  - `paper/versions/ral/figure_table_binding.md`
+  - `paper/versions/ral/latex_assembly_notes.md`
+  - `paper/versions/ral/full_draft_v1_notes.md`
+  - `paper/versions/ral/main.pdf`
+  - `paper/versions/ral/reviewer_submission/main.pdf`
+- Agent teaming in this follow-up:
+  - attempted delegated source-of-truth / binding-surface audit slots, but no
+    usable independent subagent output was collected before the main session
+    completed the same audit locally
+  - attempted delegated build verification, but the spawned worker remained at
+    an assigned stub for two wait windows totaling about `55s`
+  - after the second no-progress wait, the main session took over compile
+    verification by exception and completed the reviewer-page visual check
+- Next recommended sub-milestone:
+  - author-facing submission sign-off / packaging only; do not reopen Figure 1
+    or redesign Table I unless a new blocking reviewer-facing issue appears
 
 ## Run context
 

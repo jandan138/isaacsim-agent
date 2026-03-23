@@ -108,5 +108,14 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   before the final one-pass sync compile.
 - After the Table I reduction pass, both manuscript variants were rebuilt
   successfully and remain at `8` pages.
+- A follow-up final polish pass kept Figure 1 frozen and preserved the same
+  Table I structure, label, insertion point, and reviewer-facing anonymity.
+- That follow-up was not a redesign pass: it kept the existing matrix layout
+  and limited the live Table I refinements to the shorter caption, the
+  lower-weight `Declared tools:` note, and lighter P2 wording.
+- The follow-up stayed inside `tables/contract_interface_examples.tex`; the
+  earlier intro/setup framing sentences remained unchanged in this round.
+- A fresh single-pass rebuild of both manuscript variants after the final
+  polish follow-up kept both PDFs at `8` pages with stable references.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

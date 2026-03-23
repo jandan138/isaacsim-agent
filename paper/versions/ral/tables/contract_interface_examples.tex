@@ -1,13 +1,13 @@
 \begin{table*}[!t]
   \centering
-  \caption{Recorded planner outputs under a shared declared tool list. P0 may emit an undeclared action, P1 binds the emission to a dispatchable typed call, and P2 adds only a brief planner-side self-check.}
+  \caption{Recorded planner outputs under a shared declared tool list. P0 may emit an undeclared action, P1 yields a dispatchable typed call, and P2 adds a brief planner-side self-check.}
   \label{tab:contract-interface-examples}
   \small
   \setlength{\tabcolsep}{5pt}
   \renewcommand{\arraystretch}{1.16}
   \begin{minipage}{0.985\textwidth}
-    \raggedright\scriptsize Shared declared tool list: \texttt{get\_robot\_state | get\_goal\_state | navigate\_to(target\_pose)}
-  \end{minipage}\\[3pt]
+    \raggedright\scriptsize Declared tools: \texttt{get\_robot\_state | get\_goal\_state | navigate\_to(target\_pose)}
+  \end{minipage}\\[2pt]
   \begin{tabularx}{0.985\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.18\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
     \toprule
     & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P0 --- Free JSON}\\[-1pt]{\scriptsize minimal action}\end{minipage}
@@ -17,12 +17,12 @@
     Example emission
     & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: move\_to\_goal\\arguments: \{\}\end{minipage}
     & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\end{minipage}
-    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\the configured goal pose\end{minipage} \\
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\goal pose\end{minipage} \\
     \addlinespace[3pt]
     Dispatchability
     & \begin{minipage}[t]{\linewidth}\raggedright undeclared tool possible;\\not dispatchable\end{minipage}
     & \begin{minipage}[t]{\linewidth}\raggedright declared callable +\\required args; dispatchable\end{minipage}
-    & \begin{minipage}[t]{\linewidth}\raggedright same callable surface as P1;\\planner-side verification\end{minipage} \\
+    & \begin{minipage}[t]{\linewidth}\raggedright same call surface as P1;\\+ planner-side check\end{minipage} \\
     \bottomrule
   \end{tabularx}
 \end{table*}

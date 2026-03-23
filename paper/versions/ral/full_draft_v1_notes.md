@@ -262,3 +262,24 @@
   reduction pass, including one extra single-pass compile pair after the
   dispatchability-row fix and a final sync pair after the last Table I
   tightening, and kept both at `8` pages.
+
+## Table I Final Polish Pass
+
+- Figure 1 was intentionally frozen again in this follow-up pass; the work
+  targeted only non-Figure-1 manuscript improvement.
+- This follow-up was a final polish pass on
+  `tables/contract_interface_examples.tex`, not a redesign pass.
+- Kept the existing `table*` + `minipage` note + `tabularx` 4-column matrix,
+  along with the same label and intro insertion point.
+- Limited the live Table I refinements to:
+  - the shorter requested caption
+  - the lower-weight `Declared tools:` note
+  - lighter P2 example wording ending in `goal pose`
+  - lighter P2 dispatchability wording ending in `+ planner-side check`
+- Kept the earlier intro/setup framing sentences unchanged in this follow-up so
+  the final pass stayed inside the live Table I asset.
+- Recompiled the reviewer-facing and journal variants successfully after the
+  final polish follow-up and kept both at `8` pages.
+- Remaining non-blockers stayed limited to narrow-column underfull warnings,
+  the small overfull warnings in Fig. 2 / Fig. 4, and the reviewer-facing
+  conference column-balance reminder.

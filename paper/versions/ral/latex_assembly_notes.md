@@ -7,6 +7,8 @@
   `paper/versions/ral/reviewer_submission/`.
 - Keep Figure 1 frozen and out of scope.
 - Focus this pass on improving Table I / non-Figure-1 manuscript fit.
+- Treat the latest Table I follow-up as a final polish pass, not a redesign
+  pass.
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -73,6 +75,11 @@
     - a 4-column comparison matrix
     - two body rows only: example emission and dispatchability
   - the design goal was reduction and manuscript fit, not decorative styling
+  - the final polish follow-up kept the same layout and limited the remaining
+    Table I refinements to:
+    - the shorter requested caption
+    - the lower-weight `Declared tools:` note
+    - lighter P2 example / dispatchability wording
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -84,9 +91,12 @@
 
 ## Reproducibility and wording changes
 
-- This pass changed only the Table I asset and the short intro/setup sentences
-  that describe it; the deterministic-planner framing, executor semantics, and
-  other wording clarifications listed below remained in place from the earlier
+- The earlier Table I reduction pass changed the Table I asset and the short
+  intro/setup sentences that describe it; the final polish follow-up changed
+  only the live Table I asset and left those intro/setup framing sentences
+  unchanged.
+- The deterministic-planner framing, executor semantics, and other wording
+  clarifications listed below remained in place from the earlier
   reviewer-facing cleanup work.
 - `sections/setup.tex` now states explicitly that:
   - the planner backend is deterministic by design
@@ -141,6 +151,10 @@
   - reran the same single-pass pair once more so the final shared-note and
     intro/setup wording tweaks were synchronized into both PDFs
   - both variants completed successfully and remained at `8` pages
+- Final polish follow-up compile pair:
+  - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
@@ -151,6 +165,8 @@
 - The refined Table I now compiles without its previous table-local overfull-box
   warning; reviewer page 2 was checked after rebuild and the table now reads as
   a quieter manuscript comparison table rather than an explanatory panel.
+- The final polish follow-up did not introduce new Table I-local warnings and
+  further reduced the top-note and P2-column visual weight on reviewer page 2.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.
