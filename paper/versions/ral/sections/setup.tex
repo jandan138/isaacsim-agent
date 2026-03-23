@@ -36,8 +36,8 @@ emit a task-level next action without binding it to the executor's tool
 namespace. P1 uses a typed tool-call contract, requiring the planner to
 choose one exposed tool and provide dispatchable arguments. P2 keeps the same
 typed tool-call contract and adds a brief planner-side self-check before
-emission. Table~\ref{tab:contract-interface-examples} gives one recorded
-planner emission for each of those three contract formats in matrix form.
+emission. Table~\ref{tab:contract-interface-examples} records one planner
+emission for each contract format.
 
 R0 is a bare-dispatch runtime: it does not perform pre-dispatch validation or
 offer a repair path. R1 is a validate-and-retry runtime: it checks the

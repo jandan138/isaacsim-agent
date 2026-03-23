@@ -6,7 +6,7 @@
 - Keep the anonymous reviewer-facing entry under
   `paper/versions/ral/reviewer_submission/`.
 - Keep Figure 1 frozen and out of scope.
-- Focus this pass on improving Table I / non-Figure-1 manuscript visuals.
+- Focus this pass on improving Table I / non-Figure-1 manuscript fit.
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -67,13 +67,12 @@
   - retained as `Table I` instead of being converted to a formal figure
     because keeping the existing table identity avoids figure/table renumbering,
     caption churn, and new float-order risk in the 8-page RA-L layout
-  - the previous card-style redesign was replaced with a cleaner matrix-style
-    manuscript table:
-    - one thin shared declared-tool strip at the top
+  - this pass refined the previous matrix draft into a quieter
+    manuscript-style comparison table:
+    - one low-key shared declared-tool note
     - a 4-column comparison matrix
-    - three compact row labels: cue, example emission, and runtime effect
-  - the design goal was readability and main-paper fit, not decorative figure
-    styling
+    - two body rows only: example emission and dispatchability
+  - the design goal was reduction and manuscript fit, not decorative styling
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -122,22 +121,25 @@
 
 ## Build verification
 
-- Full rebuild, journal scaffold:
-  `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+- Current verification, journal scaffold:
+  `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - compile status:
     success
   - page count:
     `8`
-- Full rebuild, reviewer-facing submission:
-  `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex && bibtex main && pdflatex -interaction=nonstopmode -halt-on-error main.tex && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+- Current verification, reviewer-facing submission:
+  `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - compile status:
     success
   - page count:
     `8`
-- Follow-up compile after the Table I matrix redesign:
+- Follow-up compile after the Table I reduction pass:
   - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
   - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
-  - repeated the same pair once more so labels settled after the Table I edits
+  - reran the same single-pass pair after fixing the dispatchability-row cell
+    wrapping
+  - reran the same single-pass pair once more so the final shared-note and
+    intro/setup wording tweaks were synchronized into both PDFs
   - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
@@ -146,9 +148,9 @@
 - Small overfull-box warnings remain in:
   - `figures/main_condition_ordering.tex`
   - `figures/invalid_actions_recovery.tex`
-- The redesigned Table I now compiles without its previous table-local
-  overfull-box warning; reviewer page 2 was checked after rebuild and the table
-  now reads as a manuscript comparison matrix rather than a card-style panel.
+- The refined Table I now compiles without its previous table-local overfull-box
+  warning; reviewer page 2 was checked after rebuild and the table now reads as
+  a quieter manuscript comparison table rather than an explanatory panel.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

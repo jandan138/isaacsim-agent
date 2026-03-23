@@ -85,26 +85,28 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   submission prep; render-side work is parked for this pass.
 - Figure 1 remains the frozen manually selected asset and was not redesigned or
   regenerated in this pass.
-- This pass focused on non-Figure-1 manuscript visuals, specifically Table I.
-- This pass replaced the previous card-style Table I redesign with a cleaner
-  matrix-style manuscript table.
+- This pass focused on non-Figure-1 manuscript improvement, specifically Table I.
+- This pass refined the previous Table I matrix draft into a more restrained
+  manuscript-style comparison table.
 - Table I was intentionally retained as a table-numbered asset rather than
   converted into a formal figure so the manuscript could keep the existing
   figure numbering, table numbering, and intro/setup cross-references stable.
 - The manual `tables/contract_interface_examples.tex` asset was substantially
-  redesigned into a cleaner matrix-style manuscript table with:
-  - one thin shared declared-tool strip
+  tightened into a quieter manuscript-style comparison table with:
+  - one low-key shared-tool note
   - a four-column comparison matrix
-  - row labels for cue, example emission, and runtime effect
-- The design goal was readability and main-paper fit, not decorative figure
-  styling.
+  - short micro-subtitles under the `P0` / `P1` / `P2` headers
+  - only two body rows: example emission and dispatchability
+- The design goal was reduction and manuscript fit, not decorative styling.
 - The redesign touched only the Table I asset and the two short intro/setup
   sentences that frame it; the other main-text figures, tables, and core
   result claims were left unchanged.
 - The prior reviewer-facing cleanup items from the previous pass remain in
   place; this pass did not reopen Figure 1, add experiments, or change the core
   claim/contribution/finding/limitation layer.
-- After the Table I redesign, both manuscript variants were rebuilt
+- One extra compile pair was needed after the dispatchability-row wrapping fix
+  before the final one-pass sync compile.
+- After the Table I reduction pass, both manuscript variants were rebuilt
   successfully and remain at `8` pages.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

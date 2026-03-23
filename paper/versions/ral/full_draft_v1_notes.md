@@ -234,23 +234,24 @@
   both at `8` pages.
 - Figure 1 remained frozen and untouched throughout this pass.
 
-## Table I Visual Redesign Pass
+## Table I Reduction Pass
 
 - Figure 1 was intentionally frozen again in this pass; the work targeted only
-  non-Figure-1 manuscript visuals.
+  non-Figure-1 manuscript improvement.
 - The pass focused on Table I / `tables/contract_interface_examples.tex`, which
-  had been informative but still read like a prose-heavy instruction table.
+  had improved from the earlier card-style attempt but still read as a fuller,
+  more explanatory matrix than the main paper needed.
 - Kept Table I as a table-numbered asset instead of converting it into a formal
   figure because the figure stack is already stable in the 8-page letter:
   preserving the table identity avoided renumbering Figure 2--4, disturbing the
   table sequence, or introducing extra float-order risk in the introduction.
-- This pass replaced the previous card-style Table I redesign with a cleaner
-  matrix-style manuscript table.
-- Reworked Table I into a compact comparison matrix with:
-  - one thin shared declared-tool strip
+- This pass refined the previous matrix draft into a quieter manuscript-style
+  comparison table.
+- Reworked Table I into a reduced comparison matrix with:
+  - one low-key shared declared-tool note
   - a 4-column matrix (`row label`, `P0`, `P1`, `P2`)
-  - three short row labels: cue, example emission, and runtime effect
-- The goal was readability and main-paper fit, not decorative figure styling.
+  - two body rows only: example emission and dispatchability
+- The goal was reduction and manuscript fit, not decorative styling.
 - Kept the science fixed:
   - same declared tool list for all requests
   - `P0` still shows an undeclared emission
@@ -258,4 +259,6 @@
   - `P2` still keeps the same runtime-callable surface and adds only a
     planner-side `self_check`
 - Recompiled the reviewer-facing and journal variants successfully after the
-  redesign and kept both at `8` pages.
+  reduction pass, including one extra single-pass compile pair after the
+  dispatchability-row fix and a final sync pair after the last Table I
+  tightening, and kept both at `8` pages.

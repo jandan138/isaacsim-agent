@@ -1,39 +1,28 @@
 \begin{table*}[!t]
   \centering
-  \caption{Recorded short-forward navigation traces under a shared declared tool list. \texttt{P0} can emit an undeclared action, \texttt{P1} binds the emission to a dispatchable typed call, and \texttt{P2} adds only a brief planner-side \texttt{self\_check}.}
+  \caption{Recorded planner outputs under a shared declared tool list. P0 may emit an undeclared action, P1 binds the emission to a dispatchable typed call, and P2 adds only a brief planner-side self-check.}
   \label{tab:contract-interface-examples}
-  \footnotesize
-  \setlength{\tabcolsep}{4pt}
-  \renewcommand{\arraystretch}{1.12}
-  \colorbox{ralPanel}{%
-    \parbox{0.968\textwidth}{%
-      \raggedright
-      \textbf{Shared declared tool list in every request: }
-      \texttt{get\_robot\_state} \hspace{0.35em}\textbar\hspace{0.35em}
-      \texttt{get\_goal\_state} \hspace{0.35em}\textbar\hspace{0.35em}
-      \texttt{navigate\_to(target\_pose)}\\[-1pt]
-      {\scriptsize\textcolor{ralMuted}{binding strength: \texttt{P0} $\rightarrow$ \texttt{P1} $\rightarrow$ \texttt{P2}}}
-    }%
-  }\\[4pt]
-  \begin{tabularx}{0.982\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.15\textwidth} Y Y Y@{}}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \renewcommand{\arraystretch}{1.16}
+  \begin{minipage}{0.985\textwidth}
+    \raggedright\scriptsize Shared declared tool list: \texttt{get\_robot\_state | get\_goal\_state | navigate\_to(target\_pose)}
+  \end{minipage}\\[3pt]
+  \begin{tabularx}{0.985\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.18\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
     \toprule
-    \rowcolor{ralPanel}
-    & \textbf{P0 --- Free JSON} & \textbf{P1 --- Typed call} & \textbf{P2 --- Typed call + self-check} \\
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P0 --- Free JSON}\\[-1pt]{\scriptsize minimal action}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P1 --- Typed call}\\[-1pt]{\scriptsize one declared tool + args}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P2 --- Typed call + self-check}\\[-1pt]{\scriptsize same call + brief self-check}\end{minipage} \\
     \midrule
-    Cue
-    & minimal JSON action
-    & choose one declared tool + args
-    & P1 + brief self-check \\
-    \addlinespace[2pt]
     Example emission
-    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: move\_to\_goal\\arguments: \{\}}
-    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)}
-    & \parbox[t]{\linewidth}{\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\the configured goal pose} \\
-    \addlinespace[2pt]
-    Runtime effect
-    & may emit undeclared tool; not dispatchable
-    & declared callable + required args; dispatchable
-    & same dispatch surface as P1 + planner-side verification \\
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: move\_to\_goal\\arguments: \{\}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\the configured goal pose\end{minipage} \\
+    \addlinespace[3pt]
+    Dispatchability
+    & \begin{minipage}[t]{\linewidth}\raggedright undeclared tool possible;\\not dispatchable\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright declared callable +\\required args; dispatchable\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright same callable surface as P1;\\planner-side verification\end{minipage} \\
     \bottomrule
   \end{tabularx}
 \end{table*}
