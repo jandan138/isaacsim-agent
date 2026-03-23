@@ -131,5 +131,13 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
   (`records` -> `juxtaposes`) to match the more figure-like presentation.
 - After the redesign pass and final sync rebuild, both manuscript variants
   still compile successfully and remain at `8` pages.
+- A later restore pass explicitly rejected that latest card-style variant and
+  replaced `tables/contract_interface_examples.tex` with the restrained
+  manuscript-style comparison matrix again.
+- That restore pass kept Figure 1 frozen, did not add experiments, did not
+  change Table I science, and left intro/setup unchanged because the rebuilt
+  manuscript remained coherent without extra wording edits.
+- After the restore pass and final sync rebuild, both manuscript variants still
+  compile successfully and remain at `8` pages.
 - Remaining non-blockers are documented in
   `paper/versions/ral/latex_assembly_notes.md` and `STATUS.md`.

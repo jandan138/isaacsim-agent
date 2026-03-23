@@ -11,6 +11,8 @@
   pass.
 - A later user-requested pass intentionally re-opened Table I as a redesign
   task while keeping the same scientific content and table identity.
+- The latest user-requested pass rejects that card-style redesign and restores
+  the restrained matrix version as the live Table I state.
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -89,6 +91,12 @@
     - accent-tinted header bands
     - light-gray monospace emission boxes
     - short dispatchability blocks
+  - the latest restore pass rejects that three-card treatment and restores the
+    restrained matrix verbatim:
+    - same caption
+    - same label
+    - same two-row body
+    - same low-key declared-tools note
 - Kept the regenerated main-text tables:
   - `tables/experimental_design_summary.tex`
   - `tables/main_outcome_summary.tex`
@@ -111,6 +119,9 @@
     - `records` -> `juxtaposes`
   - `sections/setup.tex`
     - `records` -> `juxtaposes`
+- The latest restore pass changed only the live Table I asset back to the exact
+  restrained matrix and left those surrounding prose lines unchanged because
+  the rebuilt manuscript remained coherent without another wording sync.
 - The deterministic-planner framing, executor semantics, and other wording
   clarifications listed below remained in place from the earlier
   reviewer-facing cleanup work.
@@ -177,6 +188,12 @@
   - reran the same pair once to clear a transient label-stability warning
   - reran the same pair once more after the intro/setup `juxtaposes` sync
   - both variants completed successfully and remained at `8` pages
+- Restore pass compile sequence:
+  - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - reran the same pair once more to clear a transient label-stability warning
+    in the journal scaffold build
+  - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
@@ -195,6 +212,9 @@
 - The main residual tradeoff is that the monospace code inside the cards is
   smaller than in the old grid so the panel can fit beneath the frozen
   Figure 1 on page 2.
+- The latest restore pass removes that card-style tradeoff and returns reviewer
+  page 2 to the quieter restrained comparison matrix; no new undefined
+  references or rerun warnings remain after the final rebuild.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

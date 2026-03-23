@@ -3,67 +3,26 @@
   \caption{Recorded planner outputs under a shared declared tool list. P0 may emit an undeclared action, P1 yields a dispatchable typed call, and P2 adds a brief planner-side self-check.}
   \label{tab:contract-interface-examples}
   \small
-  \begingroup
-  \setlength{\fboxrule}{0.6pt}
-  \newcommand{\contractcard}[5]{%
-    \begin{minipage}[t]{0.318\textwidth}
-      \raggedright
-      {\setlength{\fboxsep}{4pt}%
-      \fcolorbox{#1!45!ralBorder}{white}{%
-        \begin{minipage}[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-          {\setlength{\fboxsep}{6pt}%
-          \colorbox{#1!12}{%
-            \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-              \raggedright
-              \textbf{#2}\\[-1pt]
-              {\scriptsize #3}%
-            }}}%
-          \par\vspace{6pt}
-          {\scriptsize\textbf{Example emission}}\par
-          \vspace{2pt}
-          {\setlength{\fboxsep}{5pt}%
-          \fcolorbox{ralGrid}{ralPanel}{%
-            \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-              \raggedright\ttfamily\scriptsize #4%
-            }}}%
-          \par\vspace{6pt}
-          {\scriptsize\textbf{Dispatchability}}\par
-          \vspace{2pt}
-          {\scriptsize #5}\par
-        \end{minipage}}}
-    \end{minipage}}
+  \setlength{\tabcolsep}{5pt}
+  \renewcommand{\arraystretch}{1.16}
   \begin{minipage}{0.985\textwidth}
-    \raggedright
-    {\setlength{\fboxsep}{5pt}%
-    \fcolorbox{ralBorder}{ralPanel}{%
-      \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-        \raggedright
-        \scriptsize\textbf{Declared tools}\hspace{0.6em}%
-        \texttt{get\_robot\_state | get\_goal\_state | navigate\_to(target\_pose)}%
-      }}}%
-  \end{minipage}
-
-  \vspace{5pt}
-
-  \contractcard
-    {ralP0R0}
-    {P0 --- Free JSON}
-    {minimal action}
-    {tool\_name: move\_to\_goal\\arguments: \{\}}
-    {undeclared tool possible;\\not dispatchable}
-  \hfill
-  \contractcard
-    {ralP1R0}
-    {P1 --- Typed call}
-    {one declared tool + args}
-    {tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)}
-    {declared callable +\\required args; dispatchable}
-  \hfill
-  \contractcard
-    {ralP2R0}
-    {P2 --- Typed call + self-check}
-    {same call + brief self-check}
-    {tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\goal pose}
-    {same call surface as P1;\\+ planner-side check}
-  \endgroup
+    \raggedright\scriptsize Declared tools: \texttt{get\_robot\_state | get\_goal\_state | navigate\_to(target\_pose)}
+  \end{minipage}\\[2pt]
+  \begin{tabularx}{0.985\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.18\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+    \toprule
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P0 --- Free JSON}\\[-1pt]{\scriptsize minimal action}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P1 --- Typed call}\\[-1pt]{\scriptsize one declared tool + args}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\textbf{P2 --- Typed call + self-check}\\[-1pt]{\scriptsize same call + brief self-check}\end{minipage} \\
+    \midrule
+    Example emission
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: move\_to\_goal\\arguments: \{\}\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright\ttfamily\scriptsize tool\_name: navigate\_to\\target\_pose: (1.0, 0.0, 0.0)\\self\_check: target\_pose matches\\goal pose\end{minipage} \\
+    \addlinespace[3pt]
+    Dispatchability
+    & \begin{minipage}[t]{\linewidth}\raggedright undeclared tool possible;\\not dispatchable\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright declared callable +\\required args; dispatchable\end{minipage}
+    & \begin{minipage}[t]{\linewidth}\raggedright same call surface as P1;\\+ planner-side check\end{minipage} \\
+    \bottomrule
+  \end{tabularx}
 \end{table*}

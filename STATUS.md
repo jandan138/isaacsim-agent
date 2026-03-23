@@ -7,21 +7,102 @@
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `Paper final-edit / submission prep`
 - Milestone state:
-  - this run performed an intentional Table I redesign pass after the earlier
-    final-polish follow-up
+  - this run rejected the latest card-style Table I variant and restored the
+    restrained manuscript-style comparison matrix
   - Figure 1 was intentionally frozen and left untouched
   - no new experiments were added
   - Table I remained a table-numbered asset with the same label, insertion
     point, and reviewer-facing anonymity
-  - this run redesigned the live Table I asset into a reviewer-safe
-    figure-like three-card comparison panel while preserving the same science
-  - the goal of this pass was a restrained figure-like comparison treatment,
-    not a change in claims, examples, or terminology
+  - this run restored the exact user-provided matrix text in the live Table I
+    asset and removed the three-card / panel-style layout from the manuscript
+  - the goal of this pass was non-Figure-1 manuscript stabilization, not a new
+    redesign or any change in claims, examples, or terminology
 - Completion level:
-  - the redesigned Table I state is compile-verified
+  - the restored restrained-matrix Table I state is compile-verified
   - reviewer-facing and journal scaffold PDFs both compile successfully
   - both compiled PDFs remain at `8` pages
-  - manuscript notes, bindings, and status docs are updated for this redesign
+  - manuscript notes, bindings, and status docs are updated for this restore
+
+## 2026-03-23 restore pass
+
+- This restore pass stayed within the requested boundaries:
+  - read the repository-level and paper-level source-of-truth files before
+    editing
+  - keep Figure 1 frozen
+  - do not add experiments
+  - do not change Table I scientific meaning, label, insertion point, or
+    reviewer-facing anonymity
+  - reject the latest card-style / panel-style Table I variant
+- Restore implementation:
+  - replaced the entire contents of
+    `paper/versions/ral/tables/contract_interface_examples.tex` with the exact
+    user-provided restrained matrix LaTeX
+  - removed the live three-card / panel-style variant completely
+  - left `sections/intro.tex` and `sections/setup.tex` unchanged because the
+    rebuilt manuscript compiled and read coherently without further wording
+    changes
+- Commands run in this restore pass:
+  - source-of-truth and manuscript reads:
+    - `sed -n '1,220p' plan.md`
+    - `sed -n '1,220p' AGENTS.md`
+    - `sed -n '1,240p' STATUS.md`
+    - `sed -n '1,220p' docs/ral_writing_playbook.md`
+    - `sed -n ...` and `rg -n ...` over the listed `paper/shared/*.md`,
+      `paper/versions/ral/*.md`, `paper/versions/ral/sections/*.tex`,
+      `paper/versions/ral/tables/*.tex`, `paper/versions/ral/figures/*`, and
+      `paper/versions/ral/refs/*`
+  - compile verification:
+    - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - reran the same pair once more to clear a transient label-stability rerun
+      warning in the journal scaffold build
+  - page/log/visual checks:
+    - `pdfinfo paper/versions/ral/reviewer_submission/main.pdf | rg '^Pages:'`
+    - `pdfinfo paper/versions/ral/main.pdf | rg '^Pages:'`
+    - `rg -n "Undefined|undefined|Overfull|Underfull|Rerun|Warning: Citation|Warning: Reference|Label\\(s\\) may have changed|Conference Paper" paper/versions/ral/reviewer_submission/main.log paper/versions/ral/main.log`
+    - `cp paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_reviewer_main_table_i_restore.pdf`
+    - `pdftoppm -png -f 2 -singlefile /tmp/ral_reviewer_main_table_i_restore.pdf /tmp/ral_reviewer_page2_table_i_restore`
+    - `view_image /tmp/ral_reviewer_page2_table_i_restore.png`
+- Validation results in this restore pass:
+  - reviewer-facing build:
+    - success
+    - `Pages: 8`
+  - journal scaffold:
+    - success
+    - `Pages: 8`
+  - reviewer page 2 visual check:
+    - latest card-style variant is gone
+    - Table I is restored to the restrained manuscript-style comparison matrix
+      below the frozen Figure 1
+  - warning status:
+    - no undefined references, citation warnings, or rerun warnings remain
+    - remaining overfull warnings are still limited to
+      `paper/versions/ral/figures/main_condition_ordering.tex` and
+      `paper/versions/ral/figures/invalid_actions_recovery.tex`
+    - underfull box warnings remain in narrow-column prose
+    - the reviewer-facing conference build still emits the standard last-page
+      column-balance reminder
+- Files updated in this restore pass:
+  - `paper/versions/ral/tables/contract_interface_examples.tex`
+  - `STATUS.md`
+  - `paper/versions/ral/README.md`
+  - `paper/versions/ral/figure_table_binding.md`
+  - `paper/versions/ral/latex_assembly_notes.md`
+  - `paper/versions/ral/full_draft_v1_notes.md`
+  - `paper/versions/ral/main.pdf`
+  - `paper/versions/ral/reviewer_submission/main.pdf`
+- Agent teaming in this restore pass:
+  - explorer audit completed and confirmed that the three-card variant should
+    be rejected, Figure 1 should remain frozen, and intro/setup could stay
+    unchanged by default
+  - worker completed the exact full-file replacement for
+    `paper/versions/ral/tables/contract_interface_examples.tex`
+  - reviewer acceptance remains desirable but was not required to proceed with
+    the exact user-directed restoration once builds and screenshot checks
+    passed
+- Next recommended sub-milestone:
+  - author review of the restored reviewer-page screenshot only; avoid further
+    Table I redesign work unless the user explicitly reopens it
 
 ## 2026-03-23 redesign pass
 

@@ -2,14 +2,14 @@
 
 This file records the current reviewer-facing binding state for the RA-L
 artifact stack after the Table I reduction pass, its final polish follow-up,
-and the later three-card redesign pass.
+the later three-card redesign pass, and the final restore-to-matrix pass.
 
 ## Main-text bindings
 
 | Asset | File(s) | Inserted from | Evidence binding | Notes |
 | --- | --- | --- | --- | --- |
 | Figure 1: system overview | `paper/versions/ral/figures/fig1_system_overview_frozen.png` and optional `paper/versions/ral/figures/fig1_system_overview_frozen.pdf`, wrapped by `paper/versions/ral/figures/fig1_system_overview_frozen.tex` | `sections/intro.tex` via `\input{figures/fig1_system_overview_frozen.tex}` | Manually selected frozen asset | Figure 1 stayed frozen by author request and was not redesigned or regenerated in this pass. |
-| Table I: contract/interface examples | `paper/versions/ral/tables/contract_interface_examples.tex` | `sections/intro.tex` | Saved prompt texts from the task configs plus archived planner responses from `results/block_a_navigation_prompt_runtime_expanded_e2e_20260316_py/runs/block-a-navigation-prompt-runtime-expanded-toy-nav-short-forward-easy-empty-stage-a-p0-r0-s0/artifacts/planner_trace.json`, `...-p1-r0-s0/artifacts/planner_trace.json`, and `...-p2-r0-s0/artifacts/planner_trace.json` | Manual manuscript-facing table, retained as a table-numbered asset to avoid renumbering the figure stack. The reduction pass refined the previous matrix draft into a quieter 4-column comparison table, the final polish follow-up lightened only the caption/note/P2 wording, and the current redesign pass reworked the same content into a reviewer-safe figure-like three-card panel while preserving the same science, label, and insertion point. |
+| Table I: contract/interface examples | `paper/versions/ral/tables/contract_interface_examples.tex` | `sections/intro.tex` | Saved prompt texts from the task configs plus archived planner responses from `results/block_a_navigation_prompt_runtime_expanded_e2e_20260316_py/runs/block-a-navigation-prompt-runtime-expanded-toy-nav-short-forward-easy-empty-stage-a-p0-r0-s0/artifacts/planner_trace.json`, `...-p1-r0-s0/artifacts/planner_trace.json`, and `...-p2-r0-s0/artifacts/planner_trace.json` | Manual manuscript-facing table, retained as a table-numbered asset to avoid renumbering the figure stack. The reduction pass refined the previous matrix draft into a quieter 4-column comparison table, the final polish follow-up lightened only the caption/note/P2 wording, the later redesign pass reworked the same content into a reviewer-safe three-card panel, and the current restore pass explicitly rejects that card-style variant and returns the live asset to the restrained comparison matrix while preserving the same science, label, and insertion point. |
 | Table II: experimental design | `paper/versions/ral/tables/experimental_design_summary.{csv,tex}` | `sections/setup.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` plus the focused ablation and harder-manipulation summaries | Full-width reviewer-facing matrix summary. |
 | Figure 2: main condition ordering | `paper/versions/ral/figures/main_condition_ordering.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_master_summary/block_a_master_summary.json` and `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Full-width table-figure hybrid. In-cell counts and `fail` / `recovered` / `clean` labels replace the old repeated success-rate bar panels. |
 | Table III: outcomes | `paper/versions/ral/tables/main_outcome_summary.{csv,tex}` | `sections/results.tex` | Main reported cohorts from final closure, master summary, and harder manipulation | Splits success / invalid / retries away from workload metrics. |
@@ -38,6 +38,11 @@ and the later three-card redesign pass.
   identity, label, and insertion path.
 - The only surrounding wording change required by that redesign was
   `records` -> `juxtaposes` in `sections/intro.tex` and `sections/setup.tex`.
+- The latest restore pass rejects the three-card / panel-style variant and
+  restores the restrained matrix version without changing the evidence binding,
+  table identity, label, or insertion path.
+- That restore pass leaves the current intro/setup wording in place because the
+  rebuilt manuscript compiles and reads coherently without another prose sync.
 
 ## Support-only bindings
 

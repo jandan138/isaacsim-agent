@@ -311,3 +311,24 @@
   underfull warnings, the small overfull warnings in Fig. 2 / Fig. 4, the
   reviewer-facing conference column-balance reminder, and the expected tradeoff
   that the code text inside the cards is smaller than in the previous grid.
+
+## Table I Restore-To-Matrix Pass
+
+- Figure 1 was intentionally frozen again; this pass targeted only
+  non-Figure-1 manuscript improvement.
+- The latest card-style / panel-style Table I variant was explicitly rejected
+  in this pass.
+- Replaced `tables/contract_interface_examples.tex` wholesale with the exact
+  restrained matrix LaTeX provided by the user.
+- Restored the live Table I state to:
+  - one low-key declared-tools note
+  - the 4-column comparison matrix
+  - two body rows only: example emission and dispatchability
+- Kept the surrounding prose unchanged in `sections/intro.tex` and
+  `sections/setup.tex` because the rebuilt manuscript remained coherent without
+  another wording edit.
+- Recompiled the reviewer-facing and journal variants successfully after the
+  restore pass and a final sync rerun; both remained at `8` pages.
+- Remaining non-blockers returned to the pre-existing narrow-column underfull
+  warnings, the small overfull warnings in Fig. 2 / Fig. 4, and the
+  reviewer-facing conference column-balance reminder.
