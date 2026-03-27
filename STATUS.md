@@ -2,26 +2,192 @@
 
 ## Current status
 
-- Date: 2026-03-23
+- Date: 2026-03-27
 - Plan source of truth: `plan.md`
 - Paper-writing source of truth: `docs/ral_writing_playbook.md`
 - Active milestone: `Paper final-edit / submission prep`
 - Milestone state:
-  - this run rejected the latest card-style Table I variant and restored the
-    restrained manuscript-style comparison matrix
-  - Figure 1 was intentionally frozen and left untouched
+  - this run finalized version-control hygiene around the existing Fig. 4
+    layout-cleanup snapshot
+  - the paper-related diffs from 2026-03-26 were kept as the commit target
+    without reopening manuscript content
+  - `.claude/` was assessed as local permissions/session state and excluded
+    from repository tracking via `.gitignore`
+  - the existing `.gitignore` cleanup for `tmp/` was kept
   - no new experiments were added
-  - Table I remained a table-numbered asset with the same label, insertion
-    point, and reviewer-facing anonymity
-  - this run restored the exact user-provided matrix text in the live Table I
-    asset and removed the three-card / panel-style layout from the manuscript
-  - the goal of this pass was non-Figure-1 manuscript stabilization, not a new
-    redesign or any change in claims, examples, or terminology
+  - no new manuscript content changes were introduced beyond repo-hygiene
+    documentation
 - Completion level:
-  - the restored restrained-matrix Table I state is compile-verified
-  - reviewer-facing and journal scaffold PDFs both compile successfully
-  - both compiled PDFs remain at `8` pages
-  - manuscript notes, bindings, and status docs are updated for this restore
+  - the working-tree paper snapshot remains the compile-verified Fig. 4
+    layout-cleanup state from 2026-03-26
+  - both manuscript PDFs were rechecked and remain at `8` pages
+  - `git diff --check` passed with no whitespace or conflict-marker issues
+  - repo-local ignore now covers `.claude/`, so those local files no longer
+    dirty `git status`
+  - the remaining paper non-blockers are still limited to
+    `paper/versions/ral/figures/main_condition_ordering.tex`
+
+## 2026-03-27 worktree cleanup and commit prep pass
+
+- This pass stayed within the requested boundaries:
+  - read the repository-level source-of-truth files before changing tracked
+    files
+  - stay within `Paper final-edit / submission prep`
+  - do not reopen Figure 1, Table I, or the Fig. 4 scientific content
+  - assess unrelated local-state changes instead of guessing
+- Worktree assessment:
+  - retained the paper diff set from the 2026-03-26 Fig. 4 pass as one coherent
+    commit-ready snapshot:
+    - `paper/versions/ral/figures/invalid_actions_recovery.tex`
+    - `paper/versions/ral/README.md`
+    - `paper/versions/ral/figure_table_binding.md`
+    - `paper/versions/ral/full_draft_v1_notes.md`
+    - `paper/versions/ral/latex_assembly_notes.md`
+    - `paper/versions/ral/main.pdf`
+    - `paper/versions/ral/reviewer_submission/main.pdf`
+    - `STATUS.md`
+  - identified `.claude/` as local permissions/session state, not project
+    source:
+    - `settings.local.json` contains machine- and tool-specific permission
+      allowlists
+    - hidden `.efc_*_settings.local.json` files are transient local artifacts
+  - kept the existing `.gitignore` change for `tmp/` and extended it to ignore
+    `.claude/`
+- Commands run in this pass:
+  - source-of-truth and repo-state reads:
+    - `sed -n '1,220p' plan.md`
+    - `sed -n '1,260p' STATUS.md`
+    - `git status --short --branch`
+    - `git log --oneline --decorate -5`
+    - `git rev-list --left-right --count origin/main...HEAD`
+    - `git diff --stat`
+  - local-state inspection:
+    - `git diff -- .gitignore`
+    - `find .claude -maxdepth 3 -type f | sort`
+    - `sed -n '1,200p' .claude/settings.local.json`
+    - `sed -n '1,120p' .claude/.efc_10501268529470227925_10720537536327661533_1773996199959626_settings.local.json`
+    - `sed -n '1,120p' .claude/.efc_10501268529470227925_17348710289381306196_1774005469043529_settings.local.json`
+    - `git check-ignore -v .claude/.efc_10501268529470227925_10720537536327661533_1773996199959626_settings.local.json .claude/settings.local.json`
+  - paper-diff inspection:
+    - `git diff -- STATUS.md paper/versions/ral/README.md paper/versions/ral/figure_table_binding.md paper/versions/ral/figures/invalid_actions_recovery.tex paper/versions/ral/full_draft_v1_notes.md paper/versions/ral/latex_assembly_notes.md`
+  - lightweight validation:
+    - `git diff --check`
+    - `pdfinfo paper/versions/ral/main.pdf | rg '^Pages:'`
+    - `pdfinfo paper/versions/ral/reviewer_submission/main.pdf | rg '^Pages:'`
+- Validation results in this pass:
+  - dirty-path classification:
+    - `.claude/`: local-only, should not be committed
+    - `.gitignore`: repository-worthy cleanup because it ignores both local
+      paper downloads in `tmp/` and the local-only `.claude/` directory
+    - paper-related diffs: consistent with the recorded 2026-03-26 Fig. 4
+      layout-cleanup pass and suitable to commit together
+  - `git diff --check`:
+    - success
+  - manuscript PDF page checks:
+    - `paper/versions/ral/main.pdf`: `Pages: 8`
+    - `paper/versions/ral/reviewer_submission/main.pdf`: `Pages: 8`
+  - ignore verification:
+    - `git check-ignore -v` confirms `.claude/` files are now ignored by the
+      repo-local `.gitignore`
+- Files updated in this pass:
+  - `.gitignore`
+  - `STATUS.md`
+- Agent teaming in this pass:
+  - attempted two explorer audits, one for paper diffs and one for local-state
+    diffs
+  - after repeated worklog checks and soft-timeout waits totaling about
+    `35s` with no subagent output, the main session took over both audits
+    locally by exception
+- Next recommended sub-milestone:
+  - if Fig. 4 already looks acceptable to the author on reviewer page 7, keep
+    manuscript content frozen and move directly to submission packaging
+
+## 2026-03-26 Fig. 4 layout cleanup pass
+
+- This pass stayed within the requested boundaries:
+  - read the repository-level and paper-level source-of-truth files before
+    editing
+  - keep Figure 1 frozen
+  - leave Table I unchanged
+  - do not add experiments
+  - do not change Fig. 4 scientific content, data, caption claim, panel
+    meaning, or legend semantics
+  - keep the reviewer-facing manuscript anonymous, compilable, and page-stable
+- Layout-cleanup implementation:
+  - changed only
+    `paper/versions/ral/figures/invalid_actions_recovery.tex`
+  - rebuilt Panel A into a stricter compact matrix with:
+    - one shared fixed-`R0` subtitle
+    - aligned `Family | P0 | P1 | P2` columns
+    - consistent cell widths and quieter row labels
+  - rebuilt Panel B into a fixed-column runtime grid with:
+    - `Family | Runtime | Outcomes | Outcomes | Retry`
+    - aligned navigation / manipulation blocks
+    - a real retry column instead of floating retry annotations
+    - the `invalid/run fixed at 0.5` semantics moved into the panel subtitle
+    - a single aligned bottom legend row
+  - left `paper/versions/ral/figures/main_condition_ordering.tex`,
+    Figure 1, Table I, and all section prose unchanged
+- Commands run in this pass:
+  - source-of-truth and manuscript reads:
+    - `sed -n '1,220p' plan.md`
+    - `sed -n '1,220p' AGENTS.md`
+    - `sed -n '1,260p' STATUS.md`
+    - `sed -n '1,260p' docs/ral_writing_playbook.md`
+    - `sed -n ...`, `rg --files ...`, and `wc -l ...` over the listed
+      `paper/shared/*.md`, `paper/versions/ral/*.md`,
+      `paper/versions/ral/sections/*`, `paper/versions/ral/figures/*`,
+      `paper/versions/ral/tables/*`, and `paper/versions/ral/refs/*`
+  - compile verification:
+    - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+    - reran the same compile pair during column-width tuning until the
+      figure-local overfull warnings in Fig. 4 were removed
+  - page/log/visual checks:
+    - `pdfinfo paper/versions/ral/reviewer_submission/main.pdf | rg '^Pages:'`
+    - `pdfinfo paper/versions/ral/main.pdf | rg '^Pages:'`
+    - `rg -n "Undefined|undefined|Overfull|Underfull|Rerun|Warning: Citation|Warning: Reference|Label\\(s\\) may have changed|Conference Paper" paper/versions/ral/reviewer_submission/main.log paper/versions/ral/main.log`
+    - `pdftoppm -png -f 7 -l 7 paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_reviewer_fig4_final`
+    - `view_image /tmp/ral_reviewer_fig4_final-7.png`
+- Validation results in this pass:
+  - reviewer-facing build:
+    - success
+    - `Pages: 8`
+  - journal scaffold:
+    - success
+    - `Pages: 8`
+  - reviewer page 7 visual check:
+    - Fig. 4 now reads as a more aligned two-panel mechanism figure
+    - Panel A and Panel B share clearer left edges, column structure, and
+      quieter typography hierarchy
+    - retry values now sit in a fixed column and the legend is an aligned
+      bottom row rather than free-floating swatches
+  - warning status:
+    - no undefined references, citation warnings, or rerun warnings remain
+    - Fig. 4 no longer emits its previous figure-local overfull warning
+    - the remaining overfull warning is still limited to
+      `paper/versions/ral/figures/main_condition_ordering.tex`
+    - underfull box warnings remain in narrow-column prose
+    - the reviewer-facing conference build still emits the standard last-page
+      column-balance reminder
+- Files updated in this pass:
+  - `paper/versions/ral/figures/invalid_actions_recovery.tex`
+  - `STATUS.md`
+  - `paper/versions/ral/README.md`
+  - `paper/versions/ral/figure_table_binding.md`
+  - `paper/versions/ral/latex_assembly_notes.md`
+  - `paper/versions/ral/full_draft_v1_notes.md`
+  - `paper/versions/ral/main.pdf`
+  - `paper/versions/ral/reviewer_submission/main.pdf`
+- Agent teaming in this pass:
+  - explorer audit completed and identified Fig. 4 panel-B geometry as the main
+    cleanup target while keeping Figure 1 and Table I out of scope
+  - reviewer acceptance completed and found no blocking issues; residual risk is
+    limited to compact-but-legible status-box text at single-column RA-L scale
+- Next recommended sub-milestone:
+  - author review of the updated reviewer page 7 / Fig. 4 only; avoid reopening
+    Figure 1, Table I, or the main-paper figure style unless a specific defect
+    remains
 
 ## 2026-03-23 restore pass
 

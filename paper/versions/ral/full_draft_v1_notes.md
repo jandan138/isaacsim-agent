@@ -164,6 +164,33 @@
 - Refreshed the supporting table captions/labels so the tables complement, and
   do not duplicate, the redesigned figures.
 
+## Fig. 4 Layout Cleanup Pass
+
+- Figure 1 was intentionally frozen in this pass.
+- Table I was intentionally left unchanged in this pass.
+- The pass targeted only
+  `paper/versions/ral/figures/invalid_actions_recovery.tex`.
+- Kept the science fixed:
+  - same data
+  - same caption claim
+  - same panel meaning
+  - same legend semantics
+- Rebuilt Fig. 4 around stricter manuscript geometry rather than palette or
+  content changes:
+  - Panel A now uses a compact aligned `Family | P0 | P1 | P2` matrix with one
+    shared fixed-`R0` subtitle
+  - Panel B now uses a fixed `Family | Runtime | Outcomes | Outcomes | Retry`
+    grid
+  - retry values moved into a real column and the legend into one aligned
+    bottom row
+- The goal was geometric alignment and manuscript fit, not infographic-style
+  redesign.
+- Recompiled both manuscript variants successfully after the cleanup and kept
+  both at `8` pages.
+- After the final cleanup compile, the remaining overfull warning returned to
+  the long-standing Fig. 2 item only; Fig. 4 no longer emitted its own
+  figure-local overfull warning.
+
 ## Expert Blocking-Issue Pass
 
 - Added `tables/contract_interface_examples.tex` as a compact

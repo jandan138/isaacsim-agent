@@ -6,13 +6,14 @@
 - Keep the anonymous reviewer-facing entry under
   `paper/versions/ral/reviewer_submission/`.
 - Keep Figure 1 frozen and out of scope.
-- Focus this pass on improving Table I / non-Figure-1 manuscript fit.
-- Treat the latest Table I follow-up as a final polish pass, not a redesign
-  pass.
-- A later user-requested pass intentionally re-opened Table I as a redesign
-  task while keeping the same scientific content and table identity.
-- The latest user-requested pass rejects that card-style redesign and restores
-  the restrained matrix version as the live Table I state.
+- Keep Table I unchanged and out of scope in this pass.
+- Focus this pass on Fig. 4 layout cleanup:
+  - geometric alignment
+  - spacing
+  - consistent box sizes
+  - shared margins
+  - typography hierarchy
+  - legend placement
 - Do not add experiments, invent numbers, or widen the evidence base.
 - Address the expert-review blocking issues around:
   - a concrete contract/interface display
@@ -61,9 +62,14 @@
   - `planner_tool_overhead`
     - consolidated workload comparison with `planner/tool` labels
   - `invalid_actions_recovery`
-    - two-part mechanism figure; the runtime panel now carries explicit text
-      labels inside the colored cells so the distinction does not rely on color
-      alone
+    - two-part mechanism figure; the latest pass keeps the same data and caption
+      claim but rebuilds the geometry into:
+      - a compact top matrix with aligned `Family | P0 | P1 | P2` columns
+      - a fixed bottom runtime grid with `Family | Runtime | Outcomes |
+        Outcomes | Retry`
+      - one aligned bottom legend row
+    - the runtime panel still carries explicit text labels inside the colored
+      cells so the distinction does not rely on color alone
 
 ## Table assembly changes
 
@@ -73,7 +79,8 @@
   - retained as `Table I` instead of being converted to a formal figure
     because keeping the existing table identity avoids figure/table renumbering,
     caption churn, and new float-order risk in the 8-page RA-L layout
-  - this pass refined the previous matrix draft into a quieter
+  - the earlier Table I reduction pass refined the previous matrix draft into a
+    quieter
     manuscript-style comparison table:
     - one low-key shared declared-tool note
     - a 4-column comparison matrix
@@ -122,6 +129,9 @@
 - The latest restore pass changed only the live Table I asset back to the exact
   restrained matrix and left those surrounding prose lines unchanged because
   the rebuilt manuscript remained coherent without another wording sync.
+- The latest Fig. 4 layout-cleanup pass changed only
+  `figures/invalid_actions_recovery.tex`; no section prose, Figure 1 asset, or
+  Table I asset changed in that pass.
 - The deterministic-planner framing, executor semantics, and other wording
   clarifications listed below remained in place from the earlier
   reviewer-facing cleanup work.
@@ -194,13 +204,22 @@
   - reran the same pair once more to clear a transient label-stability warning
     in the journal scaffold build
   - both variants completed successfully and remained at `8` pages
+- Latest Fig. 4 layout-cleanup compile sequence:
+  - `cd paper/versions/ral/reviewer_submission && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - `cd paper/versions/ral && pdflatex -interaction=nonstopmode -halt-on-error main.tex`
+  - reran the same pair during figure-column tuning until
+    `figures/invalid_actions_recovery.tex` no longer emitted a figure-local
+    overfull warning
+  - final reviewer-page visual check:
+    - `pdftoppm -png -f 7 -l 7 paper/versions/ral/reviewer_submission/main.pdf /tmp/ral_reviewer_fig4_final`
+    - `view_image /tmp/ral_reviewer_fig4_final-7.png`
+  - both variants completed successfully and remained at `8` pages
 
 ## Remaining non-blockers
 
 - Underfull-box warnings remain in narrow-column prose.
 - Small overfull-box warnings remain in:
   - `figures/main_condition_ordering.tex`
-  - `figures/invalid_actions_recovery.tex`
 - The refined Table I now compiles without its previous table-local overfull-box
   warning; reviewer page 2 was checked after rebuild and the table now reads as
   a quieter manuscript comparison table rather than an explanatory panel.
@@ -215,6 +234,12 @@
 - The latest restore pass removes that card-style tradeoff and returns reviewer
   page 2 to the quieter restrained comparison matrix; no new undefined
   references or rerun warnings remain after the final rebuild.
+- The latest Fig. 4 layout-cleanup pass similarly introduced no new undefined
+  references or rerun warnings, and reviewer page 7 now shows Fig. 4 as a more
+  aligned manuscript-style two-panel mechanism figure.
+- The main residual Fig. 4 tradeoff is only scale: the status-box text and
+  bottom legend are compact at single-column RA-L size, but they remain
+  legible and did not block reviewer acceptance.
 - The reviewer-facing conference build still emits the standard last-page
   column-balance reminder.
 - Figure 1 itself remains out of scope for this branch.

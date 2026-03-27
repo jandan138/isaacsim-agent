@@ -1,62 +1,76 @@
 \begin{figure}[!t]
   \centering
-  \setlength{\tabcolsep}{4pt}
-  \renewcommand{\arraystretch}{1.15}
-  {\footnotesize\textbf{A. Fixed-\texttt{R0} invalid actions per run}}\par
-  \vspace{2pt}
-  \begin{tabular}{L{1.60cm} *{3}{>{\centering\arraybackslash}p{0.90cm}}}
-    \toprule
-    Family & \textcolor{ralP0R0}{\textbf{P0}} & \textcolor{ralP1R0}{\textbf{P1}} & \textcolor{ralP2R0}{\textbf{P2}} \\
-    \midrule
-      \makecell[l]{Navigation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} \\
-      \makecell[l]{Manipulation\\\scriptsize fixed R0} & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\\scriptsize none} \\
-    \bottomrule
-  \end{tabular}
-  \\[4pt]
-  {\raggedright\scriptsize Typed contracts remove the invalid-action mode in the fixed-\texttt{R0} action-interface slice.\par}
-  \vspace{6pt}
-  \begin{tikzpicture}[x=1cm,y=1cm]
-    \node[anchor=west, font=\footnotesize\bfseries, text=ralSlate] at (0.0,4.2) {B. Fixed-\texttt{P1} runtime outcomes};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.0,3.82) {Family-specific runtime-only slices; right labels show retries/run.};
-    \node[anchor=east, font=\scriptsize\bfseries, text=ralSlate] at (1.85,3.37) {Navigation};
-    \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,3.15) {R0};
-    \draw[draw=ralBorder] (2.00,2.93) rectangle (6.45,3.37);
-    \filldraw[draw=ralBorder, fill=ralPanel] (2.00,2.93) rectangle (4.22,3.37);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,3.15) {\makecell[c]{clean\\1/2}};
-    \filldraw[draw=ralWarn, fill=ralWarn!18] (4.22,2.93) rectangle (6.45,3.37);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,3.15) {\makecell[c]{fail\\1/2}};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,3.15) {retry 0.0};
-    \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,2.53) {R1};
-    \draw[draw=ralBorder] (2.00,2.31) rectangle (6.45,2.75);
-    \filldraw[draw=ralBorder, fill=ralPanel] (2.00,2.31) rectangle (4.22,2.75);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,2.53) {\makecell[c]{clean\\1/2}};
-    \filldraw[draw=ralRepair, fill=ralRepair!18] (4.22,2.31) rectangle (6.45,2.75);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,2.53) {\makecell[c]{recov.\\1/2}};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,2.53) {retry 0.5};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.00,2.15) {invalid/run fixed at 0.5};
-    \node[anchor=east, font=\scriptsize\bfseries, text=ralSlate] at (1.85,1.82) {Manipulation};
-    \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,1.60) {R0};
-    \draw[draw=ralBorder] (2.00,1.38) rectangle (6.45,1.82);
-    \filldraw[draw=ralBorder, fill=ralPanel] (2.00,1.38) rectangle (4.22,1.82);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,1.60) {\makecell[c]{clean\\1/2}};
-    \filldraw[draw=ralWarn, fill=ralWarn!18] (4.22,1.38) rectangle (6.45,1.82);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,1.60) {\makecell[c]{fail\\1/2}};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,1.60) {retry 0.0};
-    \node[anchor=east, font=\scriptsize, text=ralMuted] at (1.85,0.98) {R1};
-    \draw[draw=ralBorder] (2.00,0.76) rectangle (6.45,1.20);
-    \filldraw[draw=ralBorder, fill=ralPanel] (2.00,0.76) rectangle (4.22,1.20);
-    \node[font=\scriptsize, text=ralSlate] at (3.11,0.98) {\makecell[c]{clean\\1/2}};
-    \filldraw[draw=ralRepair, fill=ralRepair!18] (4.22,0.76) rectangle (6.45,1.20);
-    \node[font=\scriptsize, text=ralSlate] at (5.34,0.98) {\makecell[c]{recov.\\1/2}};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (6.57,0.98) {retry 0.5};
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.00,0.60) {invalid/run fixed at 0.5};
-    \filldraw[draw=ralBorder, fill=ralPanel] (0.0,0.22) rectangle (0.28,0.48);
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (0.36,0.35) {clean success};
-    \filldraw[draw=ralRepair, fill=ralRepair!18] (2.0,0.22) rectangle (2.28,0.48);
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (2.36,0.35) {recovered success};
-    \filldraw[draw=ralWarn, fill=ralWarn!18] (4.1,0.22) rectangle (4.38,0.48);
-    \node[anchor=west, font=\scriptsize, text=ralMuted] at (4.46,0.35) {invalid termination};
-  \end{tikzpicture}
+  \begingroup
+  \setlength{\tabcolsep}{3pt}
+  \renewcommand{\arraystretch}{1.16}
+  \newcommand{\ralFigFourStatusBox}[3]{%
+    \tikz[baseline=(box.base)]{
+      \node[
+        draw=#1,
+        fill=#2,
+        minimum width=0.94cm,
+        minimum height=0.46cm,
+        inner sep=1.2pt,
+        align=center,
+        font=\scriptsize,
+        text=ralSlate
+      ] (box) {#3};
+    }%
+  }
+  \newcommand{\ralFigFourLegendItem}[3]{%
+    \tikz[baseline=-0.55ex]{
+      \node[
+        draw=#1,
+        fill=#2,
+        minimum width=0.24cm,
+        minimum height=0.16cm,
+        inner sep=0pt
+      ] {};
+    }%
+    \hspace{0.18em}\scriptsize\textcolor{ralMuted}{#3}%
+  }
+  \begin{minipage}{0.98\columnwidth}
+    \centering
+    {\footnotesize\textbf{A. Fixed-\texttt{R0} invalid actions per run}}\par
+    \vspace{1pt}
+    {\scriptsize\textcolor{ralMuted}{Action-interface slice; both family rows share fixed \texttt{R0}.}}\par
+    \vspace{3pt}
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}L{2.08cm} *{3}{>{\centering\arraybackslash}p{1.02cm}}@{}}
+      \toprule
+      \textbf{Family} & \textcolor{ralP0R0}{\textbf{P0}} & \textcolor{ralP1R0}{\textbf{P1}} & \textcolor{ralP2R0}{\textbf{P2}} \\
+      \midrule
+      Navigation & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\[-1pt]\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\[-1pt]\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\[-1pt]\scriptsize none} \\
+      Manipulation & \cellcolor{ralP0R0!22}\makecell[c]{\textbf{1.0}\\[-1pt]\scriptsize invalid} & \cellcolor{ralP1R0!16}\makecell[c]{\textbf{0.0}\\[-1pt]\scriptsize none} & \cellcolor{ralP2R0!16}\makecell[c]{\textbf{0.0}\\[-1pt]\scriptsize none} \\
+      \bottomrule
+    \end{tabular*}
+    \\[2pt]
+    {\raggedright\scriptsize\textcolor{ralMuted}{Typed contracts remove the invalid-action mode in the fixed-\texttt{R0} action-interface slice.}\par}
+
+    \vspace{6pt}
+    {\footnotesize\textbf{B. Fixed-\texttt{P1} runtime outcomes}}\par
+    \vspace{1pt}
+    {\scriptsize\textcolor{ralMuted}{Runtime-only slice; invalid/run fixed at 0.5 in both families; right column shows retries/run.}}\par
+    \vspace{3pt}
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}L{2.08cm} >{\centering\arraybackslash}p{1.40cm} >{\centering\arraybackslash}p{1.18cm} >{\centering\arraybackslash}p{1.18cm} >{\centering\arraybackslash}p{0.96cm}@{}}
+      \toprule
+      \textbf{Family} & \textbf{Runtime} & \multicolumn{2}{c}{\textbf{Outcomes}} & \textbf{Retry} \\
+      \cmidrule(lr){3-4}
+      Navigation & R0 & \ralFigFourStatusBox{ralBorder}{ralPanel}{clean\\1/2} & \ralFigFourStatusBox{ralWarn}{ralWarn!18}{fail\\1/2} & 0.0 \\
+       & R1 & \ralFigFourStatusBox{ralBorder}{ralPanel}{clean\\1/2} & \ralFigFourStatusBox{ralRepair}{ralRepair!18}{recov.\\1/2} & 0.5 \\
+      \midrule
+      Manipulation & R0 & \ralFigFourStatusBox{ralBorder}{ralPanel}{clean\\1/2} & \ralFigFourStatusBox{ralWarn}{ralWarn!18}{fail\\1/2} & 0.0 \\
+       & R1 & \ralFigFourStatusBox{ralBorder}{ralPanel}{clean\\1/2} & \ralFigFourStatusBox{ralRepair}{ralRepair!18}{recov.\\1/2} & 0.5 \\
+      \bottomrule
+    \end{tabular*}
+
+    \vspace{4pt}
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lll@{}}
+      \ralFigFourLegendItem{ralBorder}{ralPanel}{clean success}
+      & \ralFigFourLegendItem{ralRepair}{ralRepair!18}{recovered success}
+      & \ralFigFourLegendItem{ralWarn}{ralWarn!18}{invalid termination} \\
+    \end{tabular*}
+  \end{minipage}
+  \endgroup
   \caption{Mechanism view. Top: under fixed \texttt{R0}, \texttt{P0} produces one invalid action per run in both families, while \texttt{P1}/\texttt{P2} reduce that to zero. Bottom: under fixed \texttt{P1}, \texttt{R1} turns the invalid half of the runtime-only slice into recovered success in both families, with retries rising from 0.0 to 0.5 per run.}
   \label{fig:invalid-actions-recovery}
 \end{figure}

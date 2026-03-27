@@ -22,6 +22,7 @@ pip-wheel-metadata/
 .DS_Store
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 *~
@@ -39,3 +40,6 @@ results/*
 
 # Local real-asset validation trees
 asset/render_test/grscenes_uid_subset_10/
+
+# Temporary downloads (papers, etc.)
+tmp/

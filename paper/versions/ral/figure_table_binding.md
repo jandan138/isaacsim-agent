@@ -2,7 +2,8 @@
 
 This file records the current reviewer-facing binding state for the RA-L
 artifact stack after the Table I reduction pass, its final polish follow-up,
-the later three-card redesign pass, and the final restore-to-matrix pass.
+the later three-card redesign pass, the final restore-to-matrix pass, and the
+latest Fig. 4 layout-cleanup pass.
 
 ## Main-text bindings
 
@@ -15,19 +16,23 @@ the later three-card redesign pass, and the final restore-to-matrix pass.
 | Table III: outcomes | `paper/versions/ral/tables/main_outcome_summary.{csv,tex}` | `sections/results.tex` | Main reported cohorts from final closure, master summary, and harder manipulation | Splits success / invalid / retries away from workload metrics. |
 | Figure 3: planner/tool overhead | `paper/versions/ral/figures/planner_tool_overhead.{csv,tex}` | `sections/results.tex` | `P1` / `P2` rows from `results/processed/block_a_master_summary/block_a_master_summary.json` plus `results/processed/block_a_manipulation_harder/block_a_manipulation_harder_summary.json` | Consolidated workload comparison with `planner/tool` labels. |
 | Table IV: planner/tool overhead | `paper/versions/ral/tables/planner_tool_overhead_summary.{csv,tex}` | `sections/results.tex` | Main reported cohorts from final closure, master summary, and harder manipulation | Keeps workload cells separate from outcome cells. |
-| Figure 4: invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Two-part mechanism figure: fixed-`R0` invalid-action elimination on top, fixed-`P1` runtime recovery on bottom, with explicit non-color labels inside the runtime panel cells. |
+| Figure 4: invalid actions and recovery | `paper/versions/ral/figures/invalid_actions_recovery.{csv,tex}` | `sections/results.tex` | `results/processed/block_a_prompt_only_ablation/block_a_prompt_only_summary.json` and `results/processed/block_a_runtime_only_ablation/block_a_runtime_only_summary.json` | Two-part mechanism figure: fixed-`R0` invalid-action elimination on top, fixed-`P1` runtime recovery on bottom, with the same science and caption claim as before. The latest pass cleaned only the geometry: a compact top matrix, a fixed-column runtime grid, and an aligned bottom legend. |
 
-## Pass note
+## Pass history note
 
-- Figure 1 stayed frozen and out of scope.
-- This pass focused on non-Figure-1 manuscript improvement and changed only Table
-  I's presentation, not its evidence source.
-- Table I kept its table identity and insertion point in `sections/intro.tex`
-  because converting it into a formal figure would have disturbed the active
-  figure numbering, table numbering, and existing reviewer-facing references.
-- The redesign preserved the existing trace bindings while refining the prior
-  matrix draft into a more restrained manuscript-style comparison table.
-- The redesign goal was reduction and manuscript fit, not decorative styling.
+- Figure 1 stayed frozen and out of scope in the latest pass.
+- The latest pass focused only on Fig. 4 layout cleanup.
+- Table I stayed unchanged and out of scope in the latest pass.
+- Earlier Table I-focused passes changed only Table I's presentation, not its
+  evidence source.
+- Across those Table I-focused passes, Table I kept its table identity and
+  insertion point in `sections/intro.tex` because converting it into a formal
+  figure would have disturbed the active figure numbering, table numbering, and
+  existing reviewer-facing references.
+- The earlier reduction pass refined the prior matrix draft into a more
+  restrained manuscript-style comparison table.
+- The earlier redesign goal was reduction and manuscript fit, not decorative
+  styling.
 - The final polish follow-up was intentionally not another redesign pass; it
   kept the same 4-column matrix and only reduced the caption length, lowered
   the shared-note visual weight, and compressed the P2 wording load.
@@ -43,6 +48,10 @@ the later three-card redesign pass, and the final restore-to-matrix pass.
   table identity, label, or insertion path.
 - That restore pass leaves the current intro/setup wording in place because the
   rebuilt manuscript compiles and reads coherently without another prose sync.
+- The latest Fig. 4 layout-cleanup pass keeps the same evidence binding,
+  scientific content, caption claim, panel meaning, and legend semantics while
+  rebuilding only the figure geometry for tighter alignment and clearer
+  manuscript-style grouping.
 
 ## Support-only bindings
 
