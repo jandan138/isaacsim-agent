@@ -5,18 +5,19 @@
   \footnotesize
   \setlength{\tabcolsep}{5pt}
   \rowcolors{2}{ralPanel}{white}
-  \begin{tabularx}{\textwidth}{L{1.1cm} Y Y Y Y}
+  \begin{tabularx}{\textwidth}{L{1.1cm} Y Y Y Y Y}
     \toprule
-    Cell & \thead{Navigation\\Easy} & \thead{Manipulation\\Easy} & \thead{Navigation\\Harder} & \thead{Manipulation\\Harder} \\
+    Cell & \thead{Navigation\\Easy} & \thead{Manipulation\\Easy} & \thead{Navigation\\Harder} & \thead{Manipulation\\Harder} & \thead{$\Delta$ vs P1\\(tool calls)} \\
     \midrule
-    P0/R0 & 1.0/0.0 & 1.0/0.0 & 1.0/0.0 & 1.0/0.0 \\
-    P0/R1 & 3.82/2.82 & 9.0/8.0 & 6.75/5.75 & 10.67/9.67 \\
-    P1/R0 & 4.82/4.82 & 10.0/10.0 & 7.75/7.75 & 11.67/11.67 \\
-    P1/R1 & 4.82/4.82 & 10.0/10.0 & 7.75/7.75 & 11.67/11.67 \\
-    P2/R0 & 3.82/3.82 & 8.0/8.0 & 6.75/6.75 & 9.67/9.67 \\
-    P2/R1 & 3.82/3.82 & 8.0/8.0 & 6.75/6.75 & 9.67/9.67 \\
+    P0/R0\textsuperscript{$\dagger$} & 1.0/0.0 & 1.0/0.0 & 1.0/0.0 & 1.0/0.0 & --- \\
+    P0/R1 & 3.82/2.82 & 9.0/8.0 & 6.75/5.75 & 10.67/9.67 & --- \\
+    P1/R0 & 4.82/4.82 & 10.0/10.0 & 7.75/7.75 & 11.67/11.67 & 0 \\
+    P1/R1 & 4.82/4.82 & 10.0/10.0 & 7.75/7.75 & 11.67/11.67 & 0 \\
+    P2/R0 & 3.82/3.82 & 8.0/8.0 & 6.75/6.75 & 9.67/9.67 & $-$1.0 to $-$2.0 \\
+    P2/R1 & 3.82/3.82 & 8.0/8.0 & 6.75/6.75 & 9.67/9.67 & $-$1.0 to $-$2.0 \\
     \bottomrule
   \end{tabularx}
   \\[1pt]
-  {\raggedright\scriptsize Cell entries are \emph{planner calls/tool calls per run}.\par}
+  {\raggedright\scriptsize Cell entries are \emph{planner calls/tool calls per run}. The $\Delta$ column shows the per-cohort range of P2 savings relative to P1.\\
+  $\dagger$ P0/R0 reports 0.0 tool calls because all runs fail at the planner stage (invalid action); no tool is dispatched.\par}
 \end{table*}

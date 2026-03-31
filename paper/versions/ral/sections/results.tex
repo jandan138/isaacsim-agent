@@ -7,13 +7,12 @@ ablations, and finally the harder-task check.
 
 The main effect is a stable qualitative ordering across navigation easy,
 tabletop manipulation easy, harder navigation, and harder manipulation. In
-each slice, P0/R0 is the weakest cell. Pairing the same under-specified
-contract with R1 changes the outcome: P0/R1 succeeds where P0/R0 fails, while
-P1/R0, P1/R1, P2/R0, and P2/R1 remain strong. The same ordering holds
-across both task families and persists as tasks become harder. Because the
-planner backend and exposed task executors are deterministic by design, each
-cell is interpreted as a descriptive comparison over a fixed cohort of task
-instances rather than as an estimate from repeated stochastic rollouts.
+each slice, P0/R0 is the weakest cell: it fails on all tasks (0/11 navigation
+easy, 0/3 manipulation easy, 0/4 harder navigation, 0/3 harder manipulation),
+with every run producing an invalid action. Pairing the same under-specified
+contract with R1 changes the outcome: P0/R1 succeeds on all tasks (11/11,
+3/3, 4/4, 3/3) through recovery after one retry per run. P1/R0, P1/R1,
+P2/R0, and P2/R1 all succeed on every task with zero invalid actions.
 
 \input{figures/main_condition_ordering.tex}
 \input{tables/main_outcome_summary.tex}
@@ -31,8 +30,8 @@ validation. Invalid-action failures are concentrated in the P0 cells, showing
 that loose task-level verbs are brittle at the planner/executor boundary. Once
 the planner is forced into a typed tool namespace, the dominant failure mode
 disappears in the evaluated fixed-R0 ablation. Within the successful
-structured conditions, P2 matches P1 on success while showing lower
-planner/tool overhead across the evaluated \texttt{P1} versus \texttt{P2}
+structured conditions, P2 matches P1 on success while showing fewer
+planner/tool calls across the evaluated \texttt{P1} versus \texttt{P2}
 comparisons.
 Table~\ref{tab:planner-tool-overhead-summary} isolates that workload
 comparison so the manuscript can report it without overloading the outcome
@@ -48,14 +47,22 @@ evidence of a separate success mechanism.
 
 \subsection{Action-Interface and Runtime-Only Ablations}
 
-The targeted ablations use different easy-task subsets: the runtime-only slice
-deliberately includes recoverable invalid-first-action probes under fixed P1,
-whereas the action-interface ablation uses clean easy tasks under fixed R0.
-Together they isolate the two design axes within the same execution-design
-framing.
+The targeted ablations use different easy-task subsets: the runtime-only
+\emph{repair-probe cohort} deliberately includes recoverable
+invalid-first-action probes under fixed P1, whereas the action-interface
+ablation uses clean easy tasks under fixed R0. The repair-probe cohort
+was pre-specified from the easy-task pool using a single inclusion
+criterion: tasks known to elicit a recoverable invalid-first-action
+emission under P1/R0 (one navigation task and one manipulation task per
+family). Together they isolate the two
+design axes within the same execution-design framing.
 
 With the contract fixed at P1, moving from R0 to R1 raises success from
 2/4 to 4/4 across two navigation tasks and two tabletop manipulation tasks.
+This slice is intentionally constructed to stress-test recoverable
+invalid-first-action cases; the 2/4 to 4/4 result should be interpreted as
+evidence that R1 can repair this specific failure class, not as a general
+runtime benefit estimate.
 The mechanism is recovery, not suppression: invalid-action runs remain 2
 under both runtimes, but successful invalid-action recoveries rise from 0 to
 2 once validation and one retry are enabled. The same direction appears in
@@ -103,7 +110,7 @@ non-dispatchable-to-corrected transition.
 
 \subsection{Harder-Task Robustness}
 
-The harder-task slices increase planner/tool overhead without changing the
+The harder-task slices increase planner/tool call counts without changing the
 condition ordering. In harder navigation, the easy-slice ranking is preserved,
 while successful cells require roughly three additional planner or tool calls
 per run. In harder tabletop manipulation, P0/R0 fails on all 3/3 tasks,

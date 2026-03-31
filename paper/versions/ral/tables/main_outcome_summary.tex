@@ -9,14 +9,14 @@
     \toprule
     Cell & \thead{Navigation\\Easy} & \thead{Manipulation\\Easy} & \thead{Navigation\\Harder} & \thead{Manipulation\\Harder} \\
     \midrule
-    P0/R0 & 0/11; 1.0; 0.0 & 0/3; 1.0; 0.0 & 0/4; 1.0; 0.0 & 0/3; 1.0; 0.0 \\
-    P0/R1 & 11/11; 1.0; 1.0 & 3/3; 1.0; 1.0 & 4/4; 1.0; 1.0 & 3/3; 1.0; 1.0 \\
-    P1/R0 & 11/11; 0.0; 0.0 & 3/3; 0.0; 0.0 & 4/4; 0.0; 0.0 & 3/3; 0.0; 0.0 \\
-    P1/R1 & 11/11; 0.0; 0.0 & 3/3; 0.0; 0.0 & 4/4; 0.0; 0.0 & 3/3; 0.0; 0.0 \\
-    P2/R0 & 11/11; 0.0; 0.0 & 3/3; 0.0; 0.0 & 4/4; 0.0; 0.0 & 3/3; 0.0; 0.0 \\
-    P2/R1 & 11/11; 0.0; 0.0 & 3/3; 0.0; 0.0 & 4/4; 0.0; 0.0 & 3/3; 0.0; 0.0 \\
+    P0/R0 & 0/11; 1.0; 0.0 \scriptsize[fail] & 0/3; 1.0; 0.0 \scriptsize[fail] & 0/4; 1.0; 0.0 \scriptsize[fail] & 0/3; 1.0; 0.0 \scriptsize[fail] \\
+    P0/R1 & 11/11; 1.0; 1.0 \scriptsize[recov.] & 3/3; 1.0; 1.0 \scriptsize[recov.] & 4/4; 1.0; 1.0 \scriptsize[recov.] & 3/3; 1.0; 1.0 \scriptsize[recov.] \\
+    P1/R0 & 11/11; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] & 4/4; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] \\
+    P1/R1 & 11/11; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] & 4/4; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] \\
+    P2/R0 & 11/11; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] & 4/4; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] \\
+    P2/R1 & 11/11; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] & 4/4; 0.0; 0.0 \scriptsize[clean] & 3/3; 0.0; 0.0 \scriptsize[clean] \\
     \bottomrule
   \end{tabularx}
   \\[1pt]
-  {\raggedright\scriptsize Cell entries are \emph{success; invalid/run; retry/run}.\par}
+  {\raggedright\scriptsize Cell entries are \emph{success; invalid/run; retry/run} followed by overall status: [fail] = no runs succeeded, [recov.] = all succeeded via runtime recovery, [clean] = all succeeded without recovery.\par}
 \end{table*}

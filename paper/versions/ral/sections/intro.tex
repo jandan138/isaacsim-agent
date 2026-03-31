@@ -16,7 +16,7 @@ backend scale and benchmark breadth. We therefore ask a narrower
 robotics-systems question: when the simulator setting and task families are
 held fixed, how much do planner-to-executor contract design and lightweight
 runtime validation affect invalid actions, recovery, success, and
-planner/tool overhead?
+planner/tool call counts?
 
 We study two task families in Isaac Sim: language-conditioned navigation and
 tabletop manipulation. The matrix compares three contract variants: an
@@ -41,17 +41,18 @@ lessons rather than new-model or benchmark claims.
 This paper makes three contributions:
 
 \begin{enumerate}
-\item It presents a controlled Isaac Sim study that isolates two execution-design
-axes, planner-to-executor contract design and lightweight runtime
-validation, across navigation and tabletop manipulation tasks.
-\item It provides evidence that typed tool-call contracts reduce invalid actions
-relative to an under-specified direct-action contract, while runtime
-validation with a single retry converts recoverable invalid-first actions
-into successful executions in both covered task families.
-\item It extracts a compact architectural lesson from the tested setup: contract
-design, runtime validation, and a brief planner-side self-check are separate
-architectural choices that shape reliability and planner/tool overhead without
-changing the underlying task matrix.
+\item It presents a controlled Isaac Sim boundary study that isolates two
+execution-design axes, planner-to-executor contract design and lightweight
+runtime validation, across navigation and tabletop manipulation tasks.
+\item It provides evidence within the evaluated task matrix that typed
+tool-call contracts reduce invalid actions relative to an under-specified
+direct-action contract, while runtime validation with a single retry
+converts recoverable invalid-first actions into successful executions in
+both covered task families.
+\item It extracts a compact architectural lesson from the tested Isaac Sim
+setup: contract design, runtime validation, and a brief planner-side
+self-check are separate architectural choices that shape reliability and
+planner/tool call counts without changing the underlying task matrix.
 \end{enumerate}
 
 Fig.~\ref{fig:system-overview} summarizes the evaluated boundary: a task

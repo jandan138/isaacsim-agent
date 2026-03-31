@@ -31,9 +31,9 @@
   }
   \begin{minipage}{0.98\columnwidth}
     \centering
-    {\footnotesize\textbf{A. Fixed-\texttt{R0} invalid actions per run}}\par
+    {\footnotesize\textbf{A. Fixed-\texttt{R0} invalid actions per run} {\scriptsize($n{=}2$ families)}}\par
     \vspace{1pt}
-    {\scriptsize\textcolor{ralMuted}{Action-interface slice; both family rows share fixed \texttt{R0}.}}\par
+    {\scriptsize\textcolor{ralMuted}{Action-interface slice: the contract prompt is varied (\texttt{P0}/\texttt{P1}/\texttt{P2}) while the runtime is held at \texttt{R0} (no recovery), isolating the effect of typed contracts on invalid-action rates.}}\par
     \vspace{3pt}
     \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}L{2.08cm} *{3}{>{\centering\arraybackslash}p{1.02cm}}@{}}
       \toprule
@@ -47,9 +47,9 @@
     {\raggedright\scriptsize\textcolor{ralMuted}{Typed contracts remove the invalid-action mode in the fixed-\texttt{R0} action-interface slice.}\par}
 
     \vspace{6pt}
-    {\footnotesize\textbf{B. Fixed-\texttt{P1} runtime outcomes}}\par
+    {\footnotesize\textbf{B. Fixed-\texttt{P1} runtime outcomes} {\scriptsize($n{=}2$ families)}}\par
     \vspace{1pt}
-    {\scriptsize\textcolor{ralMuted}{Runtime-only slice; invalid/run fixed at 0.5 in both families; right column shows retries/run.}}\par
+    {\scriptsize\textcolor{ralMuted}{Runtime-only slice: the contract is held at \texttt{P1} while the runtime is varied (\texttt{R0}/\texttt{R1}), isolating runtime recovery; invalid/run fixed at 0.5 in both families; right column shows retries/run.}}\par
     \vspace{3pt}
     \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}L{2.08cm} >{\centering\arraybackslash}p{1.40cm} >{\centering\arraybackslash}p{1.18cm} >{\centering\arraybackslash}p{1.18cm} >{\centering\arraybackslash}p{0.96cm}@{}}
       \toprule
@@ -71,6 +71,6 @@
     \end{tabular*}
   \end{minipage}
   \endgroup
-  \caption{Mechanism view. Top: under fixed \texttt{R0}, \texttt{P0} produces one invalid action per run in both families, while \texttt{P1}/\texttt{P2} reduce that to zero. Bottom: under fixed \texttt{P1}, \texttt{R1} turns the invalid half of the runtime-only slice into recovered success in both families, with retries rising from 0.0 to 0.5 per run.}
+  \caption{Mechanism view from two compact ablation slices ($n{=}4$ task instances each, drawn from both navigation and manipulation families). \textbf{A} (action-interface slice): under fixed \texttt{R0}, \texttt{P0} produces one invalid action per run in both families, while \texttt{P1}/\texttt{P2} reduce that to zero. \textbf{B} (runtime-only slice): under fixed \texttt{P1}, \texttt{R1} turns the invalid half of the runtime-probed runs into recovered success in both families, with retries rising from 0.0 to 0.5 per run.}
   \label{fig:invalid-actions-recovery}
 \end{figure}

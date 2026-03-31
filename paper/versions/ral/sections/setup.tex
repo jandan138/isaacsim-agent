@@ -9,7 +9,7 @@ manipulation family contains tabletop tasks that require object identification,
 grasping, transfer, and placement. The main comparison uses a shared easy
 slice plus one harder slice per family, letting us test whether additional task
 burden changes the qualitative ordering or mainly amplifies planner/tool
-overhead.
+call counts.
 
 All conditions share the same high-level handoff:
 
@@ -57,6 +57,19 @@ foundation-model API. Given the current task state, exposed tools, and any
 retry message, it emits one JSON action per planner call; there are therefore
 no temperature, top-$p$, or rollout-sampling settings in this evaluation.
 
+Crucially, the three contract conditions separate two distinct design
+axes. P0 versus P1 isolates \\emph{action-interface specification}
+under a fixed action-selection policy: both conditions share the same
+planner decision logic, task-state input, tool registry, and planning
+strategy; only the serialization format and dispatch interface change.
+P2 adds one bounded planner-side self-check on top of the same typed
+interface used by P1, so the P1-versus-P2 comparison isolates a
+\\emph{planner-side deliberation step} rather than a second interface
+change.
+Planner instructions for all three contracts are included in the
+supplementary material and public repository so that readers can verify
+this separation.
+
 P0 realizes a direct-action JSON contract, P1 realizes typed tool JSON, and
 P2 keeps the same typed tool JSON while adding a planner-side
 \texttt{self\_check} string. The planner request already exposes the valid tool
@@ -90,10 +103,19 @@ free-form code execution.
 
 Success rate is the primary task outcome. An invalid action is an emitted
 action or tool call that violates the active contract and therefore cannot be
-dispatched as issued. A recovery is a run that contains an invalid action but
+dispatched as issued --- concretely, a non-dispatchable schema violation such
+as an unknown tool name or missing required argument. This is distinct from a
+semantically wrong but schema-valid action (e.g., a valid
+\texttt{navigate\_to} call with an incorrect target pose), which passes
+dispatch but produces an incorrect outcome, and from a task failure, which
+denotes any run that does not reach the task-complete state regardless of
+cause. In the structured contract conditions (P1, P2), no
+semantically-wrong-but-schema-valid actions were observed in the reported
+matrix; all failures in those conditions were task-complete successes.
+A recovery is a run that contains an invalid action but
 still ends successfully after runtime handling. Retries capture the extra
 repair work used in R1. Planner calls and tool calls together define
-planner/tool overhead, which is the paper's efficiency proxy.
+planner/tool call counts, which is the paper's efficiency proxy.
 
 The planner backend is deterministic by design, so the empirical unit is the
 task instance under a specified condition rather than repeated stochastic

@@ -5,16 +5,16 @@
   \footnotesize
   \setlength{\tabcolsep}{4pt}
   \rowcolors{2}{ralPanel}{white}
-  \begin{tabularx}{\textwidth}{L{2.2cm} L{1.5cm} L{1.9cm} L{2.6cm} >{\centering\arraybackslash}p{0.9cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.1cm} Y}
+  \begin{tabularx}{\textwidth}{L{2.2cm} L{1.5cm} L{1.9cm} L{2.6cm} >{\centering\arraybackslash}p{1.3cm} >{\centering\arraybackslash}p{1.1cm} Y}
     \toprule
-    Comparison & Family & Slice & Varying axes & Tasks & Runs/cell & Total & Purpose \\
+    Comparison & Family & Slice & Varying axes & Tasks (= runs/cell) & Total runs & Purpose \\
     \midrule
-    Main matrix & Navigation & Easy & P0/P1/P2 x R0/R1 & 11 & 11 & 66 & Main ordering \\
-    Main matrix & Manipulation & Easy & P0/P1/P2 x R0/R1 & 3 & 3 & 18 & Main ordering \\
-    Main matrix & Navigation & Harder & P0/P1/P2 x R0/R1 & 4 & 4 & 24 & Harder robustness \\
-    Main matrix & Manipulation & Harder & P0/P1/P2 x R0/R1 & 3 & 3 & 18 & Harder robustness \\
-    Action-interface ablation & Mixed & Easy shared subset & P0/P1/P2 at fixed R0 & 4 & 4 & 12 & Contract mechanism \\
-    Runtime-only ablation & Mixed & Recovery probes & R0/R1 at fixed P1 & 4 & 4 & 8 & Runtime recovery \\
+    Main matrix & Navigation & Easy & P0/P1/P2 x R0/R1 & 11 & 66 & Main ordering \\
+    Main matrix & Manipulation & Easy & P0/P1/P2 x R0/R1 & 3 & 18 & Main ordering \\
+    Main matrix & Navigation & Harder & P0/P1/P2 x R0/R1 & 4 & 24 & Harder robustness \\
+    Main matrix & Manipulation & Harder & P0/P1/P2 x R0/R1 & 3 & 18 & Harder robustness \\
+    Action-interface ablation & Mixed & Easy shared subset & P0/P1/P2 at fixed R0 & 4 & 12 & Contract mechanism \\
+    Runtime-only ablation & Mixed & Recovery probes & R0/R1 at fixed P1 & 4 & 8 & Runtime recovery \\
     \bottomrule
   \end{tabularx}
 \end{table*}

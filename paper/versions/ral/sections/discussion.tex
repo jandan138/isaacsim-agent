@@ -33,7 +33,7 @@ to the executor interface
 The P2 pattern suggests a second, narrower lesson. In the evaluated
 comparisons, a
 brief planner-side self-check leaves the success profile unchanged while
-reducing planner/tool overhead. The bounded interpretation is not that
+showing fewer planner/tool calls. The bounded interpretation is not that
 self-checks are universally best, but that contract design and runtime design
 remain separable design choices once the callable interface is explicit.
 
@@ -49,14 +49,12 @@ The runtime-only ablation is especially specific: it is designed around
 recoverable invalid-first-action probes, so its strongest claim is about
 lightweight repair at that boundary.
 
-The empirical frame is also descriptive rather than inferential. The planner
-backend and task executors are deterministic by design, and the study evaluates
-a fixed task set rather than repeated stochastic rollouts. The manuscript
-therefore does not treat confidence intervals or significance tests as the
-right summary for this comparison.
+As noted in the setup, the empirical frame is descriptive rather than
+inferential; the deterministic backend and fixed task set preclude
+confidence intervals or significance tests.
 
 These limits still allow a concrete systems conclusion. In the tested setting,
 planner-to-executor contracts and lightweight runtime safeguards materially
-change invalid actions, recovery, and planner/tool overhead. The next empirical
+change invalid actions, recovery, and planner/tool call counts. The next empirical
 extension should preserve the same explicit boundary while widening scenes,
 backends, and execution stacks.

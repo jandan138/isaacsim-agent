@@ -1,0 +1,11 @@
+{
+  "current_round": 2,
+  "last_score": 8,
+  "status": "completed",
+  "timestamp": "2026-03-31T21:30:00",
+  "rounds": [
+    {"round": 0, "score": 5, "verdict": "Almost"},
+    {"round": 1, "score": 8, "verdict": "Almost"},
+    {"round": 2, "score": 8, "verdict": "Almost (very close to Yes)"}
+  ]
+}

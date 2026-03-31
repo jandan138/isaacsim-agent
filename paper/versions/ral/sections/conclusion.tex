@@ -1,8 +1,8 @@
 \section{Conclusion}
 
-This paper studies how planner-to-executor contract design and runtime
-validation shape embodied-agent execution in Isaac Sim. In the fixed task
-matrix studied here, under-specified direct-action handoffs fail at the
+This paper presents a controlled Isaac Sim boundary study of how
+planner-to-executor contract design and runtime validation shape
+embodied-agent execution. In the fixed task matrix studied here, under-specified direct-action handoffs fail at the
 planner/executor boundary, typed tool calls remove that failure mode in the
 fixed-R0 slice, and validate-and-retry recovers the recoverable invalid-first-action
 cases.
@@ -10,9 +10,10 @@ cases.
 The failure analysis shows that the dominant errors are contract violations,
 not generic task collapse. Explicit contracts prevent those failures at
 the source, runtime validation repairs some that remain, and a brief
-self-check can reduce planner/tool overhead within an already strong contract.
+self-check can reduce planner/tool call counts within an already strong contract.
 Because the planner backend is deterministic, these are descriptive
-task-instance comparisons rather than stochastic rollout estimates. Within that
-scope, the practical implication is to make the callable interface explicit,
-validate it before dispatch, and treat planner-side self-checks as an
-efficiency-oriented refinement rather than a separate success mechanism.
+task-instance comparisons rather than stochastic rollout estimates. Within the
+tested Isaac Sim setting, the practical implication is to make the callable
+interface explicit, validate it before dispatch, and treat planner-side
+self-checks as an efficiency-oriented refinement rather than a separate
+success mechanism.
