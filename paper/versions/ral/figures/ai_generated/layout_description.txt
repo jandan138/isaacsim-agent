@@ -1,0 +1,85 @@
+Here is the OPTIMIZED LAYOUT DESCRIPTION for your IEEE RA-L/CVPR-style pipeline figure. This specification ensures a high-end academic aesthetic, strictly avoiding unpolished or overly flashy elements, while highlighting the paper's core scientific contribution (the controlled study axes).
+
+---
+
+# OPTIMIZED LAYOUT SPECIFICATION
+
+## Canvas Overview
+*   **Aspect Ratio:** 2.2:1 (Ultra-wide, ideal for IEEE `figure*` full-width 2-column span)
+*   **Resolution Target:** 2400px width × 1100px height.
+*   **Background:** Clean White (#FFFFFF).
+*   **Font:** Arial or Helvetica (Sans-serif). Main titles bold 24pt, sub-labels regular 18pt, arrow labels italic 16pt.
+
+---
+
+## 1. Optimized Component Positions
+The figure is divided into two main horizontal tiers: Top (60% height) and Bottom (40% height).
+
+### Top Tier: Main Pipeline (Y-center: 30%)
+Arranged sequentially from Left to Right along a single horizontal axis.
+*   **Node 1 (Task Input):** `X: 5%` — Width: 10%. Green (#10B981) gradient. Vertically split interior showing two tiny icons (Map for Navigation, Table for Tabletop).
+*   **Node 2 (Planner):** `X: 20%` — Width: 12%. Blue (#2563EB) gradient. Sub-label smaller, placed at the bottom inside the box.
+*   **Node 3 (Contract Variant):** `X: 38%` — Width: 18%. (Manipulated Variable 1). Taller than Nodes 1 & 2. Contains three vertically stacked internal rounded rectangles (P0, P1, P2) spanning the full width of the parent box.
+*   **Node 4 (Runtime Policy):** `X: 62%` — Width: 15%. (Manipulated Variable 2). Same height as Node 3. Contains two vertically stacked internal rectangles (R0, R1).
+*   **Node 5 (Isaac Sim Executor):** `X: 82%` — Width: 12%. Purple (#7C3AED) gradient.
+*   **Node 6 (Metrics):** `X: 95%` — Width: 8%. Orange (#EA580C) gradient.
+
+### Bottom Tier: Environment Insets (Y-center: 75%)
+Split evenly into two panels, separated by a distinct central gap.
+*   **Left Inset (Navigation):** `X: 5% to 48%`. Top half shows the 2D grid/path graphic. Bottom half shows the horizontal failure-repair trace.
+*   **Right Inset (Tabletop):** `X: 52% to 95%`. Top half shows 3D-like (but flat vector) workspace graphic. Bottom half shows the horizontal failure-repair trace.
+
+---
+
+## 2. Grouping Strategy & Visual Hierarchy
+
+To immediately communicate the **Controlled Study** framing in under 5 seconds:
+*   **Fixed Elements (Nodes 1, 2, 5, 6):** Standard rounded corners (8px radius). Colored headers with semi-transparent matching bodies (e.g., 100% opacity top bar for title, 15% opacity body for sub-labels).
+*   **Manipulated Variables Group (Nodes 3 & 4):**
+    *   Wrap Node 3 and Node 4 together inside a subtle, light-gray dashed bounding box.
+    *   Label this bounding box at the top center: *"Axes of Evaluation (Manipulated Variables)"* in bold, dark gray text.
+    *   The internal rows inside Node 3 (P0, P1, P2) should be distinctly colored: P0 (Soft Red/Warm), P1 (Soft Blue/Cool), P2 (Soft Green/Neutral).
+    *   The internal rows inside Node 4 (R0, R1) should be colored in escalating shades of slate gray/blue to denote complexity.
+
+---
+
+## 3. Arrow Routing (Zero Crossing Strategy)
+
+All main arrows sit on the primary horizontal center-line of the top tier.
+*   **Style:** 6px stroke width, dark gray (#333333), solid lines, massive & sharp triangular arrowheads (width: 15px, length: 20px).
+*   **Labels:** Floating slightly *above* the arrows, sans-serif italic, #4B5563 (medium gray).
+
+**Exact Paths:**
+1.  **Task → Planner:** Straight right from center-right of Task to center-left of Planner. Label: *task instruction*.
+2.  **Planner → Contract Variant:** Straight right. Label: *action request*.
+3.  **Contract Variant → Runtime Policy:** Straight right (spanning the gap inside the bounding box). Label: *typed/untyped action*.
+4.  **Runtime Policy → Isaac Sim Executor:** Straight right. Label: *validated action*.
+5.  **Isaac Sim Executor → Metrics:** Straight right. Label: *outcome*.
+6.  **Loopback Arrow (Runtime → Planner):**
+    *   *Path:* Originates from the **bottom-center edge** of Node 4 (Runtime Policy). Drops down vertically by 40px (entering the empty space between the Top and Bottom tiers). Turns 90-degrees left, runs horizontally under Node 3 (Contract Variant). Turns 90-degrees up, terminating with an arrowhead into the **bottom-center edge** of Node 2 (Planner).
+    *   *Style:* 4px stroke width, dashed line.
+    *   *Label:* Centered on the horizontal bottom segment: *"retry (R1 only)"*.
+
+---
+
+## 4. Sub-component Detailing (Failure-Repair Traces)
+
+The bottom insets require internal horizontal trace arrows. To prevent visual clutter, these traces should look like "blocks" pointing to each other, distinct from the main architectural arrows.
+
+**Trace Layout (Left to Right within each Inset):**
+1.  **Attempt Box:** Red background (#FEE2E2), dark red text. Label: "move_to_goal" / "move_object".
+2.  *Arrow:* Short gray arrow.
+3.  **System State Box:** Gray background (#F3F4F6). Label: "non-dispatchable".
+4.  *Arrow:* Short gray arrow.
+5.  **Policy Action Box:** Gray background (#F3F4F6). Label: "R1 retry".
+6.  *Arrow:* Short gray arrow.
+7.  **Success Box:** Green background (#D1FAE5), dark green text. Label: "navigate_to" / "scripted_pick_place".
+
+---
+
+## 5. Summary of Visual Polish Rules for NeurIPS/CVPR Aesthetics
+
+*   **No Drop Shadows:** Use a 1px solid border (#E5E7EB) around elements instead of drop shadows to create depth. This guarantees clean printing.
+*   **Gradients:** If used, restrict to a vertical 90-degree linear gradient within the exact same hue. For example, the Blue Planner box goes from `#3B82F6` at the top to `#2563EB` at the bottom. **No cross-color gradients.**
+*   **Alignment:** Nodes 1, 2, 5, and 6 must be perfectly top-aligned. Nodes 3 and 4 are taller but share the same vertical center line as the rest.
+*   **Padding:** Ensure at least 30px of negative space between the loopback arrow and the title text of the bottom-tier insets. White space is critical for academic diagram legibility.

@@ -1,0 +1,108 @@
+As a CVPR/NeurIPS figure reviewer, I have analyzed your layout. Your baseline specification is exceptionally strong—particularly the "zero-crossing" routing strategy and the explicit framing of the manipulated variables. 
+
+However, to guarantee acceptance and praise at top-tier venues (where reviewers scrutinize visual clarity, accessibility, and professional typesetting), **three critical upgrades are required:**
+1. **Resolution-to-Scale Correction:** At 2400px width, an 8px border radius is practically invisible (a sharp 90-degree angle). Radii and line weights must be proportionally scaled.
+2. **Colorblind Accessibility:** The Red/Green trace boxes in the bottom tier must be adjusted to colorblind-safe hues (e.g., Vermillion/Bluish-Green), a strict NeurIPS/CVPR standard.
+3. **LaTeX Integration:** Typography must include standard sub-figure labels `(a)` and `(b)` and utilize math mode for variables to match the surrounding paper text.
+
+Here is your **ENHANCED OPTIMIZED LAYOUT SPECIFICATION** ready for rendering.
+
+---
+
+# 🏆 ENHANCED LAYOUT SPECIFICATION (CVPR/NeurIPS Standard)
+
+## Canvas & Global Typography
+*   **Aspect Ratio & Dimensions:** 2.2:1 Ultra-wide. Output strictly as Vector (PDF/SVG). Raster staging resolution: `2400px width × 1100px height`.
+*   **Background:** Clean White (`#FFFFFF`) with zero watermarks or gridlines.
+*   **Typography Hierarchy:** Sans-serif (Helvetica, Arial, or LaTeX equivalent like CM Sans). 
+    *   Panel Labels `(a)` and `(b)`: **Bold 32pt**.
+    *   Main Node Titles: **Bold 24pt**.
+    *   Sub-labels / Math Variables: Regular 18pt (Use italicized serif for math components, e.g., $\mathcal{P}_0$).
+    *   Arrow Labels: *Italic 16pt*, centered over the arrows.
+*   **Corner Radii:** `24px` for main nodes, `12px` for sub-components (scaled appropriately for a 2400px canvas).
+
+---
+
+## 1. Top Tier: Main Pipeline `(a) System Architecture`
+*Y-center axis: 30% of canvas height. Perfectly top-aligned.*
+
+*   **(Label):** Place `(a) System Architecture` at `X: 2%, Y: 5%` in bold.
+*   **Node 1 (Task Input):** `X: 5%` | Width: 10%.
+    *   *Color:* Accessible Green (`#059669`). Subtle 90° vertical gradient (100% top to 85% opacity bottom).
+    *   *Content:* Split horizontally. Top: Title. Bottom: Two clean vector line-art icons (Map for Navigation, Table for Tabletop). Stroke weight `4px`.
+*   **Node 2 (Planner):** `X: 20%` | Width: 12%.
+    *   *Color:* Deep Blue (`#2563EB`). 
+    *   *Content:* Title at top. Sub-label smaller, flush-bottom inside the box.
+*   **Node 3 (Contract Variant):** `X: 38%` | Width: 18%. *(Manipulated Variable 1)*
+    *   *Design:* 20% taller than Nodes 1 & 2. 
+    *   *Content:* Three vertically stacked internal rounded rectangles spanning the full width minus a 15px margin.
+    *   *Internal Colors:* $\mathcal{P}_0$ (Warm/Soft Vermillion `#E15759`), $\mathcal{P}_1$ (Cool/Soft Cyan `#4E79A7`), $\mathcal{P}_2$ (Neutral/Soft Sage `#59A14F`). 
+*   **Node 4 (Runtime Policy):** `X: 62%` | Width: 15%. *(Manipulated Variable 2)*
+    *   *Design:* Matches Node 3 height.
+    *   *Content:* Two internal rectangles. $\mathcal{R}_0$ (Light Slate `#94A3B8`), $\mathcal{R}_1$ (Dark Slate `#475569`) denoting ascending complexity.
+*   **Node 5 (Isaac Sim Executor):** `X: 82%` | Width: 12%.
+    *   *Color:* Purple (`#7C3AED`). 
+*   **Node 6 (Metrics):** `X: 95%` | Width: 8%.
+    *   *Color:* Orange (`#EA580C`). 
+
+**Grouping Strategy (The "Science" Focus):**
+*   Wrap Node 3 and Node 4 inside a bounding box: `4px` dashed line (`#9CA3AF`), background filled with `2%` Gray (`#F8FAFC`).
+*   Top-center label overlapping the bounding box line: **"Axes of Evaluation (Manipulated Variables)"** (Bold, Dark Gray `#374151`, encased in a solid white pill-box to break the dashed line).
+
+---
+
+## 2. Bottom Tier: Environment Insets `(b) Failure-Repair Traces`
+*Y-center axis: 75% of canvas height. Evenly split into two panels with a 4% central gap.*
+
+*   **(Label):** Place `(b) Controlled Environments & Traces` at `X: 2%, Y: 52%` in bold.
+*   **Left Inset (Navigation):** `X: 5% to 48%`.
+    *   *Top Half:* 2D grid/path graphic (flat isometric vector, strictly no 3D shading/shadows).
+    *   *Bottom Half:* Horizontal trace (see styling below).
+*   **Right Inset (Tabletop):** `X: 52% to 95%`.
+    *   *Top Half:* Flat vector representation of robotic workspace.
+    *   *Bottom Half:* Horizontal trace.
+
+---
+
+## 3. Arrow Routing & Typographic Spacing
+*All arrows must maintain a `10px` offset padding from the nodes they connect to (do not let the arrowheads touch the node borders).*
+
+*   **Main Flow Style:** `8px` stroke width (thick and bold), Dark Gray (`#333333`), solid lines. 
+*   **Arrowheads:** Sharp, oversized isosceles triangles (Width: `24px`, Length: `32px`).
+*   **Labels:** Floating `15px` above the arrows, sans-serif italic, `#4B5563`. 
+
+**Paths:**
+1.  **Task → Planner:** Label: *task instruction*
+2.  **Planner → Contract Variant:** Label: *action request*
+3.  **Contract Variant → Runtime Policy:** *(Spans inside the dashed box)*. Label: *typed/untyped action*
+4.  **Runtime Policy → Isaac Sim Executor:** Label: *validated action*
+5.  **Isaac Sim Executor → Metrics:** Label: *outcome*
+6.  **Zero-Crossing Loopback (Runtime → Planner):**
+    *   *Style:* `5px` stroke width, strictly dashed (`12px` dash, `8px` gap).
+    *   *Path:* Down `60px` from bottom-center of Node 4 → Left to horizontal center of Node 2 → Up into bottom-center of Node 2. (This routing utilizes the negative space perfectly).
+    *   *Label:* Centered on horizontal segment: *"retry ($\mathcal{R}_1$ only)"*.
+
+---
+
+## 4. Sub-component Detailing (Failure-Repair Trace Stylization)
+To prevent clashing with architectural arrows, use **Chevron-style continuous blocks** or **minimalist flowchart nodes** for traces.
+
+**Trace Layout (Left to Right sequence):**
+1.  **Attempt Box:** Accessible Red/Vermillion background (`#FFD8D8`), text `#990000`. 1px border. Label: `move_to_goal`
+2.  *Connector:* Thick, stubby gray arrow (`12px` stroke, `#D1D5DB`).
+3.  **State Box:** Light Gray (`#F3F4F6`), text `#374151`. Label: `non-dispatchable`
+4.  *Connector:* Stubby gray arrow.
+5.  **Policy Box:** Blue-Tinted Gray (`#E0F2FE`), text `#0369A1`. Label: `$\mathcal{R}_1$ retry`
+6.  *Connector:* Stubby gray arrow.
+7.  **Success Box:** Accessible Green/Teal background (`#D1F4E0`), text `#006633`. Label: `navigate_to`
+
+*(All trace box texts should be rendered in a monospaced font like `Courier` or `Consolas` to denote programmatic actions, contrasting nicely with the sans-serif architectural labels).*
+
+---
+
+## 5. Strict Rendering Rules for CVPR/NeurIPS Compliance
+
+1.  **NO Drop Shadows or Glows:** Use standard 1px solid borders (`#E5E7EB` or `#CBD5E1`) to delineate elements. Academic figures must rely on stroke weight and color contrast to create hierarchy, ensuring perfect rendering in both print and PDF formats.
+2.  **Gradient Discipline:** Monochromatic gradients only (e.g., `#3B82F6` to `#2563EB`). Absolutely no cross-color/rainbow gradients. The opacity shift should be barely perceptible—just enough to add premium finish without looking "web 2.0".
+3.  **Perfect Alignment:** Top tiers share an exact horizontal midline. Internal components ($\mathcal{P}_0$-$\mathcal{P}_2$ and $\mathcal{R}_0$-$\mathcal{R}_1$) must be distributed with mathematical precision (equal padding top/bottom and between).
+4.  **Whitespace/Negative Space:** The space between the bottom of the loopback arrow and the `(b)` label must be an absolute minimum of `40px` to prevent visual suffocation. Maintain breathing room.

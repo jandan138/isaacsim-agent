@@ -1,0 +1,13 @@
+{
+  "iterations": [
+    {"version": 1, "score": 6, "issues": "aspect ratio too square, text too small, arrows too thin"},
+    {"version": 2, "score": 7, "issues": "better aspect ratio and text, arrows still could be thicker"},
+    {"version": 3, "score": 7.5, "issues": "improved overall, text sharpness and trace styling need work"},
+    {"version": 4, "score": 8, "issues": "solid improvement, minor text rendering and spacing"},
+    {"version": 5, "score": 8.5, "issues": "near ceiling of AI image gen for text-heavy diagrams, accepted as best"}
+  ],
+  "final_version": "figure_v5.jpeg",
+  "final_score": 8.5,
+  "accepted": true,
+  "reason": "MAX_ITERATIONS reached, v5 is the best quality achievable with current Gemini image generation"
+}
