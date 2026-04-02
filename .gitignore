@@ -32,6 +32,18 @@ results/*
 !results/README.md
 !results/schema.md
 
+# LaTeX compilation artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.out
+*.toc
+*.lof
+*.lot
+
 # Local validation outputs and temp files
 *.log
 *.tmp
