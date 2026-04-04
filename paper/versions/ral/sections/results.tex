@@ -39,7 +39,9 @@ table. Figure~\ref{fig:planner-tool-overhead} compresses those
 comparisons into one workload mark per row because planner and tool counts are
 equal within the plotted \texttt{P1}/\texttt{P2} pairs. We interpret that
 pattern as a workload association within already-strong contracts, not as
-evidence of a separate success mechanism.
+evidence of a separate success mechanism. Note that planner/tool call counts
+are a discrete workload proxy, not a latency, token-cost, or wall-clock
+measurement.
 
 \input{figures/planner_tool_overhead.tex}
 
@@ -50,11 +52,10 @@ evidence of a separate success mechanism.
 The targeted ablations use different easy-task subsets: the runtime-only
 \emph{repair-probe cohort} deliberately includes recoverable
 invalid-first-action probes under fixed P1, whereas the action-interface
-ablation uses clean easy tasks under fixed R0. The repair-probe cohort
-was pre-specified from the easy-task pool using a single inclusion
-criterion: tasks known to elicit a recoverable invalid-first-action
-emission under P1/R0 (one navigation task and one manipulation task per
-family). Together they isolate the two
+ablation uses clean easy tasks under fixed R0. The repair-probe cohort was pre-specified from the easy-task pool
+using a single inclusion criterion: tasks known to elicit a recoverable
+invalid-first-action emission under P1/R0. This yielded four tasks in
+total: two navigation and two tabletop-manipulation tasks. Together they isolate the two
 design axes within the same execution-design framing.
 
 With the contract fixed at P1, moving from R0 to R1 raises success from
@@ -90,23 +91,25 @@ while the fixed-P1 runtime panel shows R1 converting the invalid half of the
 runtime-only slice from failure into recovery, with retries rising from 0.0 to
 0.5 per run.
 
-The failure traces identify the dominant P0 failure mode. In navigation, failing
-P0 runs repeatedly emit the unsupported tool name
-\texttt{move\_to\_goal}; in tabletop manipulation, they emit
-\texttt{move\_object}. Both are semantically plausible task verbs, but the
-executor accepts \texttt{navigate\_to} and
-\texttt{scripted\_pick\_place\_step} instead. R1 helps because the runtime
-parses the JSON, checks the proposed tool against the exposed task namespace,
-enforces the required argument set, and then returns the literal validation
-error string to the planner before one retry. The retry does not expose a
-stronger second schema than P1: the same tool list and required arguments were
-already available on the first pass. Instead, it turns a terminating handoff
-failure into a recoverable one by appending a concrete error such as
-\texttt{unknown tool: move\_to\_goal} or
-\texttt{unknown tool: move\_object} to the repair instruction.
+The failure traces identify the dominant P0 failure mode. In navigation,
+failing P0 runs emit \texttt{move\_to\_goal}; in tabletop manipulation, they
+emit \texttt{move\_object}. Both are semantically plausible task verbs, but
+the executor only dispatches \texttt{navigate\_to} and
+\texttt{scripted\_pick\_place\_step}. As described in Section~III-C, these
+are injected boundary probes rather than stochastic foundation-model errors.
+R1 helps because the runtime parses the JSON, validates the tool name and
+required arguments, and returns the literal error string before one retry.
+The retry therefore does not introduce a richer second-pass schema; it turns
+a terminating handoff failure into a recoverable one.
 Figure~\ref{fig:system-overview} includes compact navigation and manipulation
 traces for exactly that
 non-dispatchable-to-corrected transition.
+
+\paragraph{Isaac Sim cross-backend check.}
+Two navigation instances were also evaluated under the minimal Isaac Sim
+stage. The same ordering holds: P0/R0 fails, P0/R1 recovers, P1/P2 succeed
+with zero invalid actions. This provides a limited cross-backend check that the same boundary
+ordering also appears in the physics-backed slice.
 
 \subsection{Harder-Task Robustness}
 

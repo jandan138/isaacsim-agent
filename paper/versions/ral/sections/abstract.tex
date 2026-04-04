@@ -1,7 +1,11 @@
 \begin{abstract}
-We present a controlled Isaac Sim boundary study that isolates
+We present a controlled study that isolates
 planner-to-executor contract design and lightweight runtime
-validation for embodied-agent execution. Across navigation and tabletop manipulation, we compare an
+validation for embodied-agent execution. The main factorial comparisons use a
+lightweight deterministic reference backend; a minimal Isaac Sim navigation
+slice provides a limited qualitative cross-backend check that the same
+ordering appears under physics-backed execution.
+Across navigation and tabletop manipulation, we compare an
 under-specified direct-action contract (P0), a typed tool-call contract (P1),
 and the same typed contract with a brief self-check (P2), under bare dispatch
 (R0) or validation with a single retry (R1). In the fixed-runtime
@@ -10,13 +14,12 @@ P1/R0 and P2/R0 succeed on all four and eliminate invalid actions. In the
 fixed-contract runtime-only ablation, validation plus one retry raises success
 from 2/4 to 4/4 by converting invalid-first-action runs into successful
 recoveries. Across the broader fixed task matrix, structured contracts remain
-reliable across both task families, and P2 is associated with fewer
-planner/tool calls than P1 in the evaluated comparisons. Because the
-planner backend is deterministic by design, the reported comparisons are
-descriptive over a fixed evaluation matrix rather than stochastic rollout
-estimates. These results identify explicit action interfaces and lightweight
-runtime validation as practical architectural design choices within
-the tested Isaac Sim setting and evaluated task matrix.
+reliable in both task families, and P2 is associated with fewer
+planner/tool calls than P1 in the evaluated comparisons. Because the planner is deterministic, the results are descriptive
+comparisons over fixed task instances rather than stochastic rollout
+estimates. These results identify explicit action
+interfaces and lightweight runtime validation as practical architectural
+design choices within the tested setting and evaluated task matrix.
 \end{abstract}
 
 \begin{IEEEkeywords}

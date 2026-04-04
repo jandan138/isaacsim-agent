@@ -14,7 +14,7 @@ Code as Policies, and ProgPrompt
 \cite{ahn2022saycan,liang2022codeaspolicies,singh2022progprompt}. That
 literature makes planner quality visible, but it often leaves less room to
 isolate what happens at the boundary between planner output and dispatch. Our
-paper is narrower: it holds the Isaac Sim setting fixed and studies how
+paper is narrower: it holds the simulator setting fixed and studies how
 planner-to-executor contract design changes invalid actions, recovery, success,
 and planner/tool call counts.
 
@@ -55,7 +55,7 @@ they expose long-horizon execution difficulty, safety failures, or integrated
 planning-and-control behavior across larger task sets or evaluation matrices
 \cite{yang2025embodiedbench,lu2025isbench,kachaev2025mindmotionaligned}. By
 varying only the action interface and runtime validation policy within a fixed
-Isaac Sim setting, we instead use a narrower study design to attribute
+simulator setting, we instead use a narrower study design to attribute
 differences in invalid actions, recovery, success, and planner/tool call counts to
 explicit execution-design choices. This complements broader embodied-agent
 evaluations rather than competing with them.

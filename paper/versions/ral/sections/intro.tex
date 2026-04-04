@@ -18,8 +18,9 @@ held fixed, how much do planner-to-executor contract design and lightweight
 runtime validation affect invalid actions, recovery, success, and
 planner/tool call counts?
 
-We study two task families in Isaac Sim: language-conditioned navigation and
-tabletop manipulation. The matrix compares three contract variants: an
+We study two task families---language-conditioned navigation and
+tabletop manipulation---using a lightweight deterministic reference backend for
+the main factorial comparisons and a minimal Isaac Sim navigation slice for qualitative cross-backend checking. The matrix compares three contract variants: an
 under-specified direct-action contract (P0), a typed tool-call contract
 (P1), and the same typed contract with a brief self-check (P2). It also
 compares two runtime variants: bare dispatch (R0) and validation with a
@@ -33,7 +34,7 @@ stochastic rollouts.
 The study is designed to separate two effects: whether a declared tool
 interface prevents invalid dispatches at the source, and whether one
 validation-and-retry step recovers a narrow class of violations that still
-occur. Harder tasks are included to test whether additional burden changes the
+occur. We include harder tasks to test whether added burden changes the
 qualitative ordering or mainly increases planner/tool activity. The paper is
 limited to this controlled simulator study and draws bounded execution-design
 lessons rather than new-model or benchmark claims.
@@ -41,16 +42,18 @@ lessons rather than new-model or benchmark claims.
 This paper makes three contributions:
 
 \begin{enumerate}
-\item It presents a controlled Isaac Sim boundary study that isolates two
-execution-design axes, planner-to-executor contract design and lightweight
-runtime validation, across navigation and tabletop manipulation tasks.
+\item It presents a controlled simulator boundary study of
+planner-to-executor contract design and lightweight runtime validation
+across navigation and tabletop manipulation. Quantitative comparisons come
+from a lightweight reference backend, with a small Isaac Sim navigation
+slice for qualitative cross-backend checking.
 \item It provides evidence within the evaluated task matrix that typed
 tool-call contracts reduce invalid actions relative to an under-specified
 direct-action contract, while runtime validation with a single retry
 converts recoverable invalid-first actions into successful executions in
 both covered task families.
-\item It extracts a compact architectural lesson from the tested Isaac Sim
-setup: contract design, runtime validation, and a brief planner-side
+\item It extracts a compact architectural lesson from the tested setup:
+contract design, runtime validation, and a brief planner-side
 self-check are separate architectural choices that shape reliability and
 planner/tool call counts without changing the underlying task matrix.
 \end{enumerate}

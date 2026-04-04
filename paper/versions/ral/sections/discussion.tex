@@ -17,17 +17,15 @@ pattern matters for embodied execution stacks that preserve
 planner-to-executor separation, including middleware-style action interfaces and
 guarded execution policies.
 
-At a higher level, the studied boundary maps cleanly onto execution
-architectures already familiar in robotics. The contract specifies the form of
-a dispatchable request in much the same way that ROS 2 actions define typed
-goal, feedback, and result interfaces together with the required request
-fields, while runtime validation decides whether a malformed or mismatched
-request should be rejected before execution
-\cite{biggs2019ros2actions,macenski2022ros2,martin2021plansys2}. The same
-separation appears in behavior-tree and TAMP systems: contract checks act like
-precondition guards on callable nodes or operators, and runtime validation acts
-like an execution guard that determines whether a proposed action can continue
-to the executor interface
+At a higher level, the studied boundary maps onto execution architectures
+already familiar in robotics. The contract specifies the form of a
+dispatchable request, analogous to how ROS~2 actions define typed request
+fields and execution interfaces
+\cite{biggs2019ros2actions,macenski2022ros2,martin2021plansys2}. Runtime
+validation then decides whether a malformed or mismatched request should be
+rejected before execution. A similar separation appears in behavior-tree and
+TAMP systems, where precondition or guard checks determine whether a proposed
+action can continue to the executor interface
 \cite{colledanchise2018behaviortrees,behaviortreecppdocs,behaviortreecppconditions,garrett2020pddlstream,garrett2021integratedtamp}.
 
 The P2 pattern suggests a second, narrower lesson. In the evaluated
@@ -39,8 +37,10 @@ remain separable design choices once the callable interface is explicit.
 
 \subsection{Limitations}
 
-The conclusions are bounded to a controlled Isaac Sim study. The evidence is
-simulator-based, covers two task families, and is limited to the current easy
+The conclusions are bounded to a controlled simulator study. The majority of
+the fixed evaluation matrix runs on a lightweight deterministic reference
+backend rather than inside a live Isaac Sim physics stage; Isaac Sim serves as a limited qualitative cross-backend check. The
+evidence therefore covers two task families and is limited to the current easy
 and harder slices rather than a broad execution benchmark.
 
 The action-interface ablation and runtime-only ablation are compact mechanism
@@ -49,12 +49,15 @@ The runtime-only ablation is especially specific: it is designed around
 recoverable invalid-first-action probes, so its strongest claim is about
 lightweight repair at that boundary.
 
-As noted in the setup, the empirical frame is descriptive rather than
-inferential; the deterministic backend and fixed task set preclude
-confidence intervals or significance tests.
+Using a deterministic mock planner means invalid-action patterns are
+pre-specified boundary probes rather than stochastic errors from a real
+foundation model. The empirical frame is therefore descriptive rather than
+inferential; the deterministic backend and fixed task set preclude confidence
+intervals or significance tests.
 
 These limits still allow a concrete systems conclusion. In the tested setting,
 planner-to-executor contracts and lightweight runtime safeguards materially
-change invalid actions, recovery, and planner/tool call counts. The next empirical
-extension should preserve the same explicit boundary while widening scenes,
-backends, and execution stacks.
+change invalid actions, recovery, and planner/tool call counts.
+A natural next step is to replicate this factorial with stochastic LLM
+planner backends and wider scene coverage to test whether the observed
+ordering generalizes beyond injected boundary probes.

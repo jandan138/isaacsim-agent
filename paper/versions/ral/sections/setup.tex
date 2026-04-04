@@ -1,15 +1,21 @@
 \section{Study Design and Experimental Setup}
 
-\subsection{Controlled Isaac Sim Setting}
+\subsection{Controlled Simulator Setting}
 
-The study uses a common Isaac Sim execution architecture across navigation and
-tabletop manipulation \cite{nvidiaIsaacSimDocs}. The navigation family
-contains language-conditioned mobile-goal tasks in indoor scenes. The
-manipulation family contains tabletop tasks that require object identification,
-grasping, transfer, and placement. The main comparison uses a shared easy
-slice plus one harder slice per family, letting us test whether additional task
-burden changes the qualitative ordering or mainly amplifies planner/tool
-call counts.
+The study uses two execution backends.
+The \emph{primary} backend is a lightweight deterministic reference
+environment implemented in pure Python; it carries the full factorial
+evaluation matrix and provides the quantitative comparisons reported in the
+paper. A \emph{secondary} backend runs a minimal Isaac Sim
+stage~\cite{nvidiaIsaacSimDocs} on two navigation instances as a limited
+qualitative cross-backend check that the same condition ordering (P0 worst,
+P1/P2 succeed, R1 recovers) also appears under physics-backed execution.
+The navigation family contains language-conditioned mobile-goal tasks in
+indoor scenes. The manipulation family contains tabletop tasks that require
+object identification, grasping, transfer, and placement. The main comparison
+uses a shared easy slice plus one harder slice per family, letting us test
+whether additional task burden changes the qualitative ordering or mainly
+amplifies planner/tool call counts.
 
 All conditions share the same high-level handoff:
 
@@ -56,15 +62,19 @@ The study uses a repo-local deterministic planner backend implemented in
 foundation-model API. Given the current task state, exposed tools, and any
 retry message, it emits one JSON action per planner call; there are therefore
 no temperature, top-$p$, or rollout-sampling settings in this evaluation.
+Under P0, the planner emits task-level verbs (\texttt{move\_to\_goal},
+\texttt{move\_object}) that are semantically plausible but absent from the
+executor's tool registry---\emph{injected boundary probes} designed to
+expose the contract gap, not stochastic foundation-model errors.
 
 Crucially, the three contract conditions separate two distinct design
-axes. P0 versus P1 isolates \\emph{action-interface specification}
+axes. P0 versus P1 isolates \emph{action-interface specification}
 under a fixed action-selection policy: both conditions share the same
 planner decision logic, task-state input, tool registry, and planning
 strategy; only the serialization format and dispatch interface change.
 P2 adds one bounded planner-side self-check on top of the same typed
 interface used by P1, so the P1-versus-P2 comparison isolates a
-\\emph{planner-side deliberation step} rather than a second interface
+\emph{planner-side deliberation step} rather than a second interface
 change.
 Planner instructions for all three contracts are included in the
 supplementary material and public repository so that readers can verify
@@ -111,7 +121,7 @@ dispatch but produces an incorrect outcome, and from a task failure, which
 denotes any run that does not reach the task-complete state regardless of
 cause. In the structured contract conditions (P1, P2), no
 semantically-wrong-but-schema-valid actions were observed in the reported
-matrix; all failures in those conditions were task-complete successes.
+matrix; all runs in those conditions reached task-complete success.
 A recovery is a run that contains an invalid action but
 still ends successfully after runtime handling. Retries capture the extra
 repair work used in R1. Planner calls and tool calls together define
