@@ -5,6 +5,6 @@
   }{
     \includegraphics[width=\textwidth]{\FigureAssetDir/fig1_system_overview_frozen.png}
   }
-  \caption{System overview of the evaluated planner-to-executor boundary. A task is mapped by the planner into one of three contract variants, then passed through bare dispatch \texttt{R0} or validate-and-retry \texttt{R1} before the Isaac Sim executor. Insets show representative navigation and tabletop task scenes together with compact failure-repair traces in which non-dispatchable verbs are rejected and corrected into executor-visible tools.}
+  \caption{System overview of the evaluated planner-to-executor boundary. A task is mapped by the planner into one of three contract variants, then passed through bare dispatch \texttt{R0} or validate-and-retry \texttt{R1} before the executor (a lightweight deterministic backend for the main factorial, with a minimal Isaac Sim navigation slice for qualitative cross-backend checking). Insets show representative navigation and tabletop task scenes together with compact failure-repair traces in which non-dispatchable verbs are rejected and corrected into executor-visible tools.}
   \label{fig:system-overview}
 \end{figure*}
