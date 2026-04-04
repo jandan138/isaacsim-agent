@@ -7,6 +7,7 @@
 | Round 0 (original) | 5/10 | Almost | Baseline: causal isolation gap, over-broad scope claims, P2 efficiency wording, runtime ablation framing |
 | Round 1 | 8/10 | Almost | Fixed causal isolation, scoped all claims to Isaac Sim, reframed runtime ablation, narrowed P2 wording |
 | Round 2 | 8/10+ | Almost→Yes | Distinguished P0→P1 vs P1→P2 causal axes, added repair-probe cohort selection criteria, noted schema-valid action absence |
+| Round 3 | 8/10 | Almost→Yes | Isaac Sim overclaim fix (title, abstract, setup, results, discussion, conclusion, fig1, related_work, reviewer_submission), mock planner boundary-probe disclosure, Isaac Sim validation slice in Results, P2 efficiency proxy disclaimer |
 
 ## Round 1 Review & Fixes
 
@@ -95,13 +96,31 @@ This revision is materially stronger than the prior version. The earlier critica
 2. **MAJOR (repair-probe cohort)**: Added selection criteria: cohort was pre-specified from the easy-task pool using a single inclusion criterion (tasks known to elicit recoverable invalid-first-action emissions under P1/R0).
 3. **MINOR (schema-valid actions)**: Added note that no semantically-wrong-but-schema-valid actions were observed in structured conditions.
 
+## Round 3 Review & Fixes
+
+### External Review (GPT-5.4 xhigh via Codex CLI)
+
+Round 3a score: **7.5/10** — Isaac Sim overclaim mostly fixed in main prose but not in reviewer_submission, fig1, related_work. Mock planner circularity resolved as transparency issue.
+
+Round 3b verification: **8.0/10** — All 7 flagged issues resolved. No remaining Isaac Sim overclaim. Two minor regressions found and fixed (`\\emph` typo, contradictory failure-definition sentence).
+
+### Fixes Implemented
+1. **CRITICAL (Isaac Sim overclaim)**: Title → "...in a Lightweight Simulator Setup"; abstract/intro/setup/discussion/conclusion all reframed; reviewer_submission/main.tex synced; fig1 caption updated; related_work "Isaac Sim setting" → "simulator setting"
+2. **MAJOR (backend disclosure)**: Setup §3.1 now discloses two-backend architecture (primary lightweight Python, secondary minimal Isaac Sim on 2 nav instances)
+3. **MAJOR (boundary probes)**: Setup §3.3 explicitly labels P0 emissions as "injected boundary probes"; Results repeats reminder in failure-trace interpretation
+4. **MAJOR (mock planner)**: Abstract adds variance-isolation justification; Limitations adds explicit mock-planner limitation; Future work adds LLM replication
+5. **MAJOR (Isaac Sim in Results)**: New paragraph showing validation slice confirms same qualitative ordering
+6. **MINOR (P2 efficiency)**: Added disclaimer that call counts are not latency/wall-clock
+7. **MINOR (shared guides)**: core_claim.md, limitations.md aligned with new framing
+8. **BUG**: Fixed `\\emph` → `\emph` in setup.tex; fixed "failures were successes" wording
+
 ## PDFs
 - `main_round0_original.pdf` — Original generated paper
 - `main_round1.pdf` — After Round 1 fixes
-- `main_round2.pdf` — Final version after Round 2 fixes
+- `main_round2.pdf` — After Round 2 fixes
+- `main.pdf` — Current (Round 3)
 
-## Format Check (Round 2)
+## Format Check (Round 3)
 - Pages: 8
-- Overfull hbox warnings: 1 (4.06pt in figure, within tolerance)
-- Underfull warnings: 23 (normal)
+- Overfull hbox warnings: 1 (figure, within tolerance)
 - Undefined references/citations: 0

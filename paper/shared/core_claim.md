@@ -3,15 +3,18 @@
 ## Working paper identity
 
 This paper is a controlled systems study of planner-to-executor contract design and
-runtime validation for embodied-agent execution in Isaac Sim. Its scope is limited
-to how action-interface specification and lightweight runtime handling affect invalid
+runtime validation for embodied-agent execution in a lightweight simulator setup.
+The main factorial uses a deterministic reference backend; a minimal Isaac Sim slice
+provides qualitative cross-backend validation. Its scope is limited to how
+action-interface specification and lightweight runtime handling affect invalid
 actions, recovery, success, and planner/tool overhead in the current Block A task
 matrix.
 
 ## Core claim
 
-Within the tested Block A Isaac Sim setup, planner-to-executor contract design and
-runtime validation show consistent execution effects:
+Within the tested Block A simulator setup (lightweight reference backend + Isaac Sim
+validation slice), planner-to-executor contract design and runtime validation show
+consistent execution effects:
 
 - the under-specified direct-action contract (`P0`) is the weakest condition in the
   covered slices

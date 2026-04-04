@@ -6,8 +6,9 @@ of repeated reviewer prompts.
 
 ## Study scope limitations
 
-- The evidence is simulator-based and comes from the current Isaac Sim Block A
-  setup, not from real-robot execution.
+- The evidence is simulator-based. The majority of the evaluation matrix runs on
+  a lightweight deterministic reference backend; Isaac Sim serves as a small
+  qualitative validation slice. No real-robot execution is included.
 - The paper covers Block A only and studies two execution-design axes:
   planner-to-executor contract variants and runtime validation variants.
 - The paper covers two task families only: navigation and tabletop
@@ -45,6 +46,6 @@ of repeated reviewer prompts.
 
 The safest conclusion is:
 
-Within the current controlled Isaac Sim study, planner-to-executor contract design,
+Within the current controlled simulator study, planner-to-executor contract design,
 lightweight runtime validation, and a brief self-check meaningfully affect
 reliability and planner/tool overhead.
